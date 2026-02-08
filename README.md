@@ -6,6 +6,7 @@ Aplicación móvil para iOS para gestionar el inventario del hogar con **sincron
 
 ## ✨ Características
 
+- 🛒 **Lista de la Compra Automática** - Productos con 2 unidades o menos se añaden automáticamente
 - ✅ **Sincronización en tiempo real** entre múltiples dispositivos
 - ✅ **Funciona offline** - Los cambios se sincronizan automáticamente cuando hay conexión
 - ✅ **100% accesible con VoiceOver**
@@ -14,7 +15,7 @@ Aplicación móvil para iOS para gestionar el inventario del hogar con **sincron
   - Anuncios automáticos de cambios
   - Navegación optimizada
 - ✅ **Interfaz simple y clara**
-  - Solo 2 pantallas principales: Categorías → Productos
+  - Navegación por pestañas: Inventario y Lista de Compra
   - Campo de cantidad con selector táctil (0-99 unidades)
   - Botones grandes y táctiles
   - Sin servidor propio necesario
@@ -93,6 +94,11 @@ Esto abrirá Expo. Opciones:
 
 ## 📱 Uso con VoiceOver
 
+### Navegación Principal:
+- **Pestaña Inventario:** Gestión de categorías y productos
+- **Pestaña Lista de Compra:** Productos con 2 unidades o menos (automático)
+- **Cambiar de pestaña:** Desliza izquierda/derecha en la barra inferior
+
 ### Pantalla de Categorías:
 - **Navegar:** Desliza izquierda/derecha
 - **Ver productos:** Toca dos veces sobre una categoría
@@ -110,6 +116,13 @@ Esto abrirá Expo. Opciones:
   - "Eliminar producto" - Borrar con confirmación
 - **Botones individuales también disponibles:** −, + y Editar
 - **Añadir producto:** Botón + en la esquina inferior derecha
+
+### Lista de la Compra:
+- **Visualización automática:** Productos con ≤ 2 unidades aparecen aquí automáticamente
+- **Productos urgentes:** Los que tienen 0 unidades se destacan en rojo
+- **Incrementar/Decrementar:** Mismas acciones del rotor que en Productos
+- **Desaparece automáticamente:** Cuando un producto supera 2 unidades, sale de la lista
+- **Contador:** Muestra cuántos productos necesitas comprar
 
 ### Formularios:
 - **Auto-focus:** El teclado aparece automáticamente
@@ -138,15 +151,17 @@ Esto abrirá Expo. Opciones:
 
 ```
 inventario-mobile/
-├── App.js                          # Navegación principal
+├── App.js                          # Navegación principal (Tabs + Stack)
 ├── package.json                    # Dependencias
 ├── app.json                        # Configuración de Expo
+├── eas.json                        # Configuración de EAS Build
 ├── firebase-config.js              # TUS credenciales (no subir a Git)
 ├── firebase-config.example.js      # Plantilla de configuración
 ├── firestore.rules                 # Reglas de seguridad
 ├── ACCESIBILIDAD.md                # Guía de accesibilidad
 ├── SEGURIDAD-FIREBASE.md           # Opciones de seguridad
 ├── AUTENTICACION-PENDIENTE.md      # Guía para añadir auth (futuro)
+├── COMPILACION-APP.md              # Guía para compilar sin Mac
 └── src/
     ├── services/
     │   ├── firebase.js             # Inicialización de Firebase
@@ -154,6 +169,7 @@ inventario-mobile/
     └── screens/
         ├── CategoriasScreen.js     # Lista de categorías
         ├── ProductosScreen.js      # Lista de productos
+        ├── ListaCompraScreen.js    # Lista de compra automática
         ├── NuevaCategoriaScreen.js # Formulario nueva categoría
         ├── EditarCategoriaScreen.js# Formulario editar categoría
         ├── NuevoProductoScreen.js  # Formulario nuevo producto
@@ -184,9 +200,9 @@ inventario-mobile/
 
 ---
 
-## 📦 Compilar para App Store (opcional)
+## 📦 Compilar para Uso Fuera de Casa
 
-Para crear una app independiente (sin Expo Go):
+Para usar la app sin Expo Go y con datos móviles, necesitas compilarla como una app nativa:
 
 ```powershell
 # Instalar EAS CLI
@@ -199,7 +215,13 @@ eas login
 eas build --platform ios
 ```
 
-**Nota:** Compilar para iOS requiere una cuenta de Apple Developer ($99/año).
+**⚠️ Nota importante:**
+- Requiere una cuenta de **Apple Developer** ($99/año)
+- Permite distribuir la app via **TestFlight** (hasta 10,000 usuarios beta)
+- La app funcionará con **datos móviles** fuera de casa
+- **No necesitas Mac** - todo se compila en la nube
+
+📖 **Guía completa:** Ver [COMPILACION-APP.md](COMPILACION-APP.md) para instrucciones detalladas.
 
 ---
 
