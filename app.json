@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Inventario Casa",
+    "slug": "inventario-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "inventario-mobile",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jmortiz.inventario",
+      "infoPlist": {
+        "UIAccessibilityTraits": "button",
+        "NSCameraUsageDescription": "Opcional: para escanear códigos de barras en el futuro"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.jmortiz.inventario"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
