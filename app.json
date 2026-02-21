@@ -4,31 +4,30 @@
     "slug": "inventario-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "scheme": "inventario-mobile",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#4A90E2"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.jmortiz.inventario",
       "infoPlist": {
         "UIAccessibilityTraits": "button",
-        "NSCameraUsageDescription": "Opcional: para escanear códigos de barras en el futuro"
+        "NSCameraUsageDescription": "Opcional: para escanear códigos de barras en el futuro",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
       "package": "com.jmortiz.inventario"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "925217a8-0244-49e8-b04e-f81903974751"
+      }
     }
   }
 }
