@@ -88,11 +88,12 @@ export const subscribeToProducts = (categoriaId, callback) => {
   });
 };
 
-export const addProduct = async (nombre, cantidad, categoriaId) => {
+export const addProduct = async (nombre, cantidad, categoriaId, umbralCompra = 2) => {
   try {
     const docRef = await addDoc(collection(db, 'productos'), {
       nombre,
       cantidad: parseInt(cantidad) || 0,
+      umbralCompra: parseInt(umbralCompra) || 2,
       categoriaId,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
@@ -106,9 +107,19 @@ export const addProduct = async (nombre, cantidad, categoriaId) => {
 
 export const updateProduct = async (id, updates) => {
   try {
+    const sanitizedUpdates = { ...updates };
+
+    if (sanitizedUpdates.cantidad !== undefined) {
+      sanitizedUpdates.cantidad = parseInt(sanitizedUpdates.cantidad) || 0;
+    }
+
+    if (sanitizedUpdates.umbralCompra !== undefined) {
+      sanitizedUpdates.umbralCompra = parseInt(sanitizedUpdates.umbralCompra) || 2;
+    }
+
     const docRef = doc(db, 'productos', id);
     await updateDoc(docRef, {
-      ...updates,
+      ...sanitizedUpdates,
       updatedAt: serverTimestamp()
     });
     return { success: true };

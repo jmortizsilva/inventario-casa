@@ -59,3 +59,23 @@ Todos los elementos interactivos tienen:
 - [ ] Modo oscuro con contraste aumentado
 - [ ] Sonidos hápticos al cambiar cantidades
 - [ ] Reducción de movimiento (reduce motion)
+
+
+## Actualización de accesibilidad (feb 2026)
+
+### Rotor
+
+- Se unifica terminología en toda la app:
+  - Aumentar cantidad
+  - Disminuir cantidad
+- Se elimina el uso mixto de “incrementar/decrementar”.
+
+### Pestañas
+
+- La barra inferior usa control de pestañas nativo (no simulado con botones).
+- Implementación con `react-native-bottom-tabs` y `@bottom-tabs/react-navigation`.
+
+### Idioma
+
+- Se configura iOS para español en `app.json` (`CFBundleDevelopmentRegion` y `CFBundleLocalizations`).
+- Nota: algunos términos del sistema dependen de VoiceOver/iOS y no de etiquetas JS.

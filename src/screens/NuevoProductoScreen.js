@@ -18,6 +18,7 @@ export default function NuevoProductoScreen({ route, navigation }) {
   const { categoriaId, categoriaNombre } = route.params;
   const [nombre, setNombre] = useState('');
   const [cantidad, setCantidad] = useState(0);
+  const [umbralCompra, setUmbralCompra] = useState(2);
   const [guardando, setGuardando] = useState(false);
   const nombreRef = useRef(null);
 
@@ -35,13 +36,13 @@ export default function NuevoProductoScreen({ route, navigation }) {
     }
 
     setGuardando(true);
-    const result = await addProduct(nombre.trim(), String(cantidad), categoriaId);
+    const result = await addProduct(nombre.trim(), cantidad, categoriaId, umbralCompra);
     setGuardando(false);
 
     if (result.success) {
       if (Platform.OS === 'ios') {
         AccessibilityInfo.announceForAccessibility(
-          `Producto ${nombre} añadido con cantidad ${cantidad}`
+          `Producto ${nombre} añadido con cantidad ${cantidad}. Pasará a lista de compra con ${umbralCompra} unidades o menos`
         );
       }
       navigation.goBack();
@@ -113,6 +114,36 @@ export default function NuevoProductoScreen({ route, navigation }) {
                   <Picker.Item 
                     key={num} 
                     label={`${num} ${num === 1 ? 'unidad' : 'unidades'}`} 
+                    value={num}
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
+
+          <View style={styles.campo}>
+            <Text 
+              style={styles.label}
+              accessible={true}
+              accessibilityRole="header"
+            >
+              Pasar a lista de compra con
+            </Text>
+
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={umbralCompra}
+                onValueChange={(itemValue) => setUmbralCompra(itemValue)}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
+                accessibilityLabel="Seleccionar umbral para lista de compra"
+                accessibilityHint="Desliza arriba o abajo para elegir con cuántas unidades pasa a la lista"
+                enabled={!guardando}
+              >
+                {Array.from({ length: 21 }, (_, i) => i).map(num => (
+                  <Picker.Item 
+                    key={num} 
+                    label={`${num} ${num === 1 ? 'unidad' : 'unidades'} o menos`} 
                     value={num}
                   />
                 ))}

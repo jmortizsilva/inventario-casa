@@ -283,3 +283,16 @@ Proyecto personal - Uso libre
 ---
 
 **¡Disfruta tu app de inventario! 🎉**
+
+## Cambios recientes (feb 2026)
+
+- Navegación inferior migrada a pestañas nativas iOS usando `react-native-bottom-tabs`.
+- Acciones de accesibilidad del rotor unificadas en Productos y Lista de compra:
+  - Aumentar cantidad
+  - Disminuir cantidad
+- Lista de compra ahora usa umbral por producto (`umbralCompra`) en lugar de fijo global.
+- Valor por defecto del umbral para productos existentes o nuevos sin definir: `2`.
+- Configuración iOS actualizada para priorizar localización en español:
+  - `CFBundleDevelopmentRegion = es`
+  - `CFBundleLocalizations = [es]`
+  

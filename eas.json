@@ -13,12 +13,18 @@
     },
     "preview": {
       "distribution": "internal",
+      "env": {
+        "EAS_SKIP_AUTO_FINGERPRINT": "1"
+      },
       "ios": {
         "simulator": false
       }
     },
     "production": {
       "autoIncrement": true,
+      "env": {
+        "EAS_SKIP_AUTO_FINGERPRINT": "1"
+      },
       "ios": {
         "simulator": false
       }

@@ -1,11 +1,10 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import { StatusBar } from 'expo-status-bar';
 
-// Pantallas
 import CategoriasScreen from './src/screens/CategoriasScreen';
 import ProductosScreen from './src/screens/ProductosScreen';
 import NuevaCategoriaScreen from './src/screens/NuevaCategoriaScreen';
@@ -15,9 +14,8 @@ import EditarProductoScreen from './src/screens/EditarProductoScreen';
 import ListaCompraScreen from './src/screens/ListaCompraScreen';
 
 const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
+const Tab = createNativeBottomTabNavigator();
 
-// Stack Navigator para el flujo del Inventario
 function InventarioStack() {
   return (
     <Stack.Navigator
@@ -34,46 +32,46 @@ function InventarioStack() {
         animation: 'slide_from_right',
       }}
     >
-      <Stack.Screen 
-        name="Categorias" 
+      <Stack.Screen
+        name="Categorias"
         component={CategoriasScreen}
         options={{
           headerShown: false,
         }}
       />
-      <Stack.Screen 
-        name="Productos" 
+      <Stack.Screen
+        name="Productos"
         component={ProductosScreen}
-        options={({ route }) => ({ 
-          title: route.params?.categoriaNombre || 'Productos' 
+        options={({ route }) => ({
+          title: route.params?.categoriaNombre || 'Productos'
         })}
       />
-      <Stack.Screen 
-        name="NuevaCategoria" 
+      <Stack.Screen
+        name="NuevaCategoria"
         component={NuevaCategoriaScreen}
         options={{
           title: 'Nueva Categoría',
           presentation: 'modal',
         }}
       />
-      <Stack.Screen 
-        name="EditarCategoria" 
+      <Stack.Screen
+        name="EditarCategoria"
         component={EditarCategoriaScreen}
         options={{
           title: 'Editar Categoría',
           presentation: 'modal',
         }}
       />
-      <Stack.Screen 
-        name="NuevoProducto" 
+      <Stack.Screen
+        name="NuevoProducto"
         component={NuevoProductoScreen}
         options={{
           title: 'Nuevo Producto',
           presentation: 'modal',
         }}
       />
-      <Stack.Screen 
-        name="EditarProducto" 
+      <Stack.Screen
+        name="EditarProducto"
         component={EditarProductoScreen}
         options={{
           title: 'Editar Producto',
@@ -94,15 +92,6 @@ export default function App() {
           tabBarInactiveTintColor: '#8E8E93',
           tabBarStyle: {
             backgroundColor: '#FFFFFF',
-            borderTopColor: '#E5E5EA',
-            borderTopWidth: 1,
-            paddingTop: 5,
-            paddingBottom: 5,
-            height: 60,
-          },
-          tabBarLabelStyle: {
-            fontSize: 12,
-            fontWeight: '600',
           },
           headerStyle: {
             backgroundColor: '#007AFF',
@@ -114,25 +103,23 @@ export default function App() {
           },
         }}
       >
-        <Tab.Screen 
-          name="InventarioTab" 
+        <Tab.Screen
+          name="InventarioTab"
           component={InventarioStack}
           options={{
             title: 'Inventario',
             headerShown: false,
             tabBarLabel: 'Inventario',
-            tabBarAccessibilityLabel: 'Inventario, navegar por categorías y productos',
-            tabBarIcon: () => <Text style={{ fontSize: 24 }}>📦</Text>,
+            tabBarIcon: () => (Platform.OS === 'ios' ? { sfSymbol: 'shippingbox.fill' } : null),
           }}
         />
-        <Tab.Screen 
-          name="ListaCompra" 
+        <Tab.Screen
+          name="ListaCompra"
           component={ListaCompraScreen}
           options={{
             title: 'Lista de la Compra',
             tabBarLabel: 'Compra',
-            tabBarAccessibilityLabel: 'Lista de la compra, productos con pocas unidades',
-            tabBarIcon: () => <Text style={{ fontSize: 24 }}>🛒</Text>,
+            tabBarIcon: () => (Platform.OS === 'ios' ? { sfSymbol: 'cart.fill' } : null),
           }}
         />
       </Tab.Navigator>

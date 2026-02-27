@@ -14,6 +14,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.jmortiz.inventario",
       "infoPlist": {
+        "CFBundleDevelopmentRegion": "es",
+        "CFBundleLocalizations": [
+          "es"
+        ],
         "UIAccessibilityTraits": "button",
         "NSCameraUsageDescription": "Opcional: para escanear códigos de barras en el futuro",
         "ITSAppUsesNonExemptEncryption": false
@@ -22,6 +26,9 @@
     "android": {
       "package": "com.jmortiz.inventario"
     },
+    "plugins": [
+      "react-native-bottom-tabs"
+    ],
     "web": {
     },
     "extra": {
