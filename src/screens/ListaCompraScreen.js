@@ -8,7 +8,7 @@ import {
   AccessibilityInfo,
   Alert,
 } from 'react-native';
-import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 
 export default function ListaCompraScreen() {
@@ -16,19 +16,21 @@ export default function ListaCompraScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Query para obtener todos los productos con cantidad <= 2
-    const q = query(
-      collection(db, 'productos'),
-      where('cantidad', '<=', 2)
-    );
+    const q = query(collection(db, 'productos'));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const productos = [];
       querySnapshot.forEach((doc) => {
-        productos.push({
+        const data = doc.data();
+        const umbralCompra = data.umbralCompra ?? 2;
+
+        if ((data.cantidad ?? 0) <= umbralCompra) {
+          productos.push({
           id: doc.id,
-          ...doc.data()
-        });
+          ...data,
+          umbralCompra
+          });
+        }
       });
 
       // Ordenar por cantidad (menor primero) y luego por nombre
@@ -65,8 +67,9 @@ export default function ListaCompraScreen() {
         `${nombreProducto}: ${nuevaCantidad} ${nuevaCantidad === 1 ? 'unidad' : 'unidades'}`
       );
 
-      // Si supera 2 unidades, anunciar que se elimina de la lista
-      if (nuevaCantidad > 2) {
+      const umbralProducto = productosCompra.find((p) => p.id === productoId)?.umbralCompra ?? 2;
+
+      if (nuevaCantidad > umbralProducto) {
         AccessibilityInfo.announceForAccessibility(
           `${nombreProducto} eliminado de la lista de compra`
         );
@@ -107,17 +110,17 @@ export default function ListaCompraScreen() {
         ]}
         accessible={true}
         accessibilityLabel={`${item.nombre}, ${item.cantidad} ${item.cantidad === 1 ? 'unidad' : 'unidades'}${urgente ? ', urgente' : ''}`}
-        accessibilityHint="Desliza arriba para incrementar, abajo para decrementar"
+        accessibilityHint="Desliza arriba para aumentar, abajo para disminuir"
         accessibilityActions={[
-          { name: 'increment', label: 'Incrementar cantidad' },
-          { name: 'decrement', label: 'Decrementar cantidad' },
+          { name: 'aumentar', label: 'Aumentar cantidad' },
+          { name: 'disminuir', label: 'Disminuir cantidad' },
         ]}
         onAccessibilityAction={(event) => {
           switch (event.nativeEvent.actionName) {
-            case 'increment':
+            case 'aumentar':
               incrementarCantidad(item.id, item.cantidad, item.nombre);
               break;
-            case 'decrement':
+            case 'disminuir':
               decrementarCantidad(item.id, item.cantidad, item.nombre);
               break;
           }
@@ -139,7 +142,7 @@ export default function ListaCompraScreen() {
           <TouchableOpacity
             style={styles.botonCantidad}
             onPress={() => decrementarCantidad(item.id, item.cantidad, item.nombre)}
-            accessibilityLabel="Decrementar cantidad"
+            accessibilityLabel="Disminuir cantidad"
             accessibilityRole="button"
             disabled={item.cantidad === 0}
           >
@@ -149,7 +152,7 @@ export default function ListaCompraScreen() {
           <TouchableOpacity
             style={styles.botonCantidad}
             onPress={() => incrementarCantidad(item.id, item.cantidad, item.nombre)}
-            accessibilityLabel="Incrementar cantidad"
+            accessibilityLabel="Aumentar cantidad"
             accessibilityRole="button"
           >
             <Text style={styles.botonTexto}>+</Text>

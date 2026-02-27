@@ -18,6 +18,7 @@ export default function EditarProductoScreen({ route, navigation }) {
   const { producto, categoriaId, categoriaNombre } = route.params;
   const [nombre, setNombre] = useState(producto.nombre);
   const [cantidad, setCantidad] = useState(producto.cantidad);
+  const [umbralCompra, setUmbralCompra] = useState(producto.umbralCompra ?? 2);
   const [guardando, setGuardando] = useState(false);
   const nombreRef = useRef(null);
 
@@ -35,7 +36,13 @@ export default function EditarProductoScreen({ route, navigation }) {
       return;
     }
     
-    if (nombre.trim() === producto.nombre && cantidad === producto.cantidad) {
+    const umbralOriginal = producto.umbralCompra ?? 2;
+
+    if (
+      nombre.trim() === producto.nombre &&
+      cantidad === producto.cantidad &&
+      umbralCompra === umbralOriginal
+    ) {
       navigation.goBack();
       return;
     }
@@ -43,14 +50,15 @@ export default function EditarProductoScreen({ route, navigation }) {
     setGuardando(true);
     const result = await updateProduct(producto.id, {
       nombre: nombre.trim(),
-      cantidad: cantidad
+      cantidad: cantidad,
+      umbralCompra: umbralCompra
     });
     setGuardando(false);
 
     if (result.success) {
       if (Platform.OS === 'ios') {
         AccessibilityInfo.announceForAccessibility(
-          `Producto actualizado: ${nombre}, cantidad ${cantidad}`
+          `Producto actualizado: ${nombre}, cantidad ${cantidad}. Lista de compra con ${umbralCompra} unidades o menos`
         );
       }
       navigation.goBack();
@@ -122,6 +130,36 @@ export default function EditarProductoScreen({ route, navigation }) {
                   <Picker.Item 
                     key={num} 
                     label={`${num} ${num === 1 ? 'unidad' : 'unidades'}`} 
+                    value={num}
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
+
+          <View style={styles.campo}>
+            <Text 
+              style={styles.label}
+              accessible={true}
+              accessibilityRole="header"
+            >
+              Pasar a lista de compra con
+            </Text>
+
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={umbralCompra}
+                onValueChange={(itemValue) => setUmbralCompra(itemValue)}
+                style={styles.picker}
+                itemStyle={styles.pickerItem}
+                accessibilityLabel="Seleccionar umbral para lista de compra"
+                accessibilityHint="Desliza arriba o abajo para elegir con cuántas unidades pasa a la lista"
+                enabled={!guardando}
+              >
+                {Array.from({ length: 21 }, (_, i) => i).map(num => (
+                  <Picker.Item 
+                    key={num} 
+                    label={`${num} ${num === 1 ? 'unidad' : 'unidades'} o menos`} 
                     value={num}
                   />
                 ))}
