@@ -75,19 +75,19 @@ export default function ProductosScreen({ route, navigation }) {
       style={styles.productoCard}
       accessible={true}
       accessibilityLabel={`${item.nombre}, ${item.cantidad} unidades`}
-      accessibilityHint="Usa las acciones del rotor para modificar"
+      accessibilityHint="Usa las acciones del rotor para aumentar o disminuir"
       accessibilityActions={[
-        { name: 'incrementar', label: 'Incrementar cantidad' },
-        { name: 'decrementar', label: 'Decrementar cantidad' },
+        { name: 'aumentar', label: 'Aumentar cantidad' },
+        { name: 'disminuir', label: 'Disminuir cantidad' },
         { name: 'editar', label: 'Editar producto' },
         { name: 'eliminar', label: 'Eliminar producto' }
       ]}
       onAccessibilityAction={(event) => {
         switch (event.nativeEvent.actionName) {
-          case 'incrementar':
+          case 'aumentar':
             incrementarCantidad(item);
             break;
-          case 'decrementar':
+          case 'disminuir':
             decrementarCantidad(item);
             break;
           case 'editar':
