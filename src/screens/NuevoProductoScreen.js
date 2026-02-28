@@ -8,19 +8,41 @@ import {
   Alert,
   AccessibilityInfo,
   Platform,
+  Switch,
   KeyboardAvoidingView,
   ScrollView
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { addProduct } from '../services/firestore';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function NuevoProductoScreen({ route, navigation }) {
+  const { householdId } = useAuth();
   const { categoriaId, categoriaNombre } = route.params;
   const [nombre, setNombre] = useState('');
   const [cantidad, setCantidad] = useState(0);
   const [umbralCompra, setUmbralCompra] = useState(2);
+  const [autoListaCompra, setAutoListaCompra] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const nombreRef = useRef(null);
+  const lastNombreEventCountRef = useRef(0);
+
+  const handleNombreChange = (event) => {
+    const { text, eventCount } = event.nativeEvent;
+
+    if (
+      typeof eventCount === 'number' &&
+      eventCount < lastNombreEventCountRef.current
+    ) {
+      return;
+    }
+
+    if (typeof eventCount === 'number') {
+      lastNombreEventCountRef.current = eventCount;
+    }
+
+    setNombre(text);
+  };
 
   useEffect(() => {
     navigation.setOptions({ title: `Nuevo en ${categoriaNombre}` });
@@ -36,13 +58,22 @@ export default function NuevoProductoScreen({ route, navigation }) {
     }
 
     setGuardando(true);
-    const result = await addProduct(nombre.trim(), cantidad, categoriaId, umbralCompra);
+    const result = await addProduct(
+      householdId,
+      nombre.trim(),
+      cantidad,
+      categoriaId,
+      umbralCompra,
+      autoListaCompra
+    );
     setGuardando(false);
 
     if (result.success) {
       if (Platform.OS === 'ios') {
         AccessibilityInfo.announceForAccessibility(
-          `Producto ${nombre} añadido con cantidad ${cantidad}. Pasará a lista de compra con ${umbralCompra} unidades o menos`
+          autoListaCompra
+            ? `Producto ${nombre} añadido con cantidad ${cantidad}. Pasará a lista de compra con ${umbralCompra} unidades o menos`
+            : `Producto ${nombre} añadido con cantidad ${cantidad}. No se añadirá automáticamente a lista de compra`
         );
       }
       navigation.goBack();
@@ -71,7 +102,7 @@ export default function NuevoProductoScreen({ route, navigation }) {
               ref={nombreRef}
               style={styles.input}
               value={nombre}
-              onChangeText={setNombre}
+              onChange={handleNombreChange}
               placeholder="Ej: Arroz, Leche, Pan..."
               placeholderTextColor="#999"
               accessibilityLabel="Nombre del producto"
@@ -122,6 +153,25 @@ export default function NuevoProductoScreen({ route, navigation }) {
           </View>
 
           <View style={styles.campo}>
+            <View style={styles.switchRow}>
+              <Text 
+                style={styles.label}
+                accessible={true}
+                accessibilityRole="header"
+              >
+                Añadir automáticamente a la lista
+              </Text>
+              <Switch
+                value={autoListaCompra}
+                onValueChange={setAutoListaCompra}
+                disabled={guardando}
+                accessibilityLabel="Conmutador de lista de compra automática"
+              />
+            </View>
+          </View>
+
+          {autoListaCompra ? (
+          <View style={styles.campo}>
             <Text 
               style={styles.label}
               accessible={true}
@@ -150,6 +200,7 @@ export default function NuevoProductoScreen({ route, navigation }) {
               </Picker>
             </View>
           </View>
+          ) : null}
 
           <View style={styles.botonesContainer}>
             <TouchableOpacity
@@ -201,6 +252,12 @@ const styles = StyleSheet.create({
   },
   campo: {
     marginBottom: 25,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
   },
   label: {
     fontSize: 18,

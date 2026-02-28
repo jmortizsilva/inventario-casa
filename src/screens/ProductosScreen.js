@@ -12,27 +12,40 @@ import {
 import { 
   subscribeToProducts, 
   updateProductQuantity, 
-  deleteProduct 
+  deleteProduct,
+  updateProduct
 } from '../services/firestore';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ProductosScreen({ route, navigation }) {
+  const { householdId } = useAuth();
   const { categoriaId, categoriaNombre } = route.params;
   const [productos, setProductos] = useState([]);
 
   useEffect(() => {
     navigation.setOptions({ title: categoriaNombre });
+
+    if (!householdId) {
+      return () => {};
+    }
     
     // Suscripción en tiempo real a los productos
-    const unsubscribe = subscribeToProducts(categoriaId, (data) => {
-      setProductos(data);
+    const unsubscribe = subscribeToProducts(householdId, categoriaId, (data) => {
+      setProductos(
+        data.map((product) => ({
+          ...product,
+          autoListaCompra: product.autoListaCompra ?? true,
+          enListaCompraManual: product.enListaCompraManual ?? false,
+        }))
+      );
     });
 
     return () => unsubscribe();
-  }, [categoriaId]);
+  }, [categoriaId, householdId]);
 
   const incrementarCantidad = async (producto) => {
     const nuevaCantidad = producto.cantidad + 1;
-    const result = await updateProductQuantity(producto.id, nuevaCantidad);
+    const result = await updateProductQuantity(householdId, producto.id, nuevaCantidad);
     if (result.success && Platform.OS === 'ios') {
       AccessibilityInfo.announceForAccessibility(
         `${producto.nombre}: cantidad actualizada a ${nuevaCantidad}`
@@ -42,7 +55,7 @@ export default function ProductosScreen({ route, navigation }) {
 
   const decrementarCantidad = async (producto) => {
     const nuevaCantidad = Math.max(0, producto.cantidad - 1);
-    const result = await updateProductQuantity(producto.id, nuevaCantidad);
+    const result = await updateProductQuantity(householdId, producto.id, nuevaCantidad);
     if (result.success && Platform.OS === 'ios') {
       AccessibilityInfo.announceForAccessibility(
         `${producto.nombre}: cantidad actualizada a ${nuevaCantidad}`
@@ -60,7 +73,7 @@ export default function ProductosScreen({ route, navigation }) {
           text: 'Eliminar',
           style: 'destructive',
           onPress: async () => {
-            const result = await deleteProduct(id);
+            const result = await deleteProduct(householdId, id);
             if (result.success) {
               AccessibilityInfo.announceForAccessibility(`${nombre} eliminado`);
             }
@@ -68,6 +81,21 @@ export default function ProductosScreen({ route, navigation }) {
         }
       ]
     );
+  };
+
+  const toggleManualLista = async (producto) => {
+    const nuevoEstado = !(producto.enListaCompraManual ?? false);
+    const result = await updateProduct(householdId, producto.id, {
+      enListaCompraManual: nuevoEstado,
+    });
+
+    if (result.success && Platform.OS === 'ios') {
+      AccessibilityInfo.announceForAccessibility(
+        nuevoEstado
+          ? `${producto.nombre} añadido manualmente a la lista de compra`
+          : `${producto.nombre} quitado de la lista de compra manual`
+      );
+    }
   };
 
   const renderProducto = ({ item }) => (
@@ -79,6 +107,12 @@ export default function ProductosScreen({ route, navigation }) {
       accessibilityActions={[
         { name: 'aumentar', label: 'Aumentar cantidad' },
         { name: 'disminuir', label: 'Disminuir cantidad' },
+        {
+          name: 'toggleListaManual',
+          label: item.enListaCompraManual
+            ? 'Quitar de lista de compra'
+            : 'Añadir a lista de compra',
+        },
         { name: 'editar', label: 'Editar producto' },
         { name: 'eliminar', label: 'Eliminar producto' }
       ]}
@@ -89,6 +123,9 @@ export default function ProductosScreen({ route, navigation }) {
             break;
           case 'disminuir':
             decrementarCantidad(item);
+            break;
+          case 'toggleListaManual':
+            toggleManualLista(item);
             break;
           case 'editar':
             navigation.navigate('EditarProducto', { 
@@ -154,6 +191,18 @@ export default function ProductosScreen({ route, navigation }) {
           importantForAccessibility="no"
         >
           <Text style={styles.botonEditarTexto}>✎</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.botonLista,
+            item.enListaCompraManual && styles.botonListaActivo,
+          ]}
+          onPress={() => toggleManualLista(item)}
+          accessible={false}
+          importantForAccessibility="no"
+        >
+          <Text style={styles.botonEditarTexto}>🛒</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -259,6 +308,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 50,
     justifyContent: 'center',
+  },
+  botonLista: {
+    flex: 1,
+    backgroundColor: '#8E8E93',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    minHeight: 50,
+    justifyContent: 'center',
+  },
+  botonListaActivo: {
+    backgroundColor: '#1F8B4C',
   },
   botonTexto: {
     fontSize: 24,

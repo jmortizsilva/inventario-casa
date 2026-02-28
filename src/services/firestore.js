@@ -13,10 +13,17 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 
+const getHouseholdPath = (householdId, section) => {
+  if (!householdId) {
+    throw new Error('No hay hogar seleccionado');
+  }
+  return collection(db, 'households', householdId, section);
+};
+
 // ============ CATEGORÍAS ============
 
-export const subscribeToCategories = (callback) => {
-  const q = query(collection(db, 'categorias'), orderBy('nombre'));
+export const subscribeToCategories = (householdId, callback) => {
+  const q = query(getHouseholdPath(householdId, 'categorias'), orderBy('nombre'));
   return onSnapshot(q, (snapshot) => {
     const categorias = [];
     snapshot.forEach((doc) => {
@@ -26,9 +33,9 @@ export const subscribeToCategories = (callback) => {
   });
 };
 
-export const addCategory = async (nombre) => {
+export const addCategory = async (householdId, nombre) => {
   try {
-    const docRef = await addDoc(collection(db, 'categorias'), {
+    const docRef = await addDoc(getHouseholdPath(householdId, 'categorias'), {
       nombre,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
@@ -40,9 +47,9 @@ export const addCategory = async (nombre) => {
   }
 };
 
-export const updateCategory = async (id, nombre) => {
+export const updateCategory = async (householdId, id, nombre) => {
   try {
-    const docRef = doc(db, 'categorias', id);
+    const docRef = doc(db, 'households', householdId, 'categorias', id);
     await updateDoc(docRef, {
       nombre,
       updatedAt: serverTimestamp()
@@ -54,16 +61,19 @@ export const updateCategory = async (id, nombre) => {
   }
 };
 
-export const deleteCategory = async (id) => {
+export const deleteCategory = async (householdId, id) => {
   try {
     // Eliminar todos los productos de esta categoría primero
-    const productosQuery = query(collection(db, 'productos'), where('categoriaId', '==', id));
+    const productosQuery = query(
+      getHouseholdPath(householdId, 'productos'),
+      where('categoriaId', '==', id)
+    );
     const productosSnapshot = await getDocs(productosQuery);
     const deletePromises = productosSnapshot.docs.map((doc) => deleteDoc(doc.ref));
     await Promise.all(deletePromises);
     
     // Eliminar la categoría
-    await deleteDoc(doc(db, 'categorias', id));
+    await deleteDoc(doc(db, 'households', householdId, 'categorias', id));
     return { success: true };
   } catch (error) {
     console.error('Error al eliminar categoría:', error);
@@ -73,9 +83,9 @@ export const deleteCategory = async (id) => {
 
 // ============ PRODUCTOS ============
 
-export const subscribeToProducts = (categoriaId, callback) => {
+export const subscribeToProducts = (householdId, categoriaId, callback) => {
   const q = query(
-    collection(db, 'productos'), 
+    getHouseholdPath(householdId, 'productos'), 
     where('categoriaId', '==', categoriaId),
     orderBy('nombre')
   );
@@ -88,12 +98,21 @@ export const subscribeToProducts = (categoriaId, callback) => {
   });
 };
 
-export const addProduct = async (nombre, cantidad, categoriaId, umbralCompra = 2) => {
+export const addProduct = async (
+  householdId,
+  nombre,
+  cantidad,
+  categoriaId,
+  umbralCompra = 2,
+  autoListaCompra = true
+) => {
   try {
-    const docRef = await addDoc(collection(db, 'productos'), {
+    const docRef = await addDoc(getHouseholdPath(householdId, 'productos'), {
       nombre,
       cantidad: parseInt(cantidad) || 0,
       umbralCompra: parseInt(umbralCompra) || 2,
+      autoListaCompra: autoListaCompra !== false,
+      enListaCompraManual: false,
       categoriaId,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
@@ -105,7 +124,7 @@ export const addProduct = async (nombre, cantidad, categoriaId, umbralCompra = 2
   }
 };
 
-export const updateProduct = async (id, updates) => {
+export const updateProduct = async (householdId, id, updates) => {
   try {
     const sanitizedUpdates = { ...updates };
 
@@ -117,7 +136,15 @@ export const updateProduct = async (id, updates) => {
       sanitizedUpdates.umbralCompra = parseInt(sanitizedUpdates.umbralCompra) || 2;
     }
 
-    const docRef = doc(db, 'productos', id);
+    if (sanitizedUpdates.autoListaCompra !== undefined) {
+      sanitizedUpdates.autoListaCompra = Boolean(sanitizedUpdates.autoListaCompra);
+    }
+
+    if (sanitizedUpdates.enListaCompraManual !== undefined) {
+      sanitizedUpdates.enListaCompraManual = Boolean(sanitizedUpdates.enListaCompraManual);
+    }
+
+    const docRef = doc(db, 'households', householdId, 'productos', id);
     await updateDoc(docRef, {
       ...sanitizedUpdates,
       updatedAt: serverTimestamp()
@@ -129,13 +156,13 @@ export const updateProduct = async (id, updates) => {
   }
 };
 
-export const updateProductQuantity = async (id, cantidad) => {
-  return updateProduct(id, { cantidad: parseInt(cantidad) || 0 });
+export const updateProductQuantity = async (householdId, id, cantidad) => {
+  return updateProduct(householdId, id, { cantidad: parseInt(cantidad) || 0 });
 };
 
-export const deleteProduct = async (id) => {
+export const deleteProduct = async (householdId, id) => {
   try {
-    await deleteDoc(doc(db, 'productos', id));
+    await deleteDoc(doc(db, 'households', householdId, 'productos', id));
     return { success: true };
   } catch (error) {
     console.error('Error al eliminar producto:', error);

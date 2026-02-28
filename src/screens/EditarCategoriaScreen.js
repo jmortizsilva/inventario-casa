@@ -12,12 +12,32 @@ import {
   ScrollView
 } from 'react-native';
 import { updateCategory } from '../services/firestore';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function EditarCategoriaScreen({ route, navigation }) {
+  const { householdId } = useAuth();
   const { categoriaId, categoriaNombre } = route.params;
   const [nombre, setNombre] = useState(categoriaNombre);
   const [guardando, setGuardando] = useState(false);
   const inputRef = useRef(null);
+  const lastNombreEventCountRef = useRef(0);
+
+  const handleNombreChange = (event) => {
+    const { text, eventCount } = event.nativeEvent;
+
+    if (
+      typeof eventCount === 'number' &&
+      eventCount < lastNombreEventCountRef.current
+    ) {
+      return;
+    }
+
+    if (typeof eventCount === 'number') {
+      lastNombreEventCountRef.current = eventCount;
+    }
+
+    setNombre(text);
+  };
 
   useEffect(() => {
     setTimeout(() => {
@@ -38,7 +58,7 @@ export default function EditarCategoriaScreen({ route, navigation }) {
     }
 
     setGuardando(true);
-    const result = await updateCategory(categoriaId, nombre.trim());
+    const result = await updateCategory(householdId, categoriaId, nombre.trim());
     setGuardando(false);
 
     if (result.success) {
@@ -70,7 +90,7 @@ export default function EditarCategoriaScreen({ route, navigation }) {
             ref={inputRef}
             style={styles.input}
             value={nombre}
-            onChangeText={setNombre}
+            onChange={handleNombreChange}
             placeholder="Nombre de la categoría"
             placeholderTextColor="#999"
             accessibilityLabel="Nombre de la categoría"

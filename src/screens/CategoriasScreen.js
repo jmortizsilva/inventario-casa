@@ -10,13 +10,19 @@ import {
   Platform
 } from 'react-native';
 import { subscribeToCategories, deleteCategory } from '../services/firestore';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function CategoriasScreen({ navigation }) {
+  const { householdId, householdCode, householdName } = useAuth();
   const [categorias, setCategorias] = useState([]);
 
   useEffect(() => {
+    if (!householdId) {
+      return () => {};
+    }
+
     // Suscripción en tiempo real a las categorías
-    const unsubscribe = subscribeToCategories((data) => {
+    const unsubscribe = subscribeToCategories(householdId, (data) => {
       setCategorias(data);
       // Anunciar cambios para VoiceOver
       if (Platform.OS === 'ios') {
@@ -27,7 +33,7 @@ export default function CategoriasScreen({ navigation }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [householdId]);
 
   const handleEliminarCategoria = (id, nombre) => {
     Alert.alert(
@@ -39,7 +45,7 @@ export default function CategoriasScreen({ navigation }) {
           text: 'Eliminar',
           style: 'destructive',
           onPress: async () => {
-            const result = await deleteCategory(id);
+            const result = await deleteCategory(householdId, id);
             if (result.success) {
               AccessibilityInfo.announceForAccessibility(`Categoría ${nombre} eliminada`);
             } else {
@@ -101,6 +107,8 @@ export default function CategoriasScreen({ navigation }) {
         accessibilityRole="header"
       >
         <Text style={styles.titulo}>Inventario Casa</Text>
+        {householdName ? <Text style={styles.householdName}>Hogar: {householdName}</Text> : null}
+        {householdCode ? <Text style={styles.codigo}>Código hogar: {householdCode}</Text> : null}
       </View>
 
       {categorias.length === 0 ? (
@@ -152,6 +160,18 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
+  },
+  codigo: {
+    marginTop: 6,
+    color: '#E6F0FF',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  householdName: {
+    marginTop: 6,
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
   lista: {
     padding: 15,

@@ -8,27 +8,42 @@ import {
   AccessibilityInfo,
   Alert,
 } from 'react-native';
-import { collection, query, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function ListaCompraScreen() {
+  const { householdId } = useAuth();
   const [productosCompra, setProductosCompra] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, 'productos'));
+    if (!householdId) {
+      setProductosCompra([]);
+      setLoading(false);
+      return () => {};
+    }
+
+    const q = query(collection(db, 'households', householdId, 'productos'));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const productos = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         const umbralCompra = data.umbralCompra ?? 2;
+        const autoListaCompra = data.autoListaCompra ?? true;
+        const enListaCompraManual = data.enListaCompraManual ?? false;
 
-        if ((data.cantidad ?? 0) <= umbralCompra) {
+        const estaEnListaPorAutomatico = autoListaCompra && (data.cantidad ?? 0) <= umbralCompra;
+        const estaEnListaPorManual = enListaCompraManual;
+
+        if (estaEnListaPorAutomatico || estaEnListaPorManual) {
           productos.push({
           id: doc.id,
           ...data,
-          umbralCompra
+          umbralCompra,
+          autoListaCompra,
+          enListaCompraManual,
           });
         }
       });
@@ -53,12 +68,12 @@ export default function ListaCompraScreen() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [householdId]);
 
   const incrementarCantidad = async (productoId, cantidadActual, nombreProducto) => {
     try {
       const nuevaCantidad = cantidadActual + 1;
-      const productoRef = doc(db, 'productos', productoId);
+      const productoRef = doc(db, 'households', householdId, 'productos', productoId);
       await updateDoc(productoRef, {
         cantidad: nuevaCantidad
       });
@@ -68,8 +83,10 @@ export default function ListaCompraScreen() {
       );
 
       const umbralProducto = productosCompra.find((p) => p.id === productoId)?.umbralCompra ?? 2;
+      const manual = productosCompra.find((p) => p.id === productoId)?.enListaCompraManual ?? false;
+      const auto = productosCompra.find((p) => p.id === productoId)?.autoListaCompra ?? true;
 
-      if (nuevaCantidad > umbralProducto) {
+      if (!manual && auto && nuevaCantidad > umbralProducto) {
         AccessibilityInfo.announceForAccessibility(
           `${nombreProducto} eliminado de la lista de compra`
         );
@@ -85,7 +102,7 @@ export default function ListaCompraScreen() {
 
     try {
       const nuevaCantidad = cantidadActual - 1;
-      const productoRef = doc(db, 'productos', productoId);
+      const productoRef = doc(db, 'households', householdId, 'productos', productoId);
       await updateDoc(productoRef, {
         cantidad: nuevaCantidad
       });
@@ -109,7 +126,7 @@ export default function ListaCompraScreen() {
           urgente && styles.productoUrgente
         ]}
         accessible={true}
-        accessibilityLabel={`${item.nombre}, ${item.cantidad} ${item.cantidad === 1 ? 'unidad' : 'unidades'}${urgente ? ', urgente' : ''}`}
+        accessibilityLabel={`${item.nombre}, ${item.cantidad} ${item.cantidad === 1 ? 'unidad' : 'unidades'}${urgente ? ', urgente' : ''}${item.enListaCompraManual ? ', añadido manualmente' : ''}`}
         accessibilityHint="Desliza arriba para aumentar, abajo para disminuir"
         accessibilityActions={[
           { name: 'aumentar', label: 'Aumentar cantidad' },

@@ -12,11 +12,31 @@ import {
   ScrollView
 } from 'react-native';
 import { addCategory } from '../services/firestore';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function NuevaCategoriaScreen({ navigation }) {
+  const { householdId } = useAuth();
   const [nombre, setNombre] = useState('');
   const [guardando, setGuardando] = useState(false);
   const inputRef = useRef(null);
+  const lastNombreEventCountRef = useRef(0);
+
+  const handleNombreChange = (event) => {
+    const { text, eventCount } = event.nativeEvent;
+
+    if (
+      typeof eventCount === 'number' &&
+      eventCount < lastNombreEventCountRef.current
+    ) {
+      return;
+    }
+
+    if (typeof eventCount === 'number') {
+      lastNombreEventCountRef.current = eventCount;
+    }
+
+    setNombre(text);
+  };
 
   useEffect(() => {
     // Auto-focus en el campo de texto para accesibilidad
@@ -35,7 +55,7 @@ export default function NuevaCategoriaScreen({ navigation }) {
     }
 
     setGuardando(true);
-    const result = await addCategory(nombre.trim());
+    const result = await addCategory(householdId, nombre.trim());
     setGuardando(false);
 
     if (result.success) {
@@ -67,7 +87,7 @@ export default function NuevaCategoriaScreen({ navigation }) {
             ref={inputRef}
             style={styles.input}
             value={nombre}
-            onChangeText={setNombre}
+            onChange={handleNombreChange}
             placeholder="Ej: Despensa, Refrigerador..."
             placeholderTextColor="#999"
             accessibilityLabel="Nombre de la categoría"

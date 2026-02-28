@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 // Configuración de Firebase desde variables de entorno
@@ -18,5 +19,6 @@ const app = initializeApp(firebaseConfig);
 
 // Inicializar Firestore (sin persistencia offline para React Native)
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-export { db };
+export { db, auth };

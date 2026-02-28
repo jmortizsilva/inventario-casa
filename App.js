@@ -1,5 +1,5 @@
-import React from 'react';
-import { Platform } from 'react-native';
+    import React from 'react';
+    import { ActivityIndicator, Platform, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
@@ -12,6 +12,9 @@ import EditarCategoriaScreen from './src/screens/EditarCategoriaScreen';
 import NuevoProductoScreen from './src/screens/NuevoProductoScreen';
 import EditarProductoScreen from './src/screens/EditarProductoScreen';
 import ListaCompraScreen from './src/screens/ListaCompraScreen';
+import AjustesScreen from './src/screens/AjustesScreen';
+import LoginScreen from './src/screens/LoginScreen';
+import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 
 const Stack = createNativeStackNavigator();
 const Tab = createNativeBottomTabNavigator();
@@ -82,7 +85,21 @@ function InventarioStack() {
   );
 }
 
-export default function App() {
+function MainApp() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return <LoginScreen />;
+  }
+
   return (
     <NavigationContainer>
       <StatusBar style="light" />
@@ -122,7 +139,24 @@ export default function App() {
             tabBarIcon: () => (Platform.OS === 'ios' ? { sfSymbol: 'cart.fill' } : null),
           }}
         />
+        <Tab.Screen
+          name="Ajustes"
+          component={AjustesScreen}
+          options={{
+            title: 'Ajustes',
+            tabBarLabel: 'Ajustes',
+            tabBarIcon: () => (Platform.OS === 'ios' ? { sfSymbol: 'gearshape.fill' } : null),
+          }}
+        />
       </Tab.Navigator>
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 }

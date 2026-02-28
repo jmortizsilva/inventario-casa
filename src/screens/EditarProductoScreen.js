@@ -8,19 +8,41 @@ import {
   Alert,
   AccessibilityInfo,
   Platform,
+  Switch,
   KeyboardAvoidingView,
   ScrollView
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { updateProduct } from '../services/firestore';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function EditarProductoScreen({ route, navigation }) {
+  const { householdId } = useAuth();
   const { producto, categoriaId, categoriaNombre } = route.params;
   const [nombre, setNombre] = useState(producto.nombre);
   const [cantidad, setCantidad] = useState(producto.cantidad);
   const [umbralCompra, setUmbralCompra] = useState(producto.umbralCompra ?? 2);
+  const [autoListaCompra, setAutoListaCompra] = useState(producto.autoListaCompra ?? true);
   const [guardando, setGuardando] = useState(false);
   const nombreRef = useRef(null);
+  const lastNombreEventCountRef = useRef(0);
+
+  const handleNombreChange = (event) => {
+    const { text, eventCount } = event.nativeEvent;
+
+    if (
+      typeof eventCount === 'number' &&
+      eventCount < lastNombreEventCountRef.current
+    ) {
+      return;
+    }
+
+    if (typeof eventCount === 'number') {
+      lastNombreEventCountRef.current = eventCount;
+    }
+
+    setNombre(text);
+  };
 
   useEffect(() => {
     navigation.setOptions({ title: `Editar ${producto.nombre}` });
@@ -41,24 +63,28 @@ export default function EditarProductoScreen({ route, navigation }) {
     if (
       nombre.trim() === producto.nombre &&
       cantidad === producto.cantidad &&
-      umbralCompra === umbralOriginal
+      umbralCompra === umbralOriginal &&
+      autoListaCompra === (producto.autoListaCompra ?? true)
     ) {
       navigation.goBack();
       return;
     }
 
     setGuardando(true);
-    const result = await updateProduct(producto.id, {
+    const result = await updateProduct(householdId, producto.id, {
       nombre: nombre.trim(),
       cantidad: cantidad,
-      umbralCompra: umbralCompra
+      umbralCompra: umbralCompra,
+      autoListaCompra: autoListaCompra
     });
     setGuardando(false);
 
     if (result.success) {
       if (Platform.OS === 'ios') {
         AccessibilityInfo.announceForAccessibility(
-          `Producto actualizado: ${nombre}, cantidad ${cantidad}. Lista de compra con ${umbralCompra} unidades o menos`
+          autoListaCompra
+            ? `Producto actualizado: ${nombre}, cantidad ${cantidad}. Lista de compra con ${umbralCompra} unidades o menos`
+            : `Producto actualizado: ${nombre}, cantidad ${cantidad}. Sin lista automática`
         );
       }
       navigation.goBack();
@@ -75,6 +101,25 @@ export default function EditarProductoScreen({ route, navigation }) {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.formulario}>
           <View style={styles.campo}>
+            <View style={styles.switchRow}>
+              <Text 
+                style={styles.label}
+                accessible={true}
+                accessibilityRole="header"
+              >
+                Añadir automáticamente a la lista
+              </Text>
+              <Switch
+                value={autoListaCompra}
+                onValueChange={setAutoListaCompra}
+                disabled={!nombre.trim() || guardando}
+                accessibilityLabel="Conmutador de lista de compra automática"
+              />
+            </View>
+          </View>
+
+          {autoListaCompra ? (
+          <View style={styles.campo}>
             <Text 
               style={styles.label}
               accessible={true}
@@ -87,7 +132,7 @@ export default function EditarProductoScreen({ route, navigation }) {
               ref={nombreRef}
               style={styles.input}
               value={nombre}
-              onChangeText={setNombre}
+              onChange={handleNombreChange}
               placeholder="Nombre del producto"
               placeholderTextColor="#999"
               accessibilityLabel="Nombre del producto"
@@ -136,6 +181,7 @@ export default function EditarProductoScreen({ route, navigation }) {
               </Picker>
             </View>
           </View>
+          ) : null}
 
           <View style={styles.campo}>
             <Text 
@@ -217,6 +263,12 @@ const styles = StyleSheet.create({
   },
   campo: {
     marginBottom: 25,
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
   },
   label: {
     fontSize: 18,
