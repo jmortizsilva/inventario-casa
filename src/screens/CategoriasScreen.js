@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,55 @@ import {
   AccessibilityInfo,
   Platform
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { subscribeToCategories, deleteCategory } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function CategoriasScreen({ navigation }) {
   const { householdId, householdName } = useAuth();
   const [categorias, setCategorias] = useState([]);
+  const [screenReaderEnabled, setScreenReaderEnabled] = useState(false);
+  const listRef = useRef(null);
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
+
+  useEffect(() => {
+    let mounted = true;
+
+    AccessibilityInfo.isScreenReaderEnabled().then((enabled) => {
+      if (mounted) {
+        setScreenReaderEnabled(Boolean(enabled));
+      }
+    });
+
+    const subscription = AccessibilityInfo.addEventListener('screenReaderChanged', (enabled) => {
+      setScreenReaderEnabled(Boolean(enabled));
+    });
+
+    return () => {
+      mounted = false;
+      subscription?.remove?.();
+    };
+  }, []);
+
+  const adjustFocusScroll = useCallback((index, total) => {
+    if (Platform.OS !== 'ios' || !screenReaderEnabled || !listRef.current) {
+      return;
+    }
+
+    if (index < Math.max(0, total - 3)) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToIndex({
+        index,
+        viewPosition: 0.82,
+        animated: true,
+      });
+    });
+  }, [screenReaderEnabled]);
 
   useEffect(() => {
     if (!householdId) {
@@ -57,7 +100,7 @@ export default function CategoriasScreen({ navigation }) {
     );
   };
 
-  const renderCategoria = ({ item }) => (
+  const renderCategoria = ({ item, index }) => (
     <TouchableOpacity
       style={styles.categoriaCard}
       onPress={() => navigation.navigate('Productos', { 
@@ -96,6 +139,7 @@ export default function CategoriasScreen({ navigation }) {
         categoriaId: item.id, 
         categoriaNombre: item.nombre 
       })}
+      onFocus={() => adjustFocusScroll(index, categorias.length)}
     >
       <Text style={styles.categoriaNombre}>{item.nombre}</Text>
       <Text 
@@ -110,7 +154,7 @@ export default function CategoriasScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <View 
-        style={styles.header}
+        style={[styles.header, { paddingTop: insets.top + 16 }]}
         accessible={true}
         accessibilityRole="header"
       >
@@ -120,7 +164,7 @@ export default function CategoriasScreen({ navigation }) {
       </View>
 
       {categorias.length === 0 ? (
-        <View style={styles.emptyContainer}>
+        <View style={[styles.emptyContainer, { paddingBottom: tabBarHeight + 24, paddingTop: insets.top + 16 }]}>
           <Text 
             style={styles.emptyText}
             accessible={true}
@@ -131,17 +175,31 @@ export default function CategoriasScreen({ navigation }) {
         </View>
       ) : (
         <FlatList
+          ref={listRef}
           data={categorias}
           renderItem={renderCategoria}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.lista}
+          contentContainerStyle={[
+            styles.lista,
+            {
+              paddingTop: Math.max(10, insets.top * 0.2),
+              paddingBottom: tabBarHeight + 30,
+            },
+          ]}
+          keyboardShouldPersistTaps="handled"
+          onScrollToIndexFailed={({ averageItemLength = 80, index }) => {
+            listRef.current?.scrollToOffset({
+              offset: Math.max(0, (averageItemLength * index) - averageItemLength),
+              animated: true,
+            });
+          }}
           accessible={false}
           accessibilityLabel={`Lista de ${categorias.length} categorías`}
         />
       )}
 
       <TouchableOpacity
-        style={styles.botonFlotante}
+        style={[styles.botonFlotante, { bottom: tabBarHeight + 16 }]}
         onPress={() => navigation.navigate('NuevaCategoria')}
         accessible={true}
         accessibilityLabel="Añadir nueva categoría"
@@ -162,7 +220,6 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#007AFF',
     padding: 20,
-    paddingTop: 60,
   },
   titulo: {
     fontSize: 28,

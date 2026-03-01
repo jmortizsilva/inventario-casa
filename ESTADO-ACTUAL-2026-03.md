@@ -31,7 +31,14 @@ Este documento refleja el estado real de la app tras la migración a autenticaci
 ## Migración de datos legacy
 
 - Se incluye migración de datos antiguos (`categorias`/`productos` top-level) al hogar activo del usuario.
-- La migración se ejecuta automáticamente cuando aplica y también manualmente desde Ajustes.
+- La migración se ejecuta manualmente desde Ajustes para evitar mezcla de datos entre hogares al unirse/crear uno nuevo.
+
+## Cambios recientes (hotfix 1.0.1)
+
+- Corregido aislamiento de datos por hogar al cambiar/unirse/crear hogar.
+- Corregida duplicación de texto en dictado de formularios.
+- Mejorado comportamiento de scroll + safe areas en listas.
+- Ajuste de foco con VoiceOver en el tramo final de listas para facilitar activación de últimos elementos.
 
 ## Reglas Firestore usadas por la app
 

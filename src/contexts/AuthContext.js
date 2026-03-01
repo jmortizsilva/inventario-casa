@@ -163,23 +163,6 @@ const assignHouseholdToUser = async (user, household) => {
     },
     { merge: true }
   );
-
-  const migration = await migrateLegacyDataToHousehold(user.uid, household.householdId);
-  if (migration.success) {
-    await setDoc(
-      userRef,
-      {
-        legacyMigratedAt: serverTimestamp(),
-        legacyMigration: {
-          migrated: migration.migrated,
-          categories: migration.categories || 0,
-          products: migration.products || 0,
-          viaAssign: true,
-        },
-      },
-      { merge: true }
-    );
-  }
 };
 
 export function AuthProvider({ children }) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   AccessibilityInfo,
   Platform
 } from 'react-native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { 
   subscribeToProducts, 
   updateProductQuantity, 
@@ -21,6 +22,46 @@ export default function ProductosScreen({ route, navigation }) {
   const { householdId } = useAuth();
   const { categoriaId, categoriaNombre } = route.params;
   const [productos, setProductos] = useState([]);
+  const [screenReaderEnabled, setScreenReaderEnabled] = useState(false);
+  const listRef = useRef(null);
+  const tabBarHeight = useBottomTabBarHeight();
+
+  useEffect(() => {
+    let mounted = true;
+
+    AccessibilityInfo.isScreenReaderEnabled().then((enabled) => {
+      if (mounted) {
+        setScreenReaderEnabled(Boolean(enabled));
+      }
+    });
+
+    const subscription = AccessibilityInfo.addEventListener('screenReaderChanged', (enabled) => {
+      setScreenReaderEnabled(Boolean(enabled));
+    });
+
+    return () => {
+      mounted = false;
+      subscription?.remove?.();
+    };
+  }, []);
+
+  const adjustFocusScroll = useCallback((index, total) => {
+    if (Platform.OS !== 'ios' || !screenReaderEnabled || !listRef.current) {
+      return;
+    }
+
+    if (index < Math.max(0, total - 3)) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToIndex({
+        index,
+        viewPosition: 0.82,
+        animated: true,
+      });
+    });
+  }, [screenReaderEnabled]);
 
   useEffect(() => {
     navigation.setOptions({ title: categoriaNombre });
@@ -98,7 +139,7 @@ export default function ProductosScreen({ route, navigation }) {
     }
   };
 
-  const renderProducto = ({ item }) => (
+  const renderProducto = ({ item, index }) => (
     <TouchableOpacity
       style={styles.productoCard}
       activeOpacity={0.9}
@@ -147,6 +188,7 @@ export default function ProductosScreen({ route, navigation }) {
             break;
         }
       }}
+      onFocus={() => adjustFocusScroll(index, productos.length)}
     >
       <View style={styles.productoInfo} importantForAccessibility="no-hide-descendants">
         <Text 
@@ -219,7 +261,7 @@ export default function ProductosScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       {productos.length === 0 ? (
-        <View style={styles.emptyContainer}>
+        <View style={[styles.emptyContainer, { paddingBottom: tabBarHeight + 24 }]}>
           <Text 
             style={styles.emptyText}
             accessible={true}
@@ -230,17 +272,25 @@ export default function ProductosScreen({ route, navigation }) {
         </View>
       ) : (
         <FlatList
+          ref={listRef}
           data={productos}
           renderItem={renderProducto}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.lista}
+          contentContainerStyle={[styles.lista, { paddingBottom: tabBarHeight + 30 }]}
+          keyboardShouldPersistTaps="handled"
+          onScrollToIndexFailed={({ averageItemLength = 120, index }) => {
+            listRef.current?.scrollToOffset({
+              offset: Math.max(0, (averageItemLength * index) - averageItemLength),
+              animated: true,
+            });
+          }}
           accessible={false}
           accessibilityLabel={`Lista de ${productos.length} productos`}
         />
       )}
 
       <TouchableOpacity
-        style={styles.botonFlotante}
+        style={[styles.botonFlotante, { bottom: tabBarHeight + 16 }]}
         onPress={() => navigation.navigate('NuevoProducto', { categoriaId, categoriaNombre })}
         accessible={true}
         accessibilityLabel="Añadir nuevo producto"

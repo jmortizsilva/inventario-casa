@@ -25,24 +25,6 @@ export default function NuevoProductoScreen({ route, navigation }) {
   const [autoListaCompra, setAutoListaCompra] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const nombreRef = useRef(null);
-  const lastNombreEventCountRef = useRef(0);
-
-  const handleNombreChange = (event) => {
-    const { text, eventCount } = event.nativeEvent;
-
-    if (
-      typeof eventCount === 'number' &&
-      eventCount < lastNombreEventCountRef.current
-    ) {
-      return;
-    }
-
-    if (typeof eventCount === 'number') {
-      lastNombreEventCountRef.current = eventCount;
-    }
-
-    setNombre(text);
-  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -130,7 +112,7 @@ export default function NuevoProductoScreen({ route, navigation }) {
               ref={nombreRef}
               style={styles.input}
               value={nombre}
-              onChange={handleNombreChange}
+              onChangeText={setNombre}
               placeholder="Ej: Arroz, Leche, Pan..."
               placeholderTextColor="#999"
               accessibilityLabel="Nombre del producto, campo de edición"

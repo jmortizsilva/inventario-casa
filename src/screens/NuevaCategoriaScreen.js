@@ -19,24 +19,6 @@ export default function NuevaCategoriaScreen({ navigation }) {
   const [nombre, setNombre] = useState('');
   const [guardando, setGuardando] = useState(false);
   const inputRef = useRef(null);
-  const lastNombreEventCountRef = useRef(0);
-
-  const handleNombreChange = (event) => {
-    const { text, eventCount } = event.nativeEvent;
-
-    if (
-      typeof eventCount === 'number' &&
-      eventCount < lastNombreEventCountRef.current
-    ) {
-      return;
-    }
-
-    if (typeof eventCount === 'number') {
-      lastNombreEventCountRef.current = eventCount;
-    }
-
-    setNombre(text);
-  };
 
   const handleGuardar = async () => {
     if (!nombre.trim()) {
@@ -118,7 +100,7 @@ export default function NuevaCategoriaScreen({ navigation }) {
             ref={inputRef}
             style={styles.input}
             value={nombre}
-            onChange={handleNombreChange}
+            onChangeText={setNombre}
             placeholder="Ej: Despensa, Refrigerador..."
             placeholderTextColor="#999"
             accessibilityLabel="Nombre de la categoría"

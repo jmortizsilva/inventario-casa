@@ -20,24 +20,6 @@ export default function EditarCategoriaScreen({ route, navigation }) {
   const [nombre, setNombre] = useState(categoriaNombre);
   const [guardando, setGuardando] = useState(false);
   const inputRef = useRef(null);
-  const lastNombreEventCountRef = useRef(0);
-
-  const handleNombreChange = (event) => {
-    const { text, eventCount } = event.nativeEvent;
-
-    if (
-      typeof eventCount === 'number' &&
-      eventCount < lastNombreEventCountRef.current
-    ) {
-      return;
-    }
-
-    if (typeof eventCount === 'number') {
-      lastNombreEventCountRef.current = eventCount;
-    }
-
-    setNombre(text);
-  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -122,7 +104,7 @@ export default function EditarCategoriaScreen({ route, navigation }) {
             ref={inputRef}
             style={styles.input}
             value={nombre}
-            onChange={handleNombreChange}
+            onChangeText={setNombre}
             placeholder="Nombre de la categoría"
             placeholderTextColor="#999"
             accessibilityLabel="Nombre de la categoría"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   AccessibilityInfo,
   Alert,
 } from 'react-native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { collection, query, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,6 +17,46 @@ export default function ListaCompraScreen() {
   const { householdId } = useAuth();
   const [productosCompra, setProductosCompra] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [screenReaderEnabled, setScreenReaderEnabled] = useState(false);
+  const listRef = useRef(null);
+  const tabBarHeight = useBottomTabBarHeight();
+
+  useEffect(() => {
+    let mounted = true;
+
+    AccessibilityInfo.isScreenReaderEnabled().then((enabled) => {
+      if (mounted) {
+        setScreenReaderEnabled(Boolean(enabled));
+      }
+    });
+
+    const subscription = AccessibilityInfo.addEventListener('screenReaderChanged', (enabled) => {
+      setScreenReaderEnabled(Boolean(enabled));
+    });
+
+    return () => {
+      mounted = false;
+      subscription?.remove?.();
+    };
+  }, []);
+
+  const adjustFocusScroll = useCallback((index, total) => {
+    if (!screenReaderEnabled || !listRef.current) {
+      return;
+    }
+
+    if (index < Math.max(0, total - 3)) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      listRef.current?.scrollToIndex({
+        index,
+        viewPosition: 0.82,
+        animated: true,
+      });
+    });
+  }, [screenReaderEnabled]);
 
   useEffect(() => {
     if (!householdId) {
@@ -116,7 +157,7 @@ export default function ListaCompraScreen() {
     }
   };
 
-  const renderProducto = ({ item }) => {
+  const renderProducto = ({ item, index }) => {
     const urgente = item.cantidad === 0;
     
     return (
@@ -142,6 +183,7 @@ export default function ListaCompraScreen() {
               break;
           }
         }}
+        onFocus={() => adjustFocusScroll(index, productosCompra.length)}
       >
         <View style={styles.infoContainer}>
           <Text style={[styles.nombre, urgente && styles.nombreUrgente]}>
@@ -182,7 +224,7 @@ export default function ListaCompraScreen() {
   if (loading) {
     return (
       <View style={styles.container}>
-        <View style={styles.loadingContainer}>
+        <View style={[styles.loadingContainer, { paddingBottom: tabBarHeight + 12 }]}>
           <Text style={styles.loadingText}>Cargando lista de compra...</Text>
         </View>
       </View>
@@ -192,7 +234,7 @@ export default function ListaCompraScreen() {
   if (productosCompra.length === 0) {
     return (
       <View style={styles.container}>
-        <View style={styles.emptyContainer}>
+        <View style={[styles.emptyContainer, { paddingBottom: tabBarHeight + 12 }]}>
           <Text style={styles.emptyIcon}>✓</Text>
           <Text style={styles.emptyText}>¡Todo bien!</Text>
           <Text style={styles.emptySubtext}>
@@ -212,10 +254,18 @@ export default function ListaCompraScreen() {
       </View>
       
       <FlatList
+        ref={listRef}
         data={productosCompra}
         renderItem={renderProducto}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.lista}
+        contentContainerStyle={[styles.lista, { paddingBottom: tabBarHeight + 24 }]}
+        keyboardShouldPersistTaps="handled"
+        onScrollToIndexFailed={({ averageItemLength = 120, index }) => {
+          listRef.current?.scrollToOffset({
+            offset: Math.max(0, (averageItemLength * index) - averageItemLength),
+            animated: true,
+          });
+        }}
         accessible={false}
         importantForAccessibility="no"
       />
