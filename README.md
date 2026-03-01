@@ -2,6 +2,10 @@
 
 Aplicación móvil para iOS para gestionar el inventario del hogar con **sincronización en tiempo real** usando Firebase Firestore. Optimizada para **accesibilidad con VoiceOver**.
 
+> 📌 Estado actualizado: ver [ESTADO-ACTUAL-2026-03.md](ESTADO-ACTUAL-2026-03.md)
+>
+> 🚀 TestFlight para cualquier tester: ver [TESTFLIGHT-EXTERNO.md](TESTFLIGHT-EXTERNO.md)
+
 ---
 
 ## ✨ Características

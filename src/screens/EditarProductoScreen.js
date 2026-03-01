@@ -45,12 +45,39 @@ export default function EditarProductoScreen({ route, navigation }) {
   };
 
   useEffect(() => {
-    navigation.setOptions({ title: `Editar ${producto.nombre}` });
-    setTimeout(() => {
-      nombreRef.current?.focus();
-      nombreRef.current?.setSelection(0, producto.nombre.length);
-    }, 500);
-  }, []);
+    navigation.setOptions({
+      title: `Editar ${producto.nombre}`,
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          disabled={guardando}
+          accessibilityRole="button"
+          accessibilityLabel="Cancelar"
+          style={styles.headerButton}
+        >
+          <Text style={[styles.headerButtonText, guardando && styles.headerButtonDisabled]}>Cancelar</Text>
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleGuardar}
+          disabled={guardando || !nombre.trim()}
+          accessibilityRole="button"
+          accessibilityLabel={guardando ? 'Guardando' : 'Guardar cambios'}
+          style={styles.headerButton}
+        >
+          <Text
+            style={[
+              styles.headerButtonText,
+              (guardando || !nombre.trim()) && styles.headerButtonDisabled,
+            ]}
+          >
+            {guardando ? 'Guardando...' : 'Guardar'}
+          </Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, producto.nombre, guardando, nombre]);
 
   const handleGuardar = async () => {
     if (!nombre.trim()) {
@@ -98,32 +125,13 @@ export default function EditarProductoScreen({ route, navigation }) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
         <View style={styles.formulario}>
-          <View style={styles.campo}>
-            <View style={styles.switchRow}>
-              <Text 
-                style={styles.label}
-                accessible={true}
-                accessibilityRole="header"
-              >
-                Añadir automáticamente a la lista
-              </Text>
-              <Switch
-                value={autoListaCompra}
-                onValueChange={setAutoListaCompra}
-                disabled={!nombre.trim() || guardando}
-                accessibilityLabel="Conmutador de lista de compra automática"
-              />
-            </View>
-          </View>
-
-          {autoListaCompra ? (
           <View style={styles.campo}>
             <Text 
               style={styles.label}
-              accessible={true}
-              accessibilityRole="header"
+              accessible={false}
+              importantForAccessibility="no"
             >
               Nombre del producto
             </Text>
@@ -135,17 +143,19 @@ export default function EditarProductoScreen({ route, navigation }) {
               onChange={handleNombreChange}
               placeholder="Nombre del producto"
               placeholderTextColor="#999"
-              accessibilityLabel="Nombre del producto"
+              accessibilityLabel="Nombre del producto, campo de edición"
               accessibilityHint="Edita el nombre del producto"
               returnKeyType="next"
               onSubmitEditing={handleGuardar}
               editable={!guardando}
+              blurOnSubmit={false}
               maxLength={50}
             />
 
             <Text 
               style={styles.contador}
-              accessible={true}
+              accessible={false}
+              importantForAccessibility="no"
               accessibilityLabel={`${nombre.length} de 50 caracteres`}
             >
               {nombre.length}/50
@@ -155,8 +165,8 @@ export default function EditarProductoScreen({ route, navigation }) {
           <View style={styles.campo}>
             <Text 
               style={styles.label}
-              accessible={true}
-              accessibilityRole="header"
+              accessible={false}
+              importantForAccessibility="no"
             >
               Cantidad
             </Text>
@@ -181,68 +191,57 @@ export default function EditarProductoScreen({ route, navigation }) {
               </Picker>
             </View>
           </View>
-          ) : null}
 
           <View style={styles.campo}>
-            <Text 
-              style={styles.label}
-              accessible={true}
-              accessibilityRole="header"
-            >
-              Pasar a lista de compra con
-            </Text>
-
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={umbralCompra}
-                onValueChange={(itemValue) => setUmbralCompra(itemValue)}
-                style={styles.picker}
-                itemStyle={styles.pickerItem}
-                accessibilityLabel="Seleccionar umbral para lista de compra"
-                accessibilityHint="Desliza arriba o abajo para elegir con cuántas unidades pasa a la lista"
-                enabled={!guardando}
+            <View style={styles.switchRow}>
+              <Text
+                style={styles.label}
+                accessible={false}
+                importantForAccessibility="no"
               >
-                {Array.from({ length: 21 }, (_, i) => i).map(num => (
-                  <Picker.Item 
-                    key={num} 
-                    label={`${num} ${num === 1 ? 'unidad' : 'unidades'} o menos`} 
-                    value={num}
-                  />
-                ))}
-              </Picker>
+                Añadir automáticamente a la lista
+              </Text>
+              <Switch
+                value={autoListaCompra}
+                onValueChange={setAutoListaCompra}
+                disabled={!nombre.trim() || guardando}
+                accessibilityLabel="Añadir automáticamente a la lista de compra"
+              />
             </View>
           </View>
 
-          <View style={styles.botonesContainer}>
-            <TouchableOpacity
-              style={[styles.boton, styles.botonCancelar]}
-              onPress={() => navigation.goBack()}
-              disabled={guardando}
-              accessible={true}
-              accessibilityLabel="Cancelar"
-              accessibilityRole="button"
-            >
-              <Text style={styles.botonTextoCancelar}>Cancelar</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.boton, 
-                styles.botonGuardar,
-                guardando && styles.botonDeshabilitado
-              ]}
-              onPress={handleGuardar}
-              disabled={guardando || !nombre.trim()}
-              accessible={true}
-              accessibilityLabel={guardando ? 'Guardando' : 'Guardar cambios'}
-              accessibilityRole="button"
-              accessibilityState={{ disabled: guardando || !nombre.trim() }}
-            >
-              <Text style={styles.botonTextoGuardar}>
-                {guardando ? 'Guardando...' : 'Guardar'}
+          {autoListaCompra ? (
+            <View style={styles.campo}>
+              <Text
+                style={styles.label}
+                accessible={false}
+                importantForAccessibility="no"
+              >
+                Pasar a lista de compra con
               </Text>
-            </TouchableOpacity>
-          </View>
+
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={umbralCompra}
+                  onValueChange={(itemValue) => setUmbralCompra(itemValue)}
+                  style={styles.picker}
+                  itemStyle={styles.pickerItem}
+                  accessibilityLabel="Pasar a lista de compra con"
+                  accessibilityHint="Desliza arriba o abajo para elegir con cuántas unidades pasa a la lista"
+                  enabled={!guardando}
+                >
+                  {Array.from({ length: 21 }, (_, i) => i).map(num => (
+                    <Picker.Item 
+                      key={num} 
+                      label={`${num} ${num === 1 ? 'unidad' : 'unidades'} o menos`} 
+                      value={num}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+          ) : null}
+
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -305,38 +304,16 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 14,
   },
-  botonesContainer: {
-    flexDirection: 'row',
-    marginTop: 30,
-    gap: 10,
+  headerButton: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
   },
-  boton: {
-    flex: 1,
-    padding: 18,
-    borderRadius: 12,
-    alignItems: 'center',
-    minHeight: 56,
-    justifyContent: 'center',
-  },
-  botonCancelar: {
-    backgroundColor: '#fff',
-    borderWidth: 2,
-    borderColor: '#FF3B30',
-  },
-  botonTextoCancelar: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FF3B30',
-  },
-  botonGuardar: {
-    backgroundColor: '#007AFF',
-  },
-  botonTextoGuardar: {
-    fontSize: 18,
-    fontWeight: '600',
+  headerButtonText: {
+    fontSize: 17,
     color: '#fff',
+    fontWeight: '600',
   },
-  botonDeshabilitado: {
-    backgroundColor: '#ccc',
+  headerButtonDisabled: {
+    opacity: 0.5,
   },
 });

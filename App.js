@@ -1,5 +1,5 @@
-    import React from 'react';
-    import { ActivityIndicator, Platform, View } from 'react-native';
+import React from 'react';
+import { ActivityIndicator, Platform, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
@@ -14,6 +14,7 @@ import EditarProductoScreen from './src/screens/EditarProductoScreen';
 import ListaCompraScreen from './src/screens/ListaCompraScreen';
 import AjustesScreen from './src/screens/AjustesScreen';
 import LoginScreen from './src/screens/LoginScreen';
+import SeleccionHogarScreen from './src/screens/SeleccionHogarScreen';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 
 const Stack = createNativeStackNavigator();
@@ -86,7 +87,7 @@ function InventarioStack() {
 }
 
 function MainApp() {
-  const { user, loading } = useAuth();
+  const { user, loading, householdId, requiresHouseholdChoice } = useAuth();
 
   if (loading) {
     return (
@@ -98,6 +99,10 @@ function MainApp() {
 
   if (!user) {
     return <LoginScreen />;
+  }
+
+  if (requiresHouseholdChoice || !householdId) {
+    return <SeleccionHogarScreen />;
   }
 
   return (

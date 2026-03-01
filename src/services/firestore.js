@@ -5,6 +5,7 @@ import {
   updateDoc, 
   deleteDoc, 
   getDocs, 
+  writeBatch,
   onSnapshot,
   query,
   orderBy,
@@ -19,6 +20,11 @@ const getHouseholdPath = (householdId, section) => {
   }
   return collection(db, 'households', householdId, section);
 };
+
+const normalizeName = (value) =>
+  String(value || '')
+    .trim()
+    .toLowerCase();
 
 // ============ CATEGORÍAS ============
 
@@ -167,5 +173,122 @@ export const deleteProduct = async (householdId, id) => {
   } catch (error) {
     console.error('Error al eliminar producto:', error);
     return { success: false, error: error.message };
+  }
+};
+
+export const migrateLegacyDataToHousehold = async (userId, householdId) => {
+  try {
+    if (!householdId) {
+      return { success: false, migrated: false, error: 'No hay hogar seleccionado' };
+    }
+
+    const [legacyCategoriesSnap, legacyProductsSnap, currentCategoriesSnap] = await Promise.all([
+      getDocs(collection(db, 'categorias')),
+      getDocs(collection(db, 'productos')),
+      getDocs(getHouseholdPath(householdId, 'categorias')),
+    ]);
+
+    if (legacyCategoriesSnap.empty && legacyProductsSnap.empty) {
+      return { success: true, migrated: false, categories: 0, products: 0 };
+    }
+
+    const batch = writeBatch(db);
+    let operations = 0;
+    let categoriesMigrated = 0;
+    let productsMigrated = 0;
+
+    const existingCategoriesByName = new Map();
+    currentCategoriesSnap.forEach((categoryDoc) => {
+      const normalized = normalizeName(categoryDoc.data()?.nombre);
+      if (normalized) {
+        existingCategoriesByName.set(normalized, categoryDoc.id);
+      }
+    });
+
+    const legacyCategoryToHouseholdCategory = new Map();
+
+    legacyCategoriesSnap.forEach((legacyCategoryDoc) => {
+      const categoryData = legacyCategoryDoc.data() || {};
+      const ownerUid = categoryData.ownerUid || null;
+
+      if (ownerUid && ownerUid !== userId) {
+        return;
+      }
+
+      const categoryName = (categoryData.nombre || '').trim();
+      if (!categoryName) {
+        return;
+      }
+
+      const normalizedName = normalizeName(categoryName);
+      const alreadyExistingId = existingCategoriesByName.get(normalizedName);
+
+      if (alreadyExistingId) {
+        legacyCategoryToHouseholdCategory.set(legacyCategoryDoc.id, alreadyExistingId);
+        return;
+      }
+
+      const newCategoryRef = doc(collection(db, 'households', householdId, 'categorias'));
+      legacyCategoryToHouseholdCategory.set(legacyCategoryDoc.id, newCategoryRef.id);
+      existingCategoriesByName.set(normalizedName, newCategoryRef.id);
+
+      batch.set(newCategoryRef, {
+        nombre: categoryName,
+        createdAt: categoryData.createdAt || serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      categoriesMigrated += 1;
+      operations += 1;
+    });
+
+    legacyProductsSnap.forEach((legacyProductDoc) => {
+      const productData = legacyProductDoc.data() || {};
+      const ownerUid = productData.ownerUid || null;
+
+      if (ownerUid && ownerUid !== userId) {
+        return;
+      }
+
+      const productName = (productData.nombre || '').trim();
+      if (!productName) {
+        return;
+      }
+
+      const mappedCategoryId = legacyCategoryToHouseholdCategory.get(productData.categoriaId);
+      if (!mappedCategoryId) {
+        return;
+      }
+
+      const newProductRef = doc(collection(db, 'households', householdId, 'productos'));
+      batch.set(newProductRef, {
+        nombre: productName,
+        cantidad: Number.isInteger(productData.cantidad) ? productData.cantidad : (parseInt(productData.cantidad, 10) || 0),
+        umbralCompra: Number.isInteger(productData.umbralCompra) ? productData.umbralCompra : (parseInt(productData.umbralCompra, 10) || 2),
+        autoListaCompra: productData.autoListaCompra !== false,
+        enListaCompraManual: productData.enListaCompraManual === true,
+        categoriaId: mappedCategoryId,
+        createdAt: productData.createdAt || serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      productsMigrated += 1;
+      operations += 1;
+    });
+
+    if (operations > 0) {
+      await batch.commit();
+    }
+
+    return {
+      success: true,
+      migrated: operations > 0,
+      categories: categoriesMigrated,
+      products: productsMigrated,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      migrated: false,
+      error: error.message,
+    };
   }
 };

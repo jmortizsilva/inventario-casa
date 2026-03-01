@@ -13,7 +13,7 @@ import { subscribeToCategories, deleteCategory } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function CategoriasScreen({ navigation }) {
-  const { householdId, householdCode, householdName } = useAuth();
+  const { householdId, householdName } = useAuth();
   const [categorias, setCategorias] = useState([]);
 
   useEffect(() => {
@@ -65,21 +65,29 @@ export default function CategoriasScreen({ navigation }) {
         categoriaNombre: item.nombre 
       })}
       accessible={true}
+      accessibilityLanguage="es-ES"
       accessibilityLabel={item.nombre}
       accessibilityHint="Toca para ver los productos"
       accessibilityActions={[
-        { name: 'editar', label: 'Editar categoría' },
-        { name: 'eliminar', label: 'Eliminar categoría' }
+        { name: 'agregarProducto', label: `Añadir producto a ${item.nombre}` },
+        { name: 'editarCategoria', label: 'Editar categoría' },
+        { name: 'eliminarCategoria', label: 'Eliminar categoría' }
       ]}
       onAccessibilityAction={(event) => {
         switch (event.nativeEvent.actionName) {
-          case 'editar':
+          case 'agregarProducto':
+            navigation.navigate('NuevoProducto', {
+              categoriaId: item.id,
+              categoriaNombre: item.nombre,
+            });
+            break;
+          case 'editarCategoria':
             navigation.navigate('EditarCategoria', { 
               categoriaId: item.id, 
               categoriaNombre: item.nombre 
             });
             break;
-          case 'eliminar':
+          case 'eliminarCategoria':
             handleEliminarCategoria(item.id, item.nombre);
             break;
         }
@@ -106,9 +114,9 @@ export default function CategoriasScreen({ navigation }) {
         accessible={true}
         accessibilityRole="header"
       >
-        <Text style={styles.titulo}>Inventario Casa</Text>
-        {householdName ? <Text style={styles.householdName}>Hogar: {householdName}</Text> : null}
-        {householdCode ? <Text style={styles.codigo}>Código hogar: {householdCode}</Text> : null}
+        <Text style={styles.titulo}>
+          {householdName ? `Inventario Casa, ${householdName}` : 'Inventario Casa'}
+        </Text>
       </View>
 
       {categorias.length === 0 ? (
@@ -160,18 +168,6 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
-  },
-  codigo: {
-    marginTop: 6,
-    color: '#E6F0FF',
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  householdName: {
-    marginTop: 6,
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
   },
   lista: {
     padding: 15,

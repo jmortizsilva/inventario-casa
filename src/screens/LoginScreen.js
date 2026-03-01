@@ -6,7 +6,6 @@ import {
   Platform,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -18,8 +17,6 @@ WebBrowser.maybeCompleteAuthSession();
 
 export default function LoginScreen() {
   const { signInWithGoogleToken, loading, error } = useAuth();
-  const [joinCode, setJoinCode] = useState('');
-  const [householdName, setHouseholdName] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const isConfigured = useMemo(() => {
@@ -50,11 +47,7 @@ export default function LoginScreen() {
 
       try {
         setSubmitting(true);
-        await signInWithGoogleToken(
-          idToken,
-          joinCode.trim().toUpperCase(),
-          householdName.trim()
-        );
+        await signInWithGoogleToken(idToken);
       } catch (signInError) {
         Alert.alert(
           'Error de autenticación',
@@ -102,33 +95,7 @@ export default function LoginScreen() {
     >
       <View style={styles.card}>
         <Text style={styles.title}>Inventario Casa</Text>
-        <Text style={styles.subtitle}>Accede con Google y comparte hogar por código</Text>
-
-        <Text style={styles.label}>Código de hogar (opcional)</Text>
-        <TextInput
-          style={styles.input}
-          value={joinCode}
-          onChangeText={(value) => setJoinCode(value.toUpperCase())}
-          autoCapitalize="characters"
-          maxLength={8}
-          editable={!blocked}
-          placeholder="Ej: A1B2C3"
-          placeholderTextColor="#888"
-          accessibilityLabel="Código de hogar opcional"
-        />
-
-        <Text style={styles.label}>Nombre del hogar (si creas uno nuevo)</Text>
-        <TextInput
-          style={styles.input}
-          value={householdName}
-          onChangeText={setHouseholdName}
-          autoCapitalize="words"
-          maxLength={40}
-          editable={!blocked}
-          placeholder="Ej: Josonica"
-          placeholderTextColor="#888"
-          accessibilityLabel="Nombre opcional del hogar"
-        />
+        <Text style={styles.subtitle}>Accede con Google para continuar</Text>
 
         <TouchableOpacity
           style={[styles.button, blocked && styles.buttonDisabled]}
@@ -145,7 +112,7 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         <Text style={styles.helpText}>
-          Si no introduces código, se crea un hogar nuevo automáticamente.
+          Después de iniciar sesión podrás elegir si mantener tu hogar, unirte con código o crear otro.
         </Text>
       </View>
     </KeyboardAvoidingView>
@@ -179,22 +146,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#444',
     marginBottom: 20,
-  },
-  label: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
-  },
-  input: {
-    borderWidth: 2,
-    borderColor: '#007AFF',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 16,
-    marginBottom: 16,
-    color: '#111',
   },
   button: {
     backgroundColor: '#007AFF',

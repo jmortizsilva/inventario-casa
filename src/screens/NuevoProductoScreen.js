@@ -45,11 +45,39 @@ export default function NuevoProductoScreen({ route, navigation }) {
   };
 
   useEffect(() => {
-    navigation.setOptions({ title: `Nuevo en ${categoriaNombre}` });
-    setTimeout(() => {
-      nombreRef.current?.focus();
-    }, 500);
-  }, []);
+    navigation.setOptions({
+      title: `Nuevo en ${categoriaNombre}`,
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          disabled={guardando}
+          accessibilityRole="button"
+          accessibilityLabel="Cancelar"
+          style={styles.headerButton}
+        >
+          <Text style={[styles.headerButtonText, guardando && styles.headerButtonDisabled]}>Cancelar</Text>
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleGuardar}
+          disabled={guardando || !nombre.trim()}
+          accessibilityRole="button"
+          accessibilityLabel={guardando ? 'Guardando' : 'Guardar producto'}
+          style={styles.headerButton}
+        >
+          <Text
+            style={[
+              styles.headerButtonText,
+              (guardando || !nombre.trim()) && styles.headerButtonDisabled,
+            ]}
+          >
+            {guardando ? 'Guardando...' : 'Guardar'}
+          </Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation, categoriaNombre, guardando, nombre]);
 
   const handleGuardar = async () => {
     if (!nombre.trim()) {
@@ -92,8 +120,8 @@ export default function NuevoProductoScreen({ route, navigation }) {
           <View style={styles.campo}>
             <Text 
               style={styles.label}
-              accessible={true}
-              accessibilityRole="header"
+              accessible={false}
+              importantForAccessibility="no"
             >
               Nombre del producto
             </Text>
@@ -105,7 +133,7 @@ export default function NuevoProductoScreen({ route, navigation }) {
               onChange={handleNombreChange}
               placeholder="Ej: Arroz, Leche, Pan..."
               placeholderTextColor="#999"
-              accessibilityLabel="Nombre del producto"
+              accessibilityLabel="Nombre del producto, campo de edición"
               accessibilityHint="Escribe el nombre del producto"
               returnKeyType="next"
               onSubmitEditing={handleGuardar}
@@ -115,7 +143,8 @@ export default function NuevoProductoScreen({ route, navigation }) {
 
             <Text 
               style={styles.contador}
-              accessible={true}
+              accessible={false}
+              importantForAccessibility="no"
               accessibilityLabel={`${nombre.length} de 50 caracteres`}
             >
               {nombre.length}/50
@@ -125,8 +154,8 @@ export default function NuevoProductoScreen({ route, navigation }) {
           <View style={styles.campo}>
             <Text 
               style={styles.label}
-              accessible={true}
-              accessibilityRole="header"
+              accessible={false}
+              importantForAccessibility="no"
             >
               Cantidad inicial
             </Text>
@@ -156,8 +185,8 @@ export default function NuevoProductoScreen({ route, navigation }) {
             <View style={styles.switchRow}>
               <Text 
                 style={styles.label}
-                accessible={true}
-                accessibilityRole="header"
+                accessible={false}
+                importantForAccessibility="no"
               >
                 Añadir automáticamente a la lista
               </Text>
@@ -174,8 +203,8 @@ export default function NuevoProductoScreen({ route, navigation }) {
           <View style={styles.campo}>
             <Text 
               style={styles.label}
-              accessible={true}
-              accessibilityRole="header"
+              accessible={false}
+              importantForAccessibility="no"
             >
               Pasar a lista de compra con
             </Text>
@@ -202,36 +231,6 @@ export default function NuevoProductoScreen({ route, navigation }) {
           </View>
           ) : null}
 
-          <View style={styles.botonesContainer}>
-            <TouchableOpacity
-              style={[styles.boton, styles.botonCancelar]}
-              onPress={() => navigation.goBack()}
-              disabled={guardando}
-              accessible={true}
-              accessibilityLabel="Cancelar"
-              accessibilityRole="button"
-            >
-              <Text style={styles.botonTextoCancelar}>Cancelar</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.boton, 
-                styles.botonGuardar,
-                guardando && styles.botonDeshabilitado
-              ]}
-              onPress={handleGuardar}
-              disabled={guardando || !nombre.trim()}
-              accessible={true}
-              accessibilityLabel={guardando ? 'Guardando' : 'Guardar producto'}
-              accessibilityRole="button"
-              accessibilityState={{ disabled: guardando || !nombre.trim() }}
-            >
-              <Text style={styles.botonTextoGuardar}>
-                {guardando ? 'Guardando...' : 'Guardar'}
-              </Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -294,38 +293,16 @@ const styles = StyleSheet.create({
     marginTop: 5,
     fontSize: 14,
   },
-  botonesContainer: {
-    flexDirection: 'row',
-    marginTop: 30,
-    gap: 10,
+  headerButton: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
   },
-  boton: {
-    flex: 1,
-    padding: 18,
-    borderRadius: 12,
-    alignItems: 'center',
-    minHeight: 56,
-    justifyContent: 'center',
-  },
-  botonCancelar: {
-    backgroundColor: '#fff',
-    borderWidth: 2,
-    borderColor: '#FF3B30',
-  },
-  botonTextoCancelar: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FF3B30',
-  },
-  botonGuardar: {
-    backgroundColor: '#007AFF',
-  },
-  botonTextoGuardar: {
-    fontSize: 18,
-    fontWeight: '600',
+  headerButtonText: {
+    fontSize: 17,
     color: '#fff',
+    fontWeight: '600',
   },
-  botonDeshabilitado: {
-    backgroundColor: '#ccc',
+  headerButtonDisabled: {
+    opacity: 0.5,
   },
 });

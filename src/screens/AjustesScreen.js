@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Alert,
+  Modal,
   ScrollView,
   Share,
   StyleSheet,
@@ -11,7 +12,9 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 
 export default function AjustesScreen() {
-  const { householdCode, householdName, signOut } = useAuth();
+  const [manualVisible, setManualVisible] = React.useState(false);
+  const [migrating, setMigrating] = React.useState(false);
+  const { householdCode, householdName, migrateLegacyDataNow, signOut } = useAuth();
 
   const handleCompartirHogar = async () => {
     if (!householdCode) {
@@ -29,15 +32,59 @@ export default function AjustesScreen() {
     }
   };
 
+  const handleImportarDatosAnteriores = async () => {
+    if (migrating) {
+      return;
+    }
+
+    setMigrating(true);
+    const result = await migrateLegacyDataNow();
+    setMigrating(false);
+
+    if (!result.success) {
+      Alert.alert('Importación', result.error || 'No se pudieron importar los datos antiguos.');
+      return;
+    }
+
+    if (!result.migrated) {
+      Alert.alert('Importación', 'No había datos antiguos pendientes para importar.');
+      return;
+    }
+
+    Alert.alert(
+      'Importación completada',
+      `Se importaron ${result.categories || 0} categorías y ${result.products || 0} productos a este hogar.`
+    );
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Hogar</Text>
-        <Text style={styles.rowLabel}>Nombre</Text>
-        <Text style={styles.rowValue}>{householdName || 'Sin nombre'}</Text>
+      <Text style={styles.screenTitle} accessibilityRole="header">
+        Ajustes
+      </Text>
 
-        <Text style={styles.rowLabel}>Código</Text>
-        <Text style={styles.rowValue}>{householdCode || 'Sin código'}</Text>
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle} accessibilityRole="header">Hogar</Text>
+
+        <View
+          style={styles.compactRow}
+          accessible={true}
+          accessibilityLabel={`Hogar: ${householdName || 'Sin nombre'}`}
+        >
+          <Text style={styles.compactRowText} accessible={false}>
+            Hogar: {householdName || 'Sin nombre'}
+          </Text>
+        </View>
+
+        <View
+          style={styles.compactRow}
+          accessible={true}
+          accessibilityLabel={`Código: ${householdCode || 'Sin código'}`}
+        >
+          <Text style={styles.compactRowText} accessible={false}>
+            Código: {householdCode || 'Sin código'}
+          </Text>
+        </View>
 
         <TouchableOpacity
           style={styles.primaryButton}
@@ -50,11 +97,26 @@ export default function AjustesScreen() {
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Tutorial rápido</Text>
-        <Text style={styles.step}>1. Crea una categoría desde Inventario con el botón +.</Text>
-        <Text style={styles.step}>2. Añade productos y define si van a lista automática o manual.</Text>
-        <Text style={styles.step}>3. Usa la pestaña Compra para revisar y ajustar cantidades.</Text>
-        <Text style={styles.step}>4. Comparte tu código de hogar para sincronizar con otra persona.</Text>
+        <Text style={styles.sectionTitle} accessibilityRole="header">Ayuda</Text>
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={handleImportarDatosAnteriores}
+          accessibilityRole="button"
+          accessibilityLabel="Importar datos anteriores"
+        >
+          <Text style={styles.secondaryButtonText}>
+            {migrating ? 'Importando...' : 'Importar datos anteriores'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={() => setManualVisible(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Abrir manual"
+        >
+          <Text style={styles.secondaryButtonText}>Abrir manual</Text>
+        </TouchableOpacity>
       </View>
 
       <TouchableOpacity
@@ -65,6 +127,30 @@ export default function AjustesScreen() {
       >
         <Text style={styles.logoutText}>Cerrar sesión</Text>
       </TouchableOpacity>
+
+      <Modal
+        visible={manualVisible}
+        animationType="slide"
+        onRequestClose={() => setManualVisible(false)}
+      >
+        <View style={styles.manualContainer}>
+          <Text style={styles.manualTitle} accessibilityRole="header">Manual</Text>
+          <ScrollView contentContainerStyle={styles.manualContent}>
+            <Text style={styles.step}>1. Crea una categoría desde Inventario con el botón +.</Text>
+            <Text style={styles.step}>2. Añade productos y define si van a lista automática o manual.</Text>
+            <Text style={styles.step}>3. Usa la pestaña Compra para revisar y ajustar cantidades.</Text>
+            <Text style={styles.step}>4. Comparte tu código de hogar para sincronizar con otra persona.</Text>
+          </ScrollView>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => setManualVisible(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Cerrar manual"
+          >
+            <Text style={styles.primaryButtonText}>Cerrar manual</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -77,6 +163,12 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     gap: 14,
+  },
+  screenTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111',
+    marginBottom: 2,
   },
   card: {
     backgroundColor: '#fff',
@@ -105,6 +197,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 6,
   },
+  compactRow: {
+    marginTop: 6,
+    marginBottom: 2,
+  },
+  compactRowText: {
+    fontSize: 16,
+    color: '#111',
+    fontWeight: '600',
+  },
   primaryButton: {
     marginTop: 10,
     backgroundColor: '#1F8B4C',
@@ -114,6 +215,19 @@ const styles = StyleSheet.create({
     minHeight: 44,
   },
   primaryButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  secondaryButton: {
+    marginTop: 4,
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 44,
+  },
+  secondaryButtonText: {
     color: '#fff',
     fontSize: 15,
     fontWeight: '700',
@@ -136,5 +250,19 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     fontWeight: '700',
+  },
+  manualContainer: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+    gap: 12,
+  },
+  manualTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#111',
+  },
+  manualContent: {
+    paddingBottom: 10,
   },
 });

@@ -99,42 +99,50 @@ export default function ProductosScreen({ route, navigation }) {
   };
 
   const renderProducto = ({ item }) => (
-    <View 
+    <TouchableOpacity
       style={styles.productoCard}
+      activeOpacity={0.9}
+      onPress={() => navigation.navigate('EditarProducto', {
+        producto: item,
+        categoriaId,
+        categoriaNombre
+      })}
       accessible={true}
+      accessibilityRole="button"
+      accessibilityLanguage="es-ES"
       accessibilityLabel={`${item.nombre}, ${item.cantidad} unidades`}
-      accessibilityHint="Usa las acciones del rotor para aumentar o disminuir"
+      accessibilityHint="Doble toque para editar. Usa las acciones del rotor para otras opciones"
       accessibilityActions={[
-        { name: 'aumentar', label: 'Aumentar cantidad' },
-        { name: 'disminuir', label: 'Disminuir cantidad' },
+        { name: 'editarProducto', label: 'Editar producto' },
+        { name: 'aumentarCantidad', label: 'Aumentar cantidad' },
+        { name: 'disminuirCantidad', label: 'Disminuir cantidad' },
         {
-          name: 'toggleListaManual',
+          name: 'listaCompra',
           label: item.enListaCompraManual
-            ? 'Quitar de lista de compra'
-            : 'Añadir a lista de compra',
+            ? 'Lista de compra: quitar'
+            : 'Lista de compra: añadir',
         },
-        { name: 'editar', label: 'Editar producto' },
-        { name: 'eliminar', label: 'Eliminar producto' }
+        { name: 'eliminarProducto', label: 'Eliminar producto' }
       ]}
       onAccessibilityAction={(event) => {
         switch (event.nativeEvent.actionName) {
-          case 'aumentar':
-            incrementarCantidad(item);
-            break;
-          case 'disminuir':
-            decrementarCantidad(item);
-            break;
-          case 'toggleListaManual':
-            toggleManualLista(item);
-            break;
-          case 'editar':
+          case 'editarProducto':
             navigation.navigate('EditarProducto', { 
               producto: item,
               categoriaId,
               categoriaNombre 
             });
             break;
-          case 'eliminar':
+          case 'aumentarCantidad':
+            incrementarCantidad(item);
+            break;
+          case 'disminuirCantidad':
+            decrementarCantidad(item);
+            break;
+          case 'listaCompra':
+            toggleManualLista(item);
+            break;
+          case 'eliminarProducto':
             handleEliminar(item.id, item.nombre);
             break;
         }
@@ -205,7 +213,7 @@ export default function ProductosScreen({ route, navigation }) {
           <Text style={styles.botonEditarTexto}>🛒</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (

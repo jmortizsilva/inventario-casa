@@ -15,6 +15,28 @@ service cloud.firestore {
       allow read, write: if signedIn() && request.auth.uid == uid;
     }
 
+    match /householdInvites/{inviteCode} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasAll(['householdId', 'ownerUid', 'createdAt'])
+        && request.resource.data.householdId is string
+        && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if signedIn()
+        && resource.data.ownerUid == request.auth.uid;
+    }
+
+    match /categorias/{categoriaId} {
+      allow read: if signedIn()
+        && (!resource.data.keys().hasAny(['ownerUid'])
+            || resource.data.ownerUid == request.auth.uid);
+    }
+
+    match /productos/{productoId} {
+      allow read: if signedIn()
+        && (!resource.data.keys().hasAny(['ownerUid'])
+            || resource.data.ownerUid == request.auth.uid);
+    }
+
     match /households/{householdId} {
       allow read: if isMember(householdId);
       allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid;
