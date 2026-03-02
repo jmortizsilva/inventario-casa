@@ -40,6 +40,32 @@ Este documento refleja el estado real de la app tras la migración a autenticaci
 - Mejorado comportamiento de scroll + safe areas en listas.
 - Ajuste de foco con VoiceOver en el tramo final de listas para facilitar activación de últimos elementos.
 
+## Incidencia detectada tras build 6 (marzo 2026)
+
+- **Síntoma reportado**: al identificarse con Google en iOS, la app se cerraba al entrar en la aplicación.
+- **Contexto de release**:
+  - Build 5 (production): versión 1.0.0, commit `2097cd0`
+  - Build 6 (production): versión 1.0.1, commit `830247a`
+
+### Causa raíz
+
+- En pantallas de listas se estaba usando `useBottomTabBarHeight` desde `@react-navigation/bottom-tabs` mientras la navegación de pestañas activa de la app es `@bottom-tabs/react-navigation`.
+- Esta mezcla de contexto de tabs podía provocar fallo en runtime al renderizar la primera pantalla tras login.
+
+### Hotfix aplicado (base versión 1.0.0)
+
+- Se eliminó el hook `useBottomTabBarHeight` de:
+  - `src/screens/CategoriasScreen.js`
+  - `src/screens/ListaCompraScreen.js`
+  - `src/screens/ProductosScreen.js`
+- Se sustituyó por espaciado inferior estable para evitar dependencia de contexto de tabs.
+- Se mantuvo la versión de app en `1.0.0` para continuar numeración de compilación (build 8 en `production`).
+
+### Validación
+
+- Build `preview` de la versión `1.0.0` ejecutado correctamente y sin cierre tras login Google.
+- Siguiente paso operativo: generar build `production` para TestFlight con incremento automático de build number.
+
 ## Reglas Firestore usadas por la app
 
 - Colecciones principales:

@@ -7,9 +7,9 @@ import {
   StyleSheet,
   Alert,
   AccessibilityInfo,
-  Platform
+  Platform,
+  InteractionManager
 } from 'react-native';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { 
   subscribeToProducts, 
   updateProductQuantity, 
@@ -24,7 +24,7 @@ export default function ProductosScreen({ route, navigation }) {
   const [productos, setProductos] = useState([]);
   const [screenReaderEnabled, setScreenReaderEnabled] = useState(false);
   const listRef = useRef(null);
-  const tabBarHeight = useBottomTabBarHeight();
+  const tabBarHeight = 84;
 
   useEffect(() => {
     let mounted = true;
@@ -87,20 +87,30 @@ export default function ProductosScreen({ route, navigation }) {
   const incrementarCantidad = async (producto) => {
     const nuevaCantidad = producto.cantidad + 1;
     const result = await updateProductQuantity(householdId, producto.id, nuevaCantidad);
-    if (result.success && Platform.OS === 'ios') {
-      AccessibilityInfo.announceForAccessibility(
-        `${producto.nombre}: cantidad actualizada a ${nuevaCantidad}`
-      );
+    if (result.success && Platform.OS === 'ios' && screenReaderEnabled) {
+      InteractionManager.runAfterInteractions(() => {
+        try {
+          AccessibilityInfo.announceForAccessibility(
+            `${producto.nombre}: cantidad actualizada a ${nuevaCantidad}`
+          );
+        } catch (_) {
+        }
+      });
     }
   };
 
   const decrementarCantidad = async (producto) => {
     const nuevaCantidad = Math.max(0, producto.cantidad - 1);
     const result = await updateProductQuantity(householdId, producto.id, nuevaCantidad);
-    if (result.success && Platform.OS === 'ios') {
-      AccessibilityInfo.announceForAccessibility(
-        `${producto.nombre}: cantidad actualizada a ${nuevaCantidad}`
-      );
+    if (result.success && Platform.OS === 'ios' && screenReaderEnabled) {
+      InteractionManager.runAfterInteractions(() => {
+        try {
+          AccessibilityInfo.announceForAccessibility(
+            `${producto.nombre}: cantidad actualizada a ${nuevaCantidad}`
+          );
+        } catch (_) {
+        }
+      });
     }
   };
 
@@ -116,7 +126,14 @@ export default function ProductosScreen({ route, navigation }) {
           onPress: async () => {
             const result = await deleteProduct(householdId, id);
             if (result.success) {
-              AccessibilityInfo.announceForAccessibility(`${nombre} eliminado`);
+              if (screenReaderEnabled) {
+                InteractionManager.runAfterInteractions(() => {
+                  try {
+                    AccessibilityInfo.announceForAccessibility(`${nombre} eliminado`);
+                  } catch (_) {
+                  }
+                });
+              }
             }
           }
         }
@@ -130,12 +147,17 @@ export default function ProductosScreen({ route, navigation }) {
       enListaCompraManual: nuevoEstado,
     });
 
-    if (result.success && Platform.OS === 'ios') {
-      AccessibilityInfo.announceForAccessibility(
-        nuevoEstado
-          ? `${producto.nombre} añadido manualmente a la lista de compra`
-          : `${producto.nombre} quitado de la lista de compra manual`
-      );
+    if (result.success && Platform.OS === 'ios' && screenReaderEnabled) {
+      InteractionManager.runAfterInteractions(() => {
+        try {
+          AccessibilityInfo.announceForAccessibility(
+            nuevoEstado
+              ? `${producto.nombre} añadido manualmente a la lista de compra`
+              : `${producto.nombre} quitado de la lista de compra manual`
+          );
+        } catch (_) {
+        }
+      });
     }
   };
 

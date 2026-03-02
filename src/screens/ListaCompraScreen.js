@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   AccessibilityInfo,
   Alert,
+  InteractionManager,
 } from 'react-native';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { collection, query, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -19,7 +19,7 @@ export default function ListaCompraScreen() {
   const [loading, setLoading] = useState(true);
   const [screenReaderEnabled, setScreenReaderEnabled] = useState(false);
   const listRef = useRef(null);
-  const tabBarHeight = useBottomTabBarHeight();
+  const tabBarHeight = 84;
 
   useEffect(() => {
     let mounted = true;
@@ -101,15 +101,20 @@ export default function ListaCompraScreen() {
       setLoading(false);
 
       // Anunciar actualización para VoiceOver
-      if (productos.length > 0) {
-        AccessibilityInfo.announceForAccessibility(
-          `Lista de compra actualizada. ${productos.length} ${productos.length === 1 ? 'producto' : 'productos'} con pocas unidades.`
-        );
+      if (productos.length > 0 && screenReaderEnabled) {
+        InteractionManager.runAfterInteractions(() => {
+          try {
+            AccessibilityInfo.announceForAccessibility(
+              `Lista de compra actualizada. ${productos.length} ${productos.length === 1 ? 'producto' : 'productos'} con pocas unidades.`
+            );
+          } catch (_) {
+          }
+        });
       }
     });
 
     return () => unsubscribe();
-  }, [householdId]);
+  }, [householdId, screenReaderEnabled]);
 
   const incrementarCantidad = async (productoId, cantidadActual, nombreProducto) => {
     try {
@@ -119,18 +124,30 @@ export default function ListaCompraScreen() {
         cantidad: nuevaCantidad
       });
 
-      AccessibilityInfo.announceForAccessibility(
-        `${nombreProducto}: ${nuevaCantidad} ${nuevaCantidad === 1 ? 'unidad' : 'unidades'}`
-      );
+      if (screenReaderEnabled) {
+        InteractionManager.runAfterInteractions(() => {
+          try {
+            AccessibilityInfo.announceForAccessibility(
+              `${nombreProducto}: ${nuevaCantidad} ${nuevaCantidad === 1 ? 'unidad' : 'unidades'}`
+            );
+          } catch (_) {
+          }
+        });
+      }
 
       const umbralProducto = productosCompra.find((p) => p.id === productoId)?.umbralCompra ?? 2;
       const manual = productosCompra.find((p) => p.id === productoId)?.enListaCompraManual ?? false;
       const auto = productosCompra.find((p) => p.id === productoId)?.autoListaCompra ?? true;
 
-      if (!manual && auto && nuevaCantidad > umbralProducto) {
-        AccessibilityInfo.announceForAccessibility(
-          `${nombreProducto} eliminado de la lista de compra`
-        );
+      if (!manual && auto && nuevaCantidad > umbralProducto && screenReaderEnabled) {
+        InteractionManager.runAfterInteractions(() => {
+          try {
+            AccessibilityInfo.announceForAccessibility(
+              `${nombreProducto} eliminado de la lista de compra`
+            );
+          } catch (_) {
+          }
+        });
       }
     } catch (error) {
       console.error('Error al incrementar cantidad:', error);
@@ -148,9 +165,16 @@ export default function ListaCompraScreen() {
         cantidad: nuevaCantidad
       });
 
-      AccessibilityInfo.announceForAccessibility(
-        `${nombreProducto}: ${nuevaCantidad} ${nuevaCantidad === 1 ? 'unidad' : 'unidades'}`
-      );
+      if (screenReaderEnabled) {
+        InteractionManager.runAfterInteractions(() => {
+          try {
+            AccessibilityInfo.announceForAccessibility(
+              `${nombreProducto}: ${nuevaCantidad} ${nuevaCantidad === 1 ? 'unidad' : 'unidades'}`
+            );
+          } catch (_) {
+          }
+        });
+      }
     } catch (error) {
       console.error('Error al decrementar cantidad:', error);
       Alert.alert('Error', 'No se pudo actualizar la cantidad');

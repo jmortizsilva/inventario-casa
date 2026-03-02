@@ -7,10 +7,10 @@ import {
   StyleSheet,
   Alert,
   AccessibilityInfo,
-  Platform
+  Platform,
+  InteractionManager
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { subscribeToCategories, deleteCategory } from '../services/firestore';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -20,7 +20,7 @@ export default function CategoriasScreen({ navigation }) {
   const [screenReaderEnabled, setScreenReaderEnabled] = useState(false);
   const listRef = useRef(null);
   const insets = useSafeAreaInsets();
-  const tabBarHeight = useBottomTabBarHeight();
+  const tabBarHeight = 84 + insets.bottom;
 
   useEffect(() => {
     let mounted = true;
@@ -67,16 +67,21 @@ export default function CategoriasScreen({ navigation }) {
     // Suscripción en tiempo real a las categorías
     const unsubscribe = subscribeToCategories(householdId, (data) => {
       setCategorias(data);
-      // Anunciar cambios para VoiceOver
-      if (Platform.OS === 'ios') {
-        AccessibilityInfo.announceForAccessibility(
-          `Categorías actualizadas. ${data.length} categorías disponibles.`
-        );
+      // Anunciar cambios solo si VoiceOver está activo y en un tick seguro
+      if (Platform.OS === 'ios' && screenReaderEnabled) {
+        InteractionManager.runAfterInteractions(() => {
+          try {
+            AccessibilityInfo.announceForAccessibility(
+              `Categorías actualizadas. ${data.length} categorías disponibles.`
+            );
+          } catch (_) {
+          }
+        });
       }
     });
 
     return () => unsubscribe();
-  }, [householdId]);
+  }, [householdId, screenReaderEnabled]);
 
   const handleEliminarCategoria = (id, nombre) => {
     Alert.alert(

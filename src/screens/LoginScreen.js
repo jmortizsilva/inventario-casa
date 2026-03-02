@@ -15,18 +15,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 WebBrowser.maybeCompleteAuthSession();
 
-export default function LoginScreen() {
-  const { signInWithGoogleToken, loading, error } = useAuth();
-  const [submitting, setSubmitting] = useState(false);
-
-  const isConfigured = useMemo(() => {
-    return Boolean(
-      process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ||
-      process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ||
-      process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID
-    );
-  }, []);
-
+function GoogleSignInButton({ loading, submitting, signInWithGoogleToken }) {
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
@@ -46,7 +35,7 @@ export default function LoginScreen() {
       }
 
       try {
-        setSubmitting(true);
+        submitting.set(true);
         await signInWithGoogleToken(idToken);
       } catch (signInError) {
         Alert.alert(
@@ -54,28 +43,16 @@ export default function LoginScreen() {
           signInError?.message || 'No se pudo iniciar sesión con Google'
         );
       } finally {
-        setSubmitting(false);
+        submitting.set(false);
       }
     };
 
     doSignIn();
-  }, [response]);
+  }, [response, signInWithGoogleToken, submitting]);
 
-  useEffect(() => {
-    if (error) {
-      Alert.alert('Error', error);
-    }
-  }, [error]);
+  const blocked = loading || submitting.value;
 
   const handleGoogleLogin = async () => {
-    if (!isConfigured) {
-      Alert.alert(
-        'Configuración pendiente',
-        'Faltan variables de entorno de Google OAuth (iOS/Android/Web Client ID).'
-      );
-      return;
-    }
-
     try {
       await promptAsync();
     } catch (promptError) {
@@ -86,7 +63,45 @@ export default function LoginScreen() {
     }
   };
 
-  const blocked = loading || submitting;
+  return (
+    <TouchableOpacity
+      style={[styles.button, blocked && styles.buttonDisabled]}
+      onPress={handleGoogleLogin}
+      disabled={blocked || !request}
+      accessibilityRole="button"
+      accessibilityLabel="Continuar con Google"
+    >
+      {blocked ? (
+        <ActivityIndicator color="#fff" />
+      ) : (
+        <Text style={styles.buttonText}>Continuar con Google</Text>
+      )}
+    </TouchableOpacity>
+  );
+}
+
+export default function LoginScreen() {
+  const { signInWithGoogleToken, loading, error } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+
+  const isConfigured = useMemo(() => {
+    return Boolean(
+      process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ||
+      process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ||
+      process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID
+    );
+  }, []);
+
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Error', error);
+    }
+  }, [error]);
+
+  const submittingState = useMemo(
+    () => ({ value: submitting, set: setSubmitting }),
+    [submitting]
+  );
 
   return (
     <KeyboardAvoidingView
@@ -97,19 +112,27 @@ export default function LoginScreen() {
         <Text style={styles.title}>Inventario Casa</Text>
         <Text style={styles.subtitle}>Accede con Google para continuar</Text>
 
-        <TouchableOpacity
-          style={[styles.button, blocked && styles.buttonDisabled]}
-          onPress={handleGoogleLogin}
-          disabled={blocked || !request}
-          accessibilityRole="button"
-          accessibilityLabel="Continuar con Google"
-        >
-          {blocked ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
+        {isConfigured ? (
+          <GoogleSignInButton
+            loading={loading}
+            submitting={submittingState}
+            signInWithGoogleToken={signInWithGoogleToken}
+          />
+        ) : (
+          <TouchableOpacity
+            style={[styles.button, styles.buttonDisabled]}
+            onPress={() =>
+              Alert.alert(
+                'Configuración pendiente',
+                'Faltan variables de entorno de Google OAuth (iOS/Android/Web Client ID).'
+              )
+            }
+            accessibilityRole="button"
+            accessibilityLabel="Continuar con Google"
+          >
             <Text style={styles.buttonText}>Continuar con Google</Text>
-          )}
-        </TouchableOpacity>
+          </TouchableOpacity>
+        )}
 
         <Text style={styles.helpText}>
           Después de iniciar sesión podrás elegir si mantener tu hogar, unirte con código o crear otro.
