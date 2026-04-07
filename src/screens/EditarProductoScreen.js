@@ -20,11 +20,27 @@ export default function EditarProductoScreen({ route, navigation }) {
   const { householdId } = useAuth();
   const { producto, categoriaId, categoriaNombre } = route.params;
   const [nombre, setNombre] = useState(producto.nombre);
+  const [nombreDefaultValue, setNombreDefaultValue] = useState(producto.nombre);
+  const [nombreInputVersion, setNombreInputVersion] = useState(0);
   const [cantidad, setCantidad] = useState(producto.cantidad);
   const [umbralCompra, setUmbralCompra] = useState(producto.umbralCompra ?? 2);
   const [autoListaCompra, setAutoListaCompra] = useState(producto.autoListaCompra ?? true);
   const [guardando, setGuardando] = useState(false);
   const nombreRef = useRef(null);
+  const nombreValueRef = useRef(producto.nombre);
+
+  const getNombreValue = () => nombreValueRef.current;
+
+  const resetNombreInput = (nextDefaultValue) => {
+    nombreValueRef.current = nextDefaultValue;
+    setNombre(nextDefaultValue);
+    setNombreDefaultValue(nextDefaultValue);
+    setNombreInputVersion((current) => current + 1);
+  };
+
+  useEffect(() => {
+    resetNombreInput(producto.nombre);
+  }, [producto.id, producto.nombre]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -59,10 +75,24 @@ export default function EditarProductoScreen({ route, navigation }) {
         </TouchableOpacity>
       ),
     });
-  }, [navigation, producto.nombre, guardando, nombre]);
+  }, [
+    navigation,
+    producto.nombre,
+    producto.cantidad,
+    producto.umbralCompra,
+    producto.autoListaCompra,
+    guardando,
+    nombre,
+    cantidad,
+    umbralCompra,
+    autoListaCompra,
+    householdId,
+  ]);
 
   const handleGuardar = async () => {
-    if (!nombre.trim()) {
+    const nombreActual = getNombreValue().trim();
+
+    if (!nombreActual) {
       Alert.alert('Error', 'El nombre del producto no puede estar vacío');
       return;
     }
@@ -70,7 +100,7 @@ export default function EditarProductoScreen({ route, navigation }) {
     const umbralOriginal = producto.umbralCompra ?? 2;
 
     if (
-      nombre.trim() === producto.nombre &&
+      nombreActual === producto.nombre &&
       cantidad === producto.cantidad &&
       umbralCompra === umbralOriginal &&
       autoListaCompra === (producto.autoListaCompra ?? true)
@@ -81,7 +111,7 @@ export default function EditarProductoScreen({ route, navigation }) {
 
     setGuardando(true);
     const result = await updateProduct(householdId, producto.id, {
-      nombre: nombre.trim(),
+      nombre: nombreActual,
       cantidad: cantidad,
       umbralCompra: umbralCompra,
       autoListaCompra: autoListaCompra
@@ -92,8 +122,8 @@ export default function EditarProductoScreen({ route, navigation }) {
       if (Platform.OS === 'ios') {
         AccessibilityInfo.announceForAccessibility(
           autoListaCompra
-            ? `Producto actualizado: ${nombre}, cantidad ${cantidad}. Lista de compra con ${umbralCompra} unidades o menos`
-            : `Producto actualizado: ${nombre}, cantidad ${cantidad}. Sin lista automática`
+            ? `Producto actualizado: ${nombreActual}, cantidad ${cantidad}. Lista de compra con ${umbralCompra} unidades o menos`
+            : `Producto actualizado: ${nombreActual}, cantidad ${cantidad}. Sin lista automática`
         );
       }
       navigation.goBack();
@@ -119,13 +149,17 @@ export default function EditarProductoScreen({ route, navigation }) {
             </Text>
             
             <TextInput
+              key={`nombre-${nombreInputVersion}`}
               ref={nombreRef}
               style={styles.input}
-              value={nombre}
-              onChangeText={setNombre}
+              defaultValue={nombreDefaultValue}
+              onChangeText={(text) => {
+                nombreValueRef.current = text;
+                setNombre(text);
+              }}
               placeholder="Nombre del producto"
               placeholderTextColor="#999"
-              accessibilityLabel="Nombre del producto, campo de edición"
+              accessibilityLabel="Nombre del producto"
               accessibilityHint="Edita el nombre del producto"
               returnKeyType="next"
               onSubmitEditing={handleGuardar}

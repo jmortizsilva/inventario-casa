@@ -17,11 +17,25 @@ import { useAuth } from '../contexts/AuthContext';
 export default function NuevaCategoriaScreen({ navigation }) {
   const { householdId } = useAuth();
   const [nombre, setNombre] = useState('');
+  const [nombreDefaultValue, setNombreDefaultValue] = useState('');
+  const [nombreInputVersion, setNombreInputVersion] = useState(0);
   const [guardando, setGuardando] = useState(false);
   const inputRef = useRef(null);
+  const nombreValueRef = useRef('');
+
+  const getNombreValue = () => nombreValueRef.current;
+
+  const resetNombreInput = (nextDefaultValue = '') => {
+    nombreValueRef.current = nextDefaultValue;
+    setNombre(nextDefaultValue);
+    setNombreDefaultValue(nextDefaultValue);
+    setNombreInputVersion((current) => current + 1);
+  };
 
   const handleGuardar = async () => {
-    if (!nombre.trim()) {
+    const nombreActual = getNombreValue().trim();
+
+    if (!nombreActual) {
       Alert.alert('Error', 'El nombre de la categoría no puede estar vacío');
       if (Platform.OS === 'ios') {
         AccessibilityInfo.announceForAccessibility('Error: nombre vacío');
@@ -30,13 +44,14 @@ export default function NuevaCategoriaScreen({ navigation }) {
     }
 
     setGuardando(true);
-    const result = await addCategory(householdId, nombre.trim());
+    const result = await addCategory(householdId, nombreActual);
     setGuardando(false);
 
     if (result.success) {
       if (Platform.OS === 'ios') {
-        AccessibilityInfo.announceForAccessibility(`Categoría ${nombre} creada correctamente`);
+        AccessibilityInfo.announceForAccessibility(`Categoría ${nombreActual} creada correctamente`);
       }
+      resetNombreInput('');
       navigation.goBack();
     } else {
       Alert.alert('Error', 'No se pudo crear la categoría');
@@ -97,10 +112,14 @@ export default function NuevaCategoriaScreen({ navigation }) {
           </Text>
           
           <TextInput
+            key={`nombre-${nombreInputVersion}`}
             ref={inputRef}
             style={styles.input}
-            value={nombre}
-            onChangeText={setNombre}
+            defaultValue={nombreDefaultValue}
+            onChangeText={(text) => {
+              nombreValueRef.current = text;
+              setNombre(text);
+            }}
             placeholder="Ej: Despensa, Refrigerador..."
             placeholderTextColor="#999"
             accessibilityLabel="Nombre de la categoría"

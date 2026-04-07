@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -23,7 +23,30 @@ export default function SeleccionHogarScreen() {
 
   const [joinCode, setJoinCode] = useState('');
   const [newHouseholdName, setNewHouseholdName] = useState('');
+  const [joinCodeDefaultValue, setJoinCodeDefaultValue] = useState('');
+  const [newHouseholdDefaultValue, setNewHouseholdDefaultValue] = useState('');
+  const [joinCodeInputVersion, setJoinCodeInputVersion] = useState(0);
+  const [newHouseholdInputVersion, setNewHouseholdInputVersion] = useState(0);
   const [busy, setBusy] = useState(false);
+  const joinCodeValueRef = useRef('');
+  const newHouseholdNameValueRef = useRef('');
+
+  const getJoinCodeValue = () => joinCodeValueRef.current;
+  const getNewHouseholdNameValue = () => newHouseholdNameValueRef.current;
+
+  const resetJoinCodeInput = (nextDefaultValue = '') => {
+    joinCodeValueRef.current = nextDefaultValue;
+    setJoinCode(nextDefaultValue);
+    setJoinCodeDefaultValue(nextDefaultValue);
+    setJoinCodeInputVersion((current) => current + 1);
+  };
+
+  const resetNewHouseholdInput = (nextDefaultValue = '') => {
+    newHouseholdNameValueRef.current = nextDefaultValue;
+    setNewHouseholdName(nextDefaultValue);
+    setNewHouseholdDefaultValue(nextDefaultValue);
+    setNewHouseholdInputVersion((current) => current + 1);
+  };
 
   const handleContinue = async () => {
     if (busy) {
@@ -39,7 +62,7 @@ export default function SeleccionHogarScreen() {
   };
 
   const handleJoin = async () => {
-    const normalized = joinCode.trim().toUpperCase();
+    const normalized = getJoinCodeValue().trim().toUpperCase();
     if (!normalized) {
       Alert.alert('Código requerido', 'Introduce un código de hogar para unirte.');
       return;
@@ -48,6 +71,7 @@ export default function SeleccionHogarScreen() {
     setBusy(true);
     try {
       await joinHouseholdByCode(normalized);
+      resetJoinCodeInput('');
     } catch (error) {
       Alert.alert('No se pudo unir', error?.message || 'Código no válido');
     } finally {
@@ -56,9 +80,12 @@ export default function SeleccionHogarScreen() {
   };
 
   const handleCreate = async () => {
+    const householdName = getNewHouseholdNameValue().trim();
+
     setBusy(true);
     try {
-      await createAdditionalHousehold(newHouseholdName.trim());
+      await createAdditionalHousehold(householdName);
+      resetNewHouseholdInput('');
     } catch (error) {
       Alert.alert('No se pudo crear', error?.message || 'Inténtalo de nuevo');
     } finally {
@@ -96,9 +123,14 @@ export default function SeleccionHogarScreen() {
 
         <Text style={styles.sectionTitle}>Unirme a otro hogar</Text>
         <TextInput
+          key={`join-code-${joinCodeInputVersion}`}
           style={styles.input}
-          value={joinCode}
-          onChangeText={(value) => setJoinCode(value.toUpperCase())}
+          defaultValue={joinCodeDefaultValue}
+          onChangeText={(value) => {
+            const normalized = value.toUpperCase();
+            joinCodeValueRef.current = normalized;
+            setJoinCode(normalized);
+          }}
           autoCapitalize="characters"
           maxLength={8}
           editable={!busy}
@@ -119,9 +151,13 @@ export default function SeleccionHogarScreen() {
 
         <Text style={styles.sectionTitle}>Crear otro hogar</Text>
         <TextInput
+          key={`new-household-${newHouseholdInputVersion}`}
           style={styles.input}
-          value={newHouseholdName}
-          onChangeText={setNewHouseholdName}
+          defaultValue={newHouseholdDefaultValue}
+          onChangeText={(value) => {
+            newHouseholdNameValueRef.current = value;
+            setNewHouseholdName(value);
+          }}
           autoCapitalize="words"
           maxLength={40}
           editable={!busy}

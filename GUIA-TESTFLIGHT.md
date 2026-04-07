@@ -110,6 +110,42 @@ eas build --platform ios --profile preview
 eas submit --platform ios
 ```
 
+## Flujo recomendado de release (rápido)
+
+1. Validar cambios en local y subir a GitHub:
+```bash
+git status
+git add .
+git commit -m "fix: guardado de cantidad y aislamiento de datos por hogar"
+git push origin main
+```
+
+2. Generar build para TestFlight:
+```bash
+npx eas-cli build --platform ios --profile production --clear-cache
+```
+
+3. Subir el build a App Store Connect:
+```bash
+npx eas-cli submit --platform ios --profile production --latest
+```
+
+4. Revisar estado en App Store Connect:
+- TestFlight > Builds
+- Esperar procesamiento de Apple (normalmente 10-30 min para internos)
+
+5. Activar testers:
+- Internos: inmediato cuando el build esté listo.
+- Externos: puede requerir revisión de Apple.
+
+## Checklist antes de publicar
+
+- Version y build correctos en Expo/EAS.
+- Login Google funciona en iOS.
+- Alta/edicion de producto guarda cantidad correcta.
+- Usuarios nuevos no ven datos legacy ajenos.
+- Documentacion actualizada (estado y notas de release).
+
 ## Comandos Útiles
 
 ```bash
@@ -164,8 +200,3 @@ eas build:view [BUILD_ID]
 ---
 
 **Nota**: No necesitas Mac para nada de esto. EAS Build compila todo en la nube de Expo usando servidores Mac.
-
-? Select environment: »
-( )   development
-( )   preview
-( )   production

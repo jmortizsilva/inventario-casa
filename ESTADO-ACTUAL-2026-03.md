@@ -100,3 +100,27 @@ npx eas-cli submit --platform ios --profile production --latest
 
 - `preview` (internal/ad hoc) requiere dispositivos registrados.
 - Para que “cualquiera” pueda probar, usar TestFlight con testers externos.
+
+## Actualizacion abril 2026
+
+### Incidencias corregidas
+
+- **Guardado de cantidad en productos**:
+  - Se corrigio un cierre obsoleto en botones `Guardar` de header (alta/edicion de producto).
+  - Sintoma previo: al seleccionar cantidad (por ejemplo 2), podia guardarse 0.
+
+- **Aislamiento de datos en primer acceso**:
+  - Se endurecio la migracion legacy para aceptar solo documentos con `ownerUid` exactamente igual al usuario autenticado.
+  - Se evita que usuarios nuevos vean categorias/productos ajenos por datos legacy globales.
+
+### Build y distribucion
+
+- Build iOS `preview` verificado correctamente para instalacion interna.
+- Para distribucion amplia de testers, mantener flujo `production` -> `submit` -> TestFlight.
+
+### Operacion de limpieza segura (opcional)
+
+- Se anadio utilitario de auditoria/limpieza segura en `scripts/firestore-safe-cleanup.js`.
+- Modo por defecto: auditoria (sin cambios).
+- Soporta backup previo y aplicacion selectiva por hogar.
+- Guia de uso: `LIMPIEZA-DATOS.md`.

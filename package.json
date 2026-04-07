@@ -6,7 +6,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "cleanup:audit": "node scripts/firestore-safe-cleanup.js --audit",
+    "cleanup:apply": "node scripts/firestore-safe-cleanup.js --apply"
   },
   "dependencies": {
     "@bottom-tabs/react-navigation": "^0.6.0",
@@ -17,9 +19,11 @@
     "@react-navigation/native-stack": "^6.9.17",
     "expo": "^54.0.33",
     "expo-auth-session": "~6.2.0",
+    "expo-dev-client": "~6.0.20",
     "expo-status-bar": "^3.0.9",
     "expo-web-browser": "~15.0.8",
     "firebase": "^11.1.0",
+    "firebase-admin": "^13.4.0",
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-bottom-tabs": "^1.1.0",

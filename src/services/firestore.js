@@ -211,7 +211,8 @@ export const migrateLegacyDataToHousehold = async (userId, householdId) => {
       const categoryData = legacyCategoryDoc.data() || {};
       const ownerUid = categoryData.ownerUid || null;
 
-      if (ownerUid && ownerUid !== userId) {
+      // Solo migramos datos legacy explícitamente vinculados al usuario.
+      if (ownerUid !== userId) {
         return;
       }
 
@@ -245,7 +246,8 @@ export const migrateLegacyDataToHousehold = async (userId, householdId) => {
       const productData = legacyProductDoc.data() || {};
       const ownerUid = productData.ownerUid || null;
 
-      if (ownerUid && ownerUid !== userId) {
+      // Solo migramos datos legacy explícitamente vinculados al usuario.
+      if (ownerUid !== userId) {
         return;
       }
 

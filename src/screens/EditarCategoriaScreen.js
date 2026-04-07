@@ -18,8 +18,24 @@ export default function EditarCategoriaScreen({ route, navigation }) {
   const { householdId } = useAuth();
   const { categoriaId, categoriaNombre } = route.params;
   const [nombre, setNombre] = useState(categoriaNombre);
+  const [nombreDefaultValue, setNombreDefaultValue] = useState(categoriaNombre);
+  const [nombreInputVersion, setNombreInputVersion] = useState(0);
   const [guardando, setGuardando] = useState(false);
   const inputRef = useRef(null);
+  const nombreValueRef = useRef(categoriaNombre);
+
+  const getNombreValue = () => nombreValueRef.current;
+
+  const resetNombreInput = (nextDefaultValue) => {
+    nombreValueRef.current = nextDefaultValue;
+    setNombre(nextDefaultValue);
+    setNombreDefaultValue(nextDefaultValue);
+    setNombreInputVersion((current) => current + 1);
+  };
+
+  useEffect(() => {
+    resetNombreInput(categoriaNombre);
+  }, [categoriaId, categoriaNombre]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -61,23 +77,25 @@ export default function EditarCategoriaScreen({ route, navigation }) {
   }, [navigation, guardando, nombre, categoriaNombre]);
 
   const handleGuardar = async () => {
-    if (!nombre.trim()) {
+    const nombreActual = getNombreValue().trim();
+
+    if (!nombreActual) {
       Alert.alert('Error', 'El nombre de la categoría no puede estar vacío');
       return;
     }
 
-    if (nombre.trim() === categoriaNombre) {
+    if (nombreActual === categoriaNombre) {
       navigation.goBack();
       return;
     }
 
     setGuardando(true);
-    const result = await updateCategory(householdId, categoriaId, nombre.trim());
+    const result = await updateCategory(householdId, categoriaId, nombreActual);
     setGuardando(false);
 
     if (result.success) {
       if (Platform.OS === 'ios') {
-        AccessibilityInfo.announceForAccessibility(`Categoría actualizada a ${nombre}`);
+        AccessibilityInfo.announceForAccessibility(`Categoría actualizada a ${nombreActual}`);
       }
       navigation.goBack();
     } else {
@@ -101,10 +119,14 @@ export default function EditarCategoriaScreen({ route, navigation }) {
           </Text>
           
           <TextInput
+            key={`nombre-${nombreInputVersion}`}
             ref={inputRef}
             style={styles.input}
-            value={nombre}
-            onChangeText={setNombre}
+            defaultValue={nombreDefaultValue}
+            onChangeText={(text) => {
+              nombreValueRef.current = text;
+              setNombre(text);
+            }}
             placeholder="Nombre de la categoría"
             placeholderTextColor="#999"
             accessibilityLabel="Nombre de la categoría"

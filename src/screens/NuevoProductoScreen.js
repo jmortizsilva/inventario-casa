@@ -20,11 +20,23 @@ export default function NuevoProductoScreen({ route, navigation }) {
   const { householdId } = useAuth();
   const { categoriaId, categoriaNombre } = route.params;
   const [nombre, setNombre] = useState('');
+  const [nombreDefaultValue, setNombreDefaultValue] = useState('');
+  const [nombreInputVersion, setNombreInputVersion] = useState(0);
   const [cantidad, setCantidad] = useState(0);
   const [umbralCompra, setUmbralCompra] = useState(2);
   const [autoListaCompra, setAutoListaCompra] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const nombreRef = useRef(null);
+  const nombreValueRef = useRef('');
+
+  const getNombreValue = () => nombreValueRef.current;
+
+  const resetNombreInput = (nextDefaultValue = '') => {
+    nombreValueRef.current = nextDefaultValue;
+    setNombre(nextDefaultValue);
+    setNombreDefaultValue(nextDefaultValue);
+    setNombreInputVersion((current) => current + 1);
+  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -59,10 +71,12 @@ export default function NuevoProductoScreen({ route, navigation }) {
         </TouchableOpacity>
       ),
     });
-  }, [navigation, categoriaNombre, guardando, nombre]);
+  }, [navigation, categoriaNombre, guardando, nombre, cantidad, umbralCompra, autoListaCompra, householdId, categoriaId]);
 
   const handleGuardar = async () => {
-    if (!nombre.trim()) {
+    const nombreActual = getNombreValue().trim();
+
+    if (!nombreActual) {
       Alert.alert('Error', 'El nombre del producto no puede estar vacío');
       return;
     }
@@ -70,7 +84,7 @@ export default function NuevoProductoScreen({ route, navigation }) {
     setGuardando(true);
     const result = await addProduct(
       householdId,
-      nombre.trim(),
+      nombreActual,
       cantidad,
       categoriaId,
       umbralCompra,
@@ -82,10 +96,11 @@ export default function NuevoProductoScreen({ route, navigation }) {
       if (Platform.OS === 'ios') {
         AccessibilityInfo.announceForAccessibility(
           autoListaCompra
-            ? `Producto ${nombre} añadido con cantidad ${cantidad}. Pasará a lista de compra con ${umbralCompra} unidades o menos`
-            : `Producto ${nombre} añadido con cantidad ${cantidad}. No se añadirá automáticamente a lista de compra`
+            ? `Producto ${nombreActual} añadido con cantidad ${cantidad}. Pasará a lista de compra con ${umbralCompra} unidades o menos`
+            : `Producto ${nombreActual} añadido con cantidad ${cantidad}. No se añadirá automáticamente a lista de compra`
         );
       }
+      resetNombreInput('');
       navigation.goBack();
     } else {
       Alert.alert('Error', 'No se pudo crear el producto');
@@ -109,13 +124,17 @@ export default function NuevoProductoScreen({ route, navigation }) {
             </Text>
             
             <TextInput
+              key={`nombre-${nombreInputVersion}`}
               ref={nombreRef}
               style={styles.input}
-              value={nombre}
-              onChangeText={setNombre}
+              defaultValue={nombreDefaultValue}
+              onChangeText={(text) => {
+                nombreValueRef.current = text;
+                setNombre(text);
+              }}
               placeholder="Ej: Arroz, Leche, Pan..."
               placeholderTextColor="#999"
-              accessibilityLabel="Nombre del producto, campo de edición"
+              accessibilityLabel="Nombre del producto"
               accessibilityHint="Escribe el nombre del producto"
               returnKeyType="next"
               onSubmitEditing={handleGuardar}
@@ -176,7 +195,7 @@ export default function NuevoProductoScreen({ route, navigation }) {
                 value={autoListaCompra}
                 onValueChange={setAutoListaCompra}
                 disabled={guardando}
-                accessibilityLabel="Conmutador de lista de compra automática"
+                accessibilityLabel="Añadir automáticamente a la lista de compra"
               />
             </View>
           </View>
