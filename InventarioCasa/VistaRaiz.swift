@@ -10,7 +10,7 @@ struct VistaRaiz: View {
     var body: some View {
         Group {
             if let inventario {
-                VistaCategorias()
+                VistaPrincipal()
                     .environment(inventario)
             } else if falloAlAbrir {
                 ContentUnavailableView {
