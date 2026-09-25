@@ -8,6 +8,7 @@
 - El modelo del núcleo son structs. `Inventario` (en el núcleo) decide y guarda a través del protocolo `Almacen`; `InventarioAlmacen` es la implementación con SwiftData, sin decisiones propias. `AlmacenEnMemoria` sirve para pruebas y vistas previas.
 - El esquema de SwiftData está versionado (`EsquemaV1`). Un cambio de modelo añade `EsquemaV2` y una etapa en `PlanMigracion`; no se toca la versión anterior.
 - Nombres: `.diacriticInsensitive` convierte la ñ en n («Año» = «ano»), por eso `Nombres.clave` quita tildes letra a letra. Para ordenar, `compare` con `.caseInsensitive` y `Locale("es_ES")` ya pone la ñ detrás de la n.
+- Textos de interfaz y vocabulario (Añadir, Quitar, Eliminar…): `docs/textos-interfaz.md`. Todos viven en `Textos.swift` con pruebas; un cambio de texto toca los tres sitios a la vez.
 
 ## Verificación
 
