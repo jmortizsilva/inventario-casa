@@ -30,6 +30,7 @@
 		A10000000000000000000036 /* Exceptions for "InventarioCasa" folder in "InventarioCasa" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				pruebas/AjustesPruebasUI.swift,
 				pruebas/ListaCompraPruebasUI.swift,
 				pruebas/ProductosPruebasUI.swift,
 				pruebas/CategoriasPruebasUI.swift,
