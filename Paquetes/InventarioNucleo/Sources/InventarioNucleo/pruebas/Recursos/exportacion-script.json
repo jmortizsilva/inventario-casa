@@ -1,0 +1,42 @@
+{
+  "formato": "inventario-casa",
+  "version": 1,
+  "categorias": [
+    {
+      "id": "be8f166e-e50c-45fa-91fe-164fbbf03f3a",
+      "nombre": "Despensa",
+      "creado": "2025-03-01T10:00:00Z",
+      "modificado": "2025-03-02T09:15:00Z"
+    },
+    {
+      "id": "b9027cbf-fa33-4be7-b7cf-127fb0f041e9",
+      "nombre": "Nevera",
+      "creado": "2026-09-25T12:00:00Z",
+      "modificado": "2026-09-25T12:00:00Z"
+    }
+  ],
+  "productos": [
+    {
+      "id": "1ee18f47-1cb9-4ee4-988f-b220e77b76d4",
+      "categoriaId": "be8f166e-e50c-45fa-91fe-164fbbf03f3a",
+      "nombre": "Arroz",
+      "cantidad": 3,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2025-03-01T10:00:00Z",
+      "modificado": "2025-03-01T10:00:00Z"
+    },
+    {
+      "id": "05d29633-c3f5-416d-9313-01c369b3721a",
+      "categoriaId": "b9027cbf-fa33-4be7-b7cf-127fb0f041e9",
+      "nombre": "Leche",
+      "cantidad": 0,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-09-25T12:00:00Z",
+      "modificado": "2026-09-25T12:00:00Z"
+    }
+  ]
+}

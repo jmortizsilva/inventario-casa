@@ -175,6 +175,78 @@ public final class Inventario {
         try guardar(productos: [producto])
     }
 
+    // MARK: Importación
+
+    /// Añade lo que trae el archivo. Las categorías con el mismo nombre que una
+    /// existente se juntan con ella; los productos que ya existen con el mismo
+    /// nombre en su categoría se saltan. Todo se guarda de una vez.
+    ///
+    /// Los identificadores se generan de nuevo: reutilizar los del archivo
+    /// podría pisar datos al importar dos veces o al importar algo ya borrado.
+    @discardableResult
+    public func importar(_ exportacion: Exportacion) throws(ErrorInventario) -> ResultadoImportacion {
+        let momento = ahora()
+        var resultado = ResultadoImportacion()
+        var nuevasCategorias: [Categoria] = []
+        var nuevosProductos: [Producto] = []
+
+        var categoriaPorClave = Dictionary(
+            categorias.map { (Nombres.clave($0.nombre), $0.id) },
+            uniquingKeysWith: { primera, _ in primera }
+        )
+        var idImportadoAId: [UUID: UUID] = [:]
+
+        for original in exportacion.categorias where !original.estaBorrada {
+            guard case .success(let nombre) = Nombres.validar(original.nombre, existentes: []) else {
+                resultado.noValidos += 1
+                continue
+            }
+            let clave = Nombres.clave(nombre)
+            if let existente = categoriaPorClave[clave] {
+                idImportadoAId[original.id] = existente
+                continue
+            }
+            let nueva = Categoria(nombre: nombre, creado: original.creado, modificado: momento)
+            nuevasCategorias.append(nueva)
+            categoriaPorClave[clave] = nueva.id
+            idImportadoAId[original.id] = nueva.id
+            resultado.categorias += 1
+        }
+
+        var clavesPorCategoria: [UUID: Set<String>] = [:]
+        for original in exportacion.productos where !original.estaBorrado {
+            guard let categoriaId = idImportadoAId[original.categoriaId],
+                  case .success(let nombre) = Nombres.validar(original.nombre, existentes: [])
+            else {
+                resultado.noValidos += 1
+                continue
+            }
+            let clave = Nombres.clave(nombre)
+            var claves = clavesPorCategoria[categoriaId]
+                ?? Set(productos(en: categoriaId).map { Nombres.clave($0.nombre) })
+            guard !claves.contains(clave) else {
+                resultado.repetidos += 1
+                continue
+            }
+            claves.insert(clave)
+            clavesPorCategoria[categoriaId] = claves
+            nuevosProductos.append(Producto(
+                categoriaId: categoriaId,
+                nombre: nombre,
+                cantidad: original.cantidad,
+                umbralCompra: original.umbralCompra,
+                autoListaCompra: original.autoListaCompra,
+                enListaCompraManual: original.enListaCompraManual,
+                creado: original.creado,
+                modificado: momento
+            ))
+            resultado.productos += 1
+        }
+
+        try guardar(categorias: nuevasCategorias, productos: nuevosProductos)
+        return resultado
+    }
+
     // MARK: Auxiliares
 
     private func validar(_ nombre: String, entre existentes: [String]) throws(ErrorInventario) -> String {
@@ -185,6 +257,7 @@ public final class Inventario {
     }
 
     private func guardar(categorias: [Categoria] = [], productos: [Producto] = []) throws(ErrorInventario) {
+        guard !categorias.isEmpty || !productos.isEmpty else { return }
         do {
             try almacen.guardar(categorias: categorias, productos: productos)
         } catch {

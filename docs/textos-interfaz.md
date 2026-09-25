@@ -156,8 +156,28 @@ importación de datos antiguos llega en la fase 6.
 
 | Elemento | Texto |
 |---|---|
+| Botón | Importar datos |
 | Botón | Manual |
 | Versión | Versión {versión} |
+
+## Importar datos
+
+El resultado sale en una alerta con Aceptar, no en un anuncio: un anuncio se
+puede perder y aquí importa saber qué no se importó. Título y mensaje:
+
+| Cuándo | Título | Mensaje |
+|---|---|---|
+| Se importó algo | Importadas 5 categorías y 42 productos | |
+| … con repetidos | Importadas 5 categorías y 40 productos | 2 ya estaban. |
+| … con datos no válidos | Importados 3 productos | 1 no se pudo importar. |
+| Nada nuevo | No había nada nuevo que importar | 4 ya estaban. |
+| Archivo no válido | No se ha importado | El archivo no es una exportación del inventario. |
+| Fallo al guardar | No se ha importado | No se pudo escribir en el móvil. Todo sigue como estaba. |
+
+El participio concuerda con lo primero que se nombra: Importada 1 categoría,
+Importadas 2 categorías, Importado 1 producto, Importados 3 productos. "No se
+pudo importar" cuenta nombres vacíos o de más de 100 letras y productos sin
+categoría.
 
 ## Manual
 

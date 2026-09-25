@@ -96,7 +96,22 @@ import Testing
         #expect(Textos.Confirmacion.eliminarCategoria(productos: 3) == "También se eliminarán sus 3 productos.")
     }
 
-    @Test func erroresDeNombre() {
+    @Test func resultadoDeImportar() {
+        typealias R = ResultadoImportacion
+        let t = Textos.Importacion.self
+        #expect(t.titulo(R(categorias: 5, productos: 42)) == "Importadas 5 categorías y 42 productos")
+        #expect(t.titulo(R(categorias: 1, productos: 1)) == "Importada 1 categoría y 1 producto")
+        #expect(t.titulo(R(categorias: 0, productos: 3)) == "Importados 3 productos")
+        #expect(t.titulo(R(categorias: 0, productos: 1)) == "Importado 1 producto")
+        #expect(t.titulo(R(categorias: 2, productos: 0)) == "Importadas 2 categorías")
+        #expect(t.titulo(R()) == "No había nada nuevo que importar")
+        #expect(t.mensaje(R(categorias: 1, productos: 1)) == nil)
+        #expect(t.mensaje(R(repetidos: 2)) == "2 ya estaban.")
+        #expect(t.mensaje(R(repetidos: 1, noValidos: 1)) == "1 ya estaba. 1 no se pudo importar.")
+        #expect(t.mensaje(R(noValidos: 3)) == "3 no se pudieron importar.")
+    }
+
+        @Test func erroresDeNombre() {
         #expect(Textos.Errores.nombreCategoria(.vacio) == nil)
         #expect(Textos.Errores.nombreCategoria(.repetido) == "Ya hay una categoría con ese nombre")
         #expect(Textos.Errores.nombreProducto(.repetido, categoria: "Nevera") == "Ya hay un producto con ese nombre en Nevera")

@@ -31,6 +31,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				pruebas/AjustesPruebasUI.swift,
+				pruebas/ImportarPruebasUI.swift,
 				pruebas/ListaCompraPruebasUI.swift,
 				pruebas/ProductosPruebasUI.swift,
 				pruebas/CategoriasPruebasUI.swift,

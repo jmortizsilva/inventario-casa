@@ -203,6 +203,46 @@ public enum Textos {
         public static let noLeido = "No se pudo leer el inventario"
     }
 
+    // MARK: Importación
+
+    public enum Importacion {
+        public static let boton = "Importar datos"
+        public static let noImportadoTitulo = "No se ha importado"
+        public static let archivoNoValido = "El archivo no es una exportación del inventario."
+        public static let nadaNuevo = "No había nada nuevo que importar"
+
+        /// «Importadas 5 categorías y 42 productos». El participio concuerda
+        /// con lo primero que se nombra.
+        public static func titulo(_ r: ResultadoImportacion) -> String {
+            switch (r.categorias, r.productos) {
+            case (0, 0):
+                return nadaNuevo
+            case (0, let p):
+                return "\(p == 1 ? "Importado" : "Importados") \(Textos.productos(p))"
+            case (let c, 0):
+                return "\(c == 1 ? "Importada" : "Importadas") \(categorias(c))"
+            case (let c, let p):
+                return "\(c == 1 ? "Importada" : "Importadas") \(categorias(c)) y \(Textos.productos(p))"
+            }
+        }
+
+        /// Lo que no se importó, o nil si se importó todo.
+        public static func mensaje(_ r: ResultadoImportacion) -> String? {
+            var partes: [String] = []
+            if r.repetidos > 0 {
+                partes.append(r.repetidos == 1 ? "1 ya estaba." : "\(r.repetidos) ya estaban.")
+            }
+            if r.noValidos > 0 {
+                partes.append(r.noValidos == 1 ? "1 no se pudo importar." : "\(r.noValidos) no se pudieron importar.")
+            }
+            return partes.isEmpty ? nil : partes.joined(separator: " ")
+        }
+
+        private static func categorias(_ n: Int) -> String {
+            n == 1 ? "1 categoría" : "\(n) categorías"
+        }
+    }
+
     // MARK: Manual
 
     public struct Apartado: Sendable, Equatable {

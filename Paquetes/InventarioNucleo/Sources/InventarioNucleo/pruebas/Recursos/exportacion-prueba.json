@@ -1,0 +1,18 @@
+{
+  "formato": "inventario-casa",
+  "version": 1,
+  "categorias": [
+    { "id": "11111111-0000-0000-0000-000000000001", "nombre": "Despensa", "creado": "2025-03-01T10:00:00Z", "modificado": "2025-03-01T10:00:00Z" },
+    { "id": "11111111-0000-0000-0000-000000000002", "nombre": "  Nevera ", "creado": "2025-03-01T10:00:00Z", "modificado": "2025-03-01T10:00:00Z" },
+    { "id": "11111111-0000-0000-0000-000000000003", "nombre": "Borrada", "creado": "2025-03-01T10:00:00Z", "modificado": "2025-03-02T10:00:00Z", "borrado": "2025-03-02T10:00:00Z" },
+    { "id": "11111111-0000-0000-0000-000000000004", "nombre": "   ", "creado": "2025-03-01T10:00:00Z", "modificado": "2025-03-01T10:00:00Z" }
+  ],
+  "productos": [
+    { "id": "22222222-0000-0000-0000-000000000001", "categoriaId": "11111111-0000-0000-0000-000000000001", "nombre": "Arroz", "cantidad": 3, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": false, "creado": "2025-03-01T10:00:00Z", "modificado": "2025-03-05T18:30:00Z" },
+    { "id": "22222222-0000-0000-0000-000000000002", "categoriaId": "11111111-0000-0000-0000-000000000001", "nombre": "arroz", "cantidad": 1, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": false, "creado": "2025-03-01T10:00:00Z", "modificado": "2025-03-01T10:00:00Z" },
+    { "id": "22222222-0000-0000-0000-000000000003", "categoriaId": "11111111-0000-0000-0000-000000000002", "nombre": "Leche", "cantidad": 1500, "umbralCompra": 40, "autoListaCompra": false, "enListaCompraManual": true, "creado": "2025-03-01T10:00:00Z", "modificado": "2025-03-01T10:00:00Z" },
+    { "id": "22222222-0000-0000-0000-000000000004", "categoriaId": "99999999-0000-0000-0000-000000000000", "nombre": "Huérfano", "cantidad": 1, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": false, "creado": "2025-03-01T10:00:00Z", "modificado": "2025-03-01T10:00:00Z" },
+    { "id": "22222222-0000-0000-0000-000000000005", "categoriaId": "11111111-0000-0000-0000-000000000003", "nombre": "De categoría borrada", "cantidad": 1, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": false, "creado": "2025-03-01T10:00:00Z", "modificado": "2025-03-02T10:00:00Z", "borrado": "2025-03-02T10:00:00Z" },
+    { "id": "22222222-0000-0000-0000-000000000006", "categoriaId": "11111111-0000-0000-0000-000000000001", "nombre": "Aceite", "cantidad": 0, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": false, "creado": "2025-03-01T10:00:00Z", "modificado": "2025-03-01T10:00:00Z" }
+  ]
+}
