@@ -12,6 +12,9 @@ struct VistaCategorias: View {
         NavigationStack {
             contenido
                 .navigationTitle(Textos.Titulos.inventario)
+                // Con el título grande, VoiceOver leía antes el botón de la barra que
+                // el título, porque el título se dibuja debajo. En la barra va primero.
+                .navigationBarTitleDisplayMode(.inline)
                 .navigationDestination(for: UUID.self) { id in
                     VistaProductos(categoriaId: id)
                 }
