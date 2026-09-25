@@ -75,4 +75,48 @@ CREATE TABLE IF NOT EXISTS intentos_unirse (
 );
 
 CREATE INDEX IF NOT EXISTS idx_intentos_unirse ON intentos_unirse (usuario_id, momento);
+
+-- Inventario de cada hogar. revision: número del hogar dado al último cambio de la fila.
+-- modificado: hora del móvil, solo para decidir qué versión gana.
+CREATE TABLE IF NOT EXISTS categorias (
+  id TEXT PRIMARY KEY,
+  hogar_id TEXT NOT NULL REFERENCES hogares(id),
+  nombre TEXT NOT NULL,
+  creado INTEGER NOT NULL,
+  modificado INTEGER NOT NULL,
+  borrado INTEGER NOT NULL DEFAULT 0,
+  revision INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_categorias_hogar_revision ON categorias (hogar_id, revision);
+
+-- cantidad es el resultado ya calculado de cantidad_fijada + movimientos posteriores.
+CREATE TABLE IF NOT EXISTS productos (
+  id TEXT PRIMARY KEY,
+  hogar_id TEXT NOT NULL REFERENCES hogares(id),
+  categoria_id TEXT NOT NULL,
+  nombre TEXT NOT NULL,
+  umbral_compra INTEGER NOT NULL,
+  auto_lista_compra INTEGER NOT NULL,
+  en_lista_compra_manual INTEGER NOT NULL,
+  creado INTEGER NOT NULL,
+  modificado INTEGER NOT NULL,
+  borrado INTEGER NOT NULL DEFAULT 0,
+  cantidad_fijada INTEGER NOT NULL DEFAULT 0,
+  cantidad_fijada_en INTEGER NOT NULL DEFAULT 0,
+  cantidad INTEGER NOT NULL DEFAULT 0,
+  revision INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_productos_hogar_revision ON productos (hogar_id, revision);
+CREATE INDEX IF NOT EXISTS idx_productos_categoria ON productos (categoria_id);
+
+CREATE TABLE IF NOT EXISTS movimientos (
+  id TEXT PRIMARY KEY,
+  producto_id TEXT NOT NULL REFERENCES productos(id),
+  cambio INTEGER NOT NULL,
+  momento INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_movimientos_producto ON movimientos (producto_id);
 `;

@@ -136,7 +136,13 @@ Dos operaciones, como en la app:
 
 El servidor calcula: `cantidad = última fijada + suma de los movimientos con
 momento posterior a esa fijación`, acotada a 0–999 al final. El resultado no
-depende del orden en que lleguen los cambios.
+depende del orden en que lleguen los cambios. Casos en
+[`pruebas-compartidas/cantidad.json`](../../pruebas-compartidas/cantidad.json),
+que usan las pruebas del servidor y tendrán que usar las de las apps.
+
+La cantidad fijada va por su propia hora (`cantidadFijadaEn`): entra aunque el
+resto del producto pierda el conflicto. Un producto nuevo sin cantidad empieza
+en 0.
 
 ### `GET /sincronizar?desde=<revision>&limite=<n>`
 
@@ -148,11 +154,11 @@ categorías y productos juntos.
 ```
 
 Si `masDisponible` es `true`, repetir con `desde = revision`. `409` si no está
-en un hogar.
+en un hogar; `400` si `desde` o `limite` no son enteros positivos.
 
 ### `POST /sincronizar`
 
-Máximo 1000 entradas en total.
+Máximo 1000 entradas en total; con más, `413` y no se aplica nada.
 
 ```json
 {

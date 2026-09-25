@@ -1,0 +1,14 @@
+{
+  "descripcion": "Unidades de un producto a partir de la última cantidad fijada y los movimientos (ver servidor/docs/CONTRATO-API.md). Los usan las pruebas del servidor y las de las apps.",
+  "casos": [
+    { "caso": "Sin movimientos", "fijada": 5, "fijadaEn": 100, "movimientos": [], "cantidad": 5 },
+    { "caso": "Movimientos posteriores se suman", "fijada": 5, "fijadaEn": 100, "movimientos": [ { "cambio": 1, "momento": 110 }, { "cambio": 1, "momento": 120 }, { "cambio": -1, "momento": 130 } ], "cantidad": 6 },
+    { "caso": "Dos personas restan a la vez: cuentan las dos", "fijada": 2, "fijadaEn": 100, "movimientos": [ { "cambio": -1, "momento": 150 }, { "cambio": -1, "momento": 150 } ], "cantidad": 0 },
+    { "caso": "Movimientos anteriores a la fijación no cuentan", "fijada": 10, "fijadaEn": 200, "movimientos": [ { "cambio": -3, "momento": 150 }, { "cambio": 2, "momento": 250 } ], "cantidad": 12 },
+    { "caso": "Movimiento en el mismo instante que la fijación no cuenta", "fijada": 4, "fijadaEn": 200, "movimientos": [ { "cambio": 1, "momento": 200 } ], "cantidad": 4 },
+    { "caso": "El orden de llegada no importa", "fijada": 3, "fijadaEn": 100, "movimientos": [ { "cambio": 2, "momento": 300 }, { "cambio": -1, "momento": 110 } ], "cantidad": 4 },
+    { "caso": "Nunca baja de 0: se acota al final", "fijada": 1, "fijadaEn": 100, "movimientos": [ { "cambio": -1, "momento": 110 }, { "cambio": -1, "momento": 120 }, { "cambio": 1, "momento": 130 } ], "cantidad": 0 },
+    { "caso": "Nunca pasa de 999", "fijada": 998, "fijadaEn": 100, "movimientos": [ { "cambio": 5, "momento": 110 } ], "cantidad": 999 },
+    { "caso": "Producto nuevo sin cantidad fijada", "fijada": 0, "fijadaEn": 0, "movimientos": [ { "cambio": 2, "momento": 50 } ], "cantidad": 2 }
+  ]
+}

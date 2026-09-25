@@ -175,7 +175,8 @@ export function salir(usuarioId: number, ahora: Reloj = relojReal): { ok: true }
   })();
 }
 
-// Borra los hogares sin nadie desde hace más de 30 días, con sus invitaciones. Devuelve cuántos.
+// Borra los hogares sin nadie desde hace más de 30 días, con su inventario y sus invitaciones.
+// Devuelve cuántos.
 export function purgarHogaresVacios(ahora: Reloj = relojReal): number {
   const bd = obtenerBd();
   const limite = ahora() - DIAS_HASTA_BORRAR_HOGAR_VACIO * UN_DIA_MS;
@@ -189,6 +190,11 @@ export function purgarHogaresVacios(ahora: Reloj = relojReal): number {
         .all(limite) as { id: string }[]
     ).map((fila) => fila.id);
     for (const id of ids) {
+      bd.prepare(
+        'DELETE FROM movimientos WHERE producto_id IN (SELECT id FROM productos WHERE hogar_id = ?)',
+      ).run(id);
+      bd.prepare('DELETE FROM productos WHERE hogar_id = ?').run(id);
+      bd.prepare('DELETE FROM categorias WHERE hogar_id = ?').run(id);
       bd.prepare('DELETE FROM invitaciones WHERE hogar_id = ?').run(id);
       bd.prepare('DELETE FROM hogares WHERE id = ?').run(id);
     }
