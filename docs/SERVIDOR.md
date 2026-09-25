@@ -80,6 +80,27 @@ No hace falta código en el servidor. Tu hogar ya se puede importar en la app
 (Ajustes → Importar datos); al entrar con la cuenta, sube como hogar nuevo.
 Los hogares de otras personas no se pasan salvo que lo pidan.
 
+### 7. Borrar la cuenta
+
+Decidido el 26 de septiembre de 2026. Apple lo exige para publicar una app
+que permite crear cuentas.
+
+- **Se borra de verdad** lo personal: correo, nombre, identificador del
+  proveedor y sesiones. Descartado marcarla como inactiva (`activo = 0`):
+  guardar el correo de quien se ha ido no sirve para nada.
+- **El inventario es del hogar**: si quedan otros miembros, sigue con ellos.
+  Si era la única persona, el hogar se borra en el acto. Los 30 días de
+  «salir» tienen sentido porque la cuenta sigue y se puede volver; aquí ya no
+  queda nadie que pueda entrar.
+- **Apple exige revocar el acceso** con su API. La app pide identificarse
+  otra vez con Apple y manda el código; el servidor lo canjea y revoca.
+  Descartado guardar el token de refresco de Apple desde el primer inicio de
+  sesión: sería un secreto de Apple por persona guardado todo el tiempo para
+  usarlo una vez.
+- **Avisos de Apple** (`POST /auth/apple/avisos`): si la persona borra su
+  cuenta de Apple, se borra la de aquí; si quita la app de su Apple ID, se
+  cierran sus sesiones.
+
 ## Contrato de la API (borrador)
 
 Mismo estilo que el de Guárdalo: sin versión en la ruta, cambios solo
@@ -96,6 +117,8 @@ aditivos, `Authorization: Bearer` en todo lo que no es `/auth/`. Irá entero en
 | `POST /hogar/salir` | Salir |
 | `GET /sincronizar?desde=<revisión>` | Categorías, productos y unidades cambiados después de esa revisión |
 | `POST /sincronizar` | Cambios del móvil: categorías, productos y movimientos de unidades |
+| `DELETE /cuenta` | Borrar la cuenta |
+| `POST /auth/apple/avisos` | Avisos de Apple: cuenta borrada o app quitada del Apple ID |
 
 ## Fases
 

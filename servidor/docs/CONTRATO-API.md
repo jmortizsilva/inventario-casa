@@ -29,11 +29,65 @@ con estas diferencias:
 
 Rutas: `GET /auth/iniciar`, `GET|POST /auth/callback/:proveedor`,
 `POST /auth/canjear`, `POST /auth/renovar`, `POST /auth/logout`,
-`POST /auth/logout-todas`, `POST /auth/apple-nativo` y, solo con
-`PERMITIR_LOGIN_DEV=true`, `POST /auth/dev-login`.
+`POST /auth/logout-todas`, `POST /auth/apple-nativo`,
+`POST /auth/apple/avisos` y, solo con `PERMITIR_LOGIN_DEV=true`,
+`POST /auth/dev-login`.
 
 La identidad es el par (proveedor, `sub`), nunca el correo. El alta es
 abierta: entrar la primera vez crea la cuenta, sin hogar.
+
+Un token de acceso de una cuenta que ya no existe da `401`, aunque no haya
+caducado.
+
+### `POST /auth/apple/avisos`
+
+La llama Apple, no las apps: es la dirección que va en *Server-to-Server
+Notification Endpoint* del App ID. El cuerpo es `{ "payload": "<JWT>" }`,
+firmado por Apple con las mismas claves que el token de inicio de sesión. Se
+comprueban la firma, el emisor y que `aud` sea la app de iOS. Su campo
+`events` es un JSON en texto con `type` y `sub`:
+
+| `type` | Qué hace |
+|---|---|
+| `account-delete` | Borra la cuenta, como `DELETE /cuenta` pero sin revocar nada en Apple |
+| `consent-revoked` | Cierra todas sus sesiones. La cuenta sigue |
+| `email-disabled`, `email-enabled` | Nada: el servidor no manda correos |
+
+→ `200 {"ok": true}`, también si el `sub` no tiene cuenta aquí. `400` si el
+token no es válido.
+
+---
+
+## Cuenta
+
+### `DELETE /cuenta`
+
+Borra la cuenta: correo, nombre, identificador del proveedor y sesiones.
+
+- Si quedan otros miembros en su hogar, el hogar y el inventario siguen con
+  ellos. El inventario no guarda quién hizo cada cambio.
+- Si era la única persona del hogar, el hogar y su inventario se borran en el
+  acto, sin los 30 días de `POST /hogar/salir`.
+- Se borran las invitaciones que creó y no se han usado.
+
+**Cuentas de Apple:** Apple exige revocar el acceso al borrar la cuenta. La
+app pide a la persona que se identifique otra vez con Apple (sirve también de
+confirmación) y manda el `authorizationCode` que recibe:
+
+```json
+{ "codigoApple": "c1a2b3…" }
+```
+
+El servidor lo canjea con el identificador de la app de iOS y revoca el token
+en Apple **antes** de borrar nada. Las cuentas de Google no mandan cuerpo.
+
+→ `200 {"ok": true}`.
+
+- `400 {"error": "falta_codigo_apple"}` si la cuenta es de Apple y no viene el
+  código.
+- `400 {"error": "codigo_apple_no_valido"}` si Apple no acepta el código (dura
+  5 minutos y sirve una vez). No se borra nada: la app puede pedir otro.
+- `502` si no se pudo hablar con Apple. Tampoco se borra nada.
 
 ---
 
