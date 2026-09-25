@@ -28,6 +28,16 @@ final class ProductosPruebasUI: XCTestCase {
     }
 
     private var campoNombre: XCUIElement { app.textFields.firstMatch }
+
+    /// Para VoiceOver, cada fila con Stepper es un único elemento ajustable con
+    /// su etiqueta; el Stepper visible va dentro.
+    private func selector(_ etiqueta: String) -> XCUIElement {
+        app.otherElements[etiqueta]
+    }
+
+    private func aumentar(_ etiqueta: String) {
+        selector(etiqueta).steppers.firstMatch.buttons["Increment"].tap()
+    }
     private var botonGuardar: XCUIElement { app.navigationBars.buttons["Guardar"] }
 
     private func menu(de fila: String, _ accion: String) {
@@ -80,11 +90,10 @@ final class ProductosPruebasUI: XCTestCase {
         app.navigationBars.buttons["Añadir producto"].tap()
         XCTAssertTrue(app.navigationBars["Nuevo producto"].waitForExistence(timeout: 3))
         campoNombre.typeText("Lejía")
-        let unidades = app.steppers["Unidades"]
-        unidades.buttons["Increment"].tap()
-        unidades.buttons["Increment"].tap()
-        unidades.buttons["Increment"].tap()
-        XCTAssertEqual(unidades.value as? String, "3")
+        aumentar("Unidades")
+        aumentar("Unidades")
+        aumentar("Unidades")
+        XCTAssertEqual(selector("Unidades").value as? String, "3")
         botonGuardar.tap()
 
         XCTAssertTrue(app.buttons["Lejía, 3 unidades"].waitForExistence(timeout: 3))
@@ -115,9 +124,11 @@ final class ProductosPruebasUI: XCTestCase {
         XCTAssertEqual(campoNombre.value as? String, "Arroz")
         XCTAssertFalse(app.keyboards.element.exists, "Al editar no debe abrirse el teclado")
 
-        let umbral = app.steppers["Pasa a la lista con"]
+        let umbral = selector("Pasa a la lista con")
         XCTAssertEqual(umbral.value as? String, "2 unidades o menos")
-        app.steppers["Unidades"].buttons["Increment"].tap()
+        XCTAssertEqual(selector("Unidades").value as? String, "3")
+        aumentar("Unidades")
+        XCTAssertEqual(selector("Unidades").value as? String, "4")
         app.switches["Añadir a la lista cuando queden pocas"].switches.firstMatch.tap()
         XCTAssertFalse(umbral.exists)
         botonGuardar.tap()

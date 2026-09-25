@@ -87,7 +87,7 @@ final class ListaCompraPruebasUI: XCTestCase {
         XCTAssertTrue(leche.waitForExistence(timeout: 3))
         leche.tap()
         XCTAssertTrue(app.navigationBars["Leche"].waitForExistence(timeout: 3))
-        app.steppers["Unidades"].buttons["Increment"].tap()
+        app.otherElements["Unidades"].steppers.firstMatch.buttons["Increment"].tap()
         app.navigationBars.buttons["Guardar"].tap()
         XCTAssertTrue(app.buttons["Leche, 1 unidad, Nevera"].waitForExistence(timeout: 3))
     }

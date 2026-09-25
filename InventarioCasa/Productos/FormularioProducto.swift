@@ -95,10 +95,11 @@ struct FormularioProducto: View {
         .alertaNoGuardado(isPresented: $errorAlGuardar)
     }
 
-    /// Stepper con un texto para la vista y otro para VoiceOver. Ponerle
-    /// .accessibilityLabel a un Stepper no sustituye la etiqueta que saca de su
-    /// texto, la añade detrás («Unidades: 3, Unidades»), aunque ese texto esté
-    /// oculto; por eso el texto visible va fuera y el Stepper sin etiqueta a la vista.
+    /// Fila con un Stepper a la vista que, para VoiceOver, es un único elemento
+    /// ajustable (deslizar arriba o abajo) con etiqueta y valor propios.
+    /// El Stepper del sistema exponía sus dos botones por separado, y ponerle
+    /// .accessibilityLabel no sustituía la etiqueta de su texto sino que la
+    /// añadía detrás («Unidades: 3, Unidades»).
     private func selector(
         visible: String,
         etiqueta: String,
@@ -108,11 +109,19 @@ struct FormularioProducto: View {
     ) -> some View {
         HStack {
             Text(visible)
-                .accessibilityHidden(true)
             Spacer()
             Stepper(etiqueta, value: numero, in: rango)
                 .labelsHidden()
-                .accessibilityValue(valor)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(etiqueta)
+        .accessibilityValue(valor)
+        .accessibilityAdjustableAction { direccion in
+            switch direccion {
+            case .increment: numero.wrappedValue = rango.acotar(numero.wrappedValue + 1)
+            case .decrement: numero.wrappedValue = rango.acotar(numero.wrappedValue - 1)
+            @unknown default: break
+            }
         }
     }
 
@@ -184,4 +193,8 @@ struct FormularioProducto: View {
             errorAlGuardar = true
         }
     }
+}
+
+private extension ClosedRange where Bound == Int {
+    func acotar(_ valor: Int) -> Int { Swift.min(Swift.max(valor, lowerBound), upperBound) }
 }
