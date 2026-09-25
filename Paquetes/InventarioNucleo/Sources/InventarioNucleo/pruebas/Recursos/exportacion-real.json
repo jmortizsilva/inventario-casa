@@ -1,0 +1,297 @@
+{
+  "formato": "inventario-casa",
+  "version": 1,
+  "categorias": [
+    {
+      "id": "ce15bc51-48af-4284-9392-badc285d5cba",
+      "nombre": "Conservas",
+      "creado": "2026-02-08T16:08:35Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "a1dc22fd-7227-4448-b8db-90e4c271f2e6",
+      "nombre": "Hogar",
+      "creado": "2026-02-28T19:24:56Z",
+      "modificado": "2026-02-28T19:24:56Z"
+    },
+    {
+      "id": "419ac596-3783-4fde-8845-6a3b19ce7d35",
+      "nombre": "Legumbres",
+      "creado": "2026-02-08T16:09:36Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "86986d5f-e161-4a0b-bd51-6eb9bf9bf399",
+      "nombre": "Lácteos",
+      "creado": "2026-02-08T16:09:17Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "179ca102-c43c-45a5-ae18-bac14c3e1304",
+      "nombre": "Salsas y aderezos",
+      "creado": "2026-02-08T18:41:11Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "d54c0a89-560a-4c7d-a426-c173357dafcb",
+      "nombre": "Congelados",
+      "creado": "2026-02-08T16:08:06Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    }
+  ],
+  "productos": [
+    {
+      "id": "8d775dfc-3856-416a-b504-c3228af7b03a",
+      "categoriaId": "86986d5f-e161-4a0b-bd51-6eb9bf9bf399",
+      "nombre": "Yogures",
+      "cantidad": 5,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-08T16:29:53Z",
+      "modificado": "2026-03-01T11:40:04Z"
+    },
+    {
+      "id": "53358d97-06b6-4b88-beae-068a2da8220c",
+      "categoriaId": "419ac596-3783-4fde-8845-6a3b19ce7d35",
+      "nombre": "Garbanzos",
+      "cantidad": 0,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-24T06:20:18Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "d1510a5e-1351-49ba-b122-30c9d3737896",
+      "categoriaId": "86986d5f-e161-4a0b-bd51-6eb9bf9bf399",
+      "nombre": "Leche",
+      "cantidad": 4,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-08T16:46:46Z",
+      "modificado": "2026-03-01T11:40:04Z"
+    },
+    {
+      "id": "48ce3bb4-9bb0-4d76-bd50-09242a23d8c9",
+      "categoriaId": "d54c0a89-560a-4c7d-a426-c173357dafcb",
+      "nombre": "Sepia",
+      "cantidad": 2,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-04-07T09:45:41Z",
+      "modificado": "2026-04-07T09:45:59Z"
+    },
+    {
+      "id": "625d0ea0-f016-4cc2-93eb-8d441cc0271c",
+      "categoriaId": "179ca102-c43c-45a5-ae18-bac14c3e1304",
+      "nombre": "Avecrem de carne",
+      "cantidad": 3,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-08T18:41:40Z",
+      "modificado": "2026-03-01T11:40:04Z"
+    },
+    {
+      "id": "f0c80a61-3b50-44ef-aa3b-9f942ecba3d2",
+      "categoriaId": "86986d5f-e161-4a0b-bd51-6eb9bf9bf399",
+      "nombre": "Yogures",
+      "cantidad": 5,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-08T16:29:53Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "8c0f3390-fe94-4c6a-a9f0-8516cb4dd165",
+      "categoriaId": "179ca102-c43c-45a5-ae18-bac14c3e1304",
+      "nombre": "Avecrem de pescado",
+      "cantidad": 0,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-08T18:41:57Z",
+      "modificado": "2026-03-01T11:40:04Z"
+    },
+    {
+      "id": "c9296b83-d2e0-4ed1-a90e-e66f4586099d",
+      "categoriaId": "419ac596-3783-4fde-8845-6a3b19ce7d35",
+      "nombre": "Judias",
+      "cantidad": 0,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-24T06:20:35Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "1eb09588-83bb-423a-99ef-b3bfd374364d",
+      "categoriaId": "86986d5f-e161-4a0b-bd51-6eb9bf9bf399",
+      "nombre": "Leche",
+      "cantidad": 4,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-08T16:46:46Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "9ab1b770-c2b0-4341-b979-97811e0d4f5f",
+      "categoriaId": "ce15bc51-48af-4284-9392-badc285d5cba",
+      "nombre": "Acelgas cocidas",
+      "cantidad": 2,
+      "umbralCompra": 1,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-28T10:13:21Z",
+      "modificado": "2026-03-01T11:40:04Z"
+    },
+    {
+      "id": "dee8eb60-7032-4cc7-b26a-0808962556c5",
+      "categoriaId": "419ac596-3783-4fde-8845-6a3b19ce7d35",
+      "nombre": "Lentejas",
+      "cantidad": 0,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-24T06:19:46Z",
+      "modificado": "2026-03-01T11:40:04Z"
+    },
+    {
+      "id": "dbbe16dd-fba7-4436-8a21-550f9dcfc0a5",
+      "categoriaId": "ce15bc51-48af-4284-9392-badc285d5cba",
+      "nombre": "Aceitunas en rodajas",
+      "cantidad": 5,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-28T11:00:30Z",
+      "modificado": "2026-03-01T11:40:04Z"
+    },
+    {
+      "id": "8500605b-0db7-4658-9a18-512eae1dbb65",
+      "categoriaId": "179ca102-c43c-45a5-ae18-bac14c3e1304",
+      "nombre": "Avecrem de pescado",
+      "cantidad": 0,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-08T18:41:57Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "2eb4ba91-82d4-4e11-9cfa-1731d8110958",
+      "categoriaId": "419ac596-3783-4fde-8845-6a3b19ce7d35",
+      "nombre": "Judias",
+      "cantidad": 0,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-24T06:20:35Z",
+      "modificado": "2026-03-01T11:40:04Z"
+    },
+    {
+      "id": "0f8c8def-c125-44ce-a428-2100d033cb2c",
+      "categoriaId": "179ca102-c43c-45a5-ae18-bac14c3e1304",
+      "nombre": "I",
+      "cantidad": 3,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-24T00:32:21Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "c80cd274-ccf2-4b14-a1b7-7fb7ccf4ccc2",
+      "categoriaId": "419ac596-3783-4fde-8845-6a3b19ce7d35",
+      "nombre": "Lentejas",
+      "cantidad": 0,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-24T06:19:46Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "613ade88-388b-47d3-ba2f-eaa77702d5f2",
+      "categoriaId": "ce15bc51-48af-4284-9392-badc285d5cba",
+      "nombre": "Garbanzos cocidos",
+      "cantidad": 1,
+      "umbralCompra": 1,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-28T10:14:00Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "091bcbc9-730b-42db-b927-b6beafd81f5a",
+      "categoriaId": "d54c0a89-560a-4c7d-a426-c173357dafcb",
+      "nombre": "Croquetas",
+      "cantidad": 2,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-04-07T10:44:38Z",
+      "modificado": "2026-04-07T10:44:38Z"
+    },
+    {
+      "id": "450fff76-b6f6-4572-9f7d-1925b9a33d43",
+      "categoriaId": "ce15bc51-48af-4284-9392-badc285d5cba",
+      "nombre": "Judías blancas",
+      "cantidad": 1,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-28T10:15:40Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "f470867c-7948-47c6-81e8-a8b3be543726",
+      "categoriaId": "179ca102-c43c-45a5-ae18-bac14c3e1304",
+      "nombre": "Avecrem de carne",
+      "cantidad": 3,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-08T18:41:40Z",
+      "modificado": "2026-02-28T20:46:33Z"
+    },
+    {
+      "id": "f25409f4-7ab5-42c6-b6b0-85d67b6a8e0e",
+      "categoriaId": "419ac596-3783-4fde-8845-6a3b19ce7d35",
+      "nombre": "Garbanzos",
+      "cantidad": 0,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-24T06:20:18Z",
+      "modificado": "2026-03-01T11:40:04Z"
+    },
+    {
+      "id": "55752dfa-aab2-4693-adcf-999006e50c0c",
+      "categoriaId": "179ca102-c43c-45a5-ae18-bac14c3e1304",
+      "nombre": "I",
+      "cantidad": 3,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-02-24T00:32:21Z",
+      "modificado": "2026-03-01T11:40:04Z"
+    },
+    {
+      "id": "f86c1ab1-f1d6-4bbf-b33f-457917698834",
+      "categoriaId": "419ac596-3783-4fde-8845-6a3b19ce7d35",
+      "nombre": "Macarrones Macarrones",
+      "cantidad": 0,
+      "umbralCompra": 2,
+      "autoListaCompra": true,
+      "enListaCompraManual": false,
+      "creado": "2026-03-03T18:15:25Z",
+      "modificado": "2026-03-03T18:15:25Z"
+    }
+  ]
+}

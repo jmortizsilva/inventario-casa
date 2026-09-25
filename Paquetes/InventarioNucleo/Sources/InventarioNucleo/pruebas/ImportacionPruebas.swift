@@ -38,6 +38,24 @@ import Testing
         #expect(inventario.listaCompra.map(\.nombre) == ["Leche"])
     }
 
+    /// `exportacion-real.json` es el hogar real exportado de Firestore en
+    /// septiembre de 2026. Trae productos duplicados (la migración de datos
+    /// antiguos de la app de Expo se ejecutó dos veces) y una categoría vacía.
+    @Test func importaElHogarReal() throws {
+        let resultado = try inventario.importar(Exportacion.leer(cargar("exportacion-real")))
+
+        #expect(resultado == ResultadoImportacion(categorias: 6, productos: 15, repetidos: 8))
+        #expect(inventario.categorias.map(\.nombre) == [
+            "Congelados", "Conservas", "Hogar", "Lácteos", "Legumbres", "Salsas y aderezos",
+        ])
+        let legumbres = try #require(inventario.categorias.first { $0.nombre == "Legumbres" })
+        #expect(inventario.productos(en: legumbres.id).map(\.nombre) == [
+            "Garbanzos", "Judias", "Lentejas", "Macarrones Macarrones",
+        ])
+        #expect(Textos.Importacion.titulo(resultado) == "Importadas 6 categorías y 15 productos")
+        #expect(Textos.Importacion.mensaje(resultado) == "8 ya estaban.")
+    }
+
     @Test(arguments: [
         "{}",
         "no es json",
