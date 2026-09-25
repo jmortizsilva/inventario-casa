@@ -1,0 +1,36 @@
+{
+  "name": "inventario-casa-servidor",
+  "version": "1.0.0",
+  "description": "Servidor de Inventario Casa: cuentas, hogares compartidos y sincronización. Node + Fastify + SQLite.",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "comprobar-tipos": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "verificar": "npm run comprobar-tipos && npm run lint && npm test"
+  },
+  "dependencies": {
+    "@fastify/formbody": "^8.0.2",
+    "@fastify/rate-limit": "^10.2.1",
+    "better-sqlite3": "^12.2.0",
+    "fastify": "^5.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.19.0",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.13.1",
+    "eslint": "^9.19.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.23.0",
+    "vitest": "^3.0.5"
+  },
+  "allowScripts": {
+    "better-sqlite3@12.11.1": true,
+    "esbuild@0.28.2": true
+  }
+}

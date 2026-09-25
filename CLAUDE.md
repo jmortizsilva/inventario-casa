@@ -36,6 +36,11 @@ cd Paquetes/InventarioNucleo && xcodebuild test -scheme InventarioNucleo-Package
 ```
 
 ```bash
+# Servidor (tipos, lint y pruebas)
+cd servidor && npm run verificar
+```
+
+```bash
 # Pruebas del script de exportación (sin conexión)
 cd scripts/exportar-firestore && npm test
 ```
