@@ -2,6 +2,9 @@
 
 - Swift 6 y SwiftUI, iOS 17 como mínimo. Persistencia local con SwiftData.
 - El proyecto usa carpetas sincronizadas de Xcode: los ficheros que se añaden en `InventarioCasa/` entran solos en el target. No hace falta tocar `project.pbxproj`.
+- Excepción: las pruebas de interfaz (XCUITest) están en `InventarioCasa/pruebas/`, dentro de la carpeta de la app. Cada fichero nuevo ahí hay que añadirlo a `membershipExceptions` en `project.pbxproj` para sacarlo del target de la app. Poner solo la carpeta (`pruebas`) no funciona, se comprobó con Xcode 27. Si se olvida, la app no compila: «unable to resolve module dependency: 'XCTest' (in target 'InventarioCasa')».
+- Argumentos de arranque solo en depuración: `-datosDeEjemplo` (datos de ejemplo en memoria) y `-almacenEnMemoria` (SwiftData vacío en memoria, para las pruebas de interfaz).
+- XCUITest no puede lanzar acciones del rotor. Lo que hacen se prueba por el menú de pulsación larga, que llama al mismo código.
 - La lógica que decide (regla de la lista de la compra, validaciones, textos que se anuncian) va en `Paquetes/InventarioNucleo`, sin importar SwiftUI ni SwiftData, y se prueba con Swift Testing.
 - Las pruebas del paquete están en `Sources/InventarioNucleo/pruebas/`. El target principal las excluye en `Package.swift`.
 - Más adelante habrá app de Android y servidor propio: los casos de prueba de la lógica compartida se escriben en JSON (`pruebas/Recursos/`) para que los use también Kotlin.
@@ -21,6 +24,12 @@ xcodebuild -project InventarioCasa.xcodeproj -scheme InventarioCasa \
 ```bash
 # Pruebas del paquete en el simulador (SwiftData del sistema de verdad)
 cd Paquetes/InventarioNucleo && xcodebuild test -scheme InventarioNucleo-Package \
+  -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5'
+```
+
+```bash
+# Pruebas de interfaz (lentas: varios minutos)
+xcodebuild test -project InventarioCasa.xcodeproj -scheme InventarioCasa \
   -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5'
 ```
 

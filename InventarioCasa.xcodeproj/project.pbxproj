@@ -11,12 +11,34 @@
 		A10000000000000000000013 /* InventarioAlmacen in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000014 /* InventarioAlmacen */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		A10000000000000000000034 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000000000000000000009 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A10000000000000000000006;
+			remoteInfo = InventarioCasa;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		A10000000000000000000001 /* InventarioCasa.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InventarioCasa.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000030 /* InventarioCasaPruebasUI.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = InventarioCasaPruebasUI.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A10000000000000000000036 /* Exceptions for "InventarioCasa" folder in "InventarioCasa" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				pruebas/CategoriasPruebasUI.swift,
+			);
+			target = A10000000000000000000006 /* InventarioCasa */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		A10000000000000000000002 /* InventarioCasa */ = {isa = PBXFileSystemSynchronizedRootGroup; path = InventarioCasa; sourceTree = "<group>"; };
+		A10000000000000000000002 /* InventarioCasa */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A10000000000000000000036 /* Exceptions for "InventarioCasa" folder in "InventarioCasa" target */, ); path = InventarioCasa; sourceTree = "<group>"; };
+		A10000000000000000000031 /* pruebas */ = {isa = PBXFileSystemSynchronizedRootGroup; path = InventarioCasa/pruebas; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +51,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000000000000000000032 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -36,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				A10000000000000000000002 /* InventarioCasa */,
+				A10000000000000000000031 /* pruebas */,
 				A10000000000000000000005 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -44,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				A10000000000000000000001 /* InventarioCasa.app */,
+				A10000000000000000000030 /* InventarioCasaPruebasUI.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -75,6 +106,27 @@
 			productReference = A10000000000000000000001 /* InventarioCasa.app */;
 			productType = "com.apple.product-type.application";
 		};
+		A10000000000000000000037 /* InventarioCasaPruebasUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000038 /* Build configuration list for PBXNativeTarget "InventarioCasaPruebasUI" */;
+			buildPhases = (
+				A10000000000000000000033 /* Sources */,
+				A10000000000000000000032 /* Frameworks */,
+				A1000000000000000000003B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A10000000000000000000035 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A10000000000000000000031 /* pruebas */,
+			);
+			name = InventarioCasaPruebasUI;
+			productName = InventarioCasaPruebasUI;
+			productReference = A10000000000000000000030 /* InventarioCasaPruebasUI.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -84,6 +136,11 @@
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2700;
 				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					A10000000000000000000037 = {
+						TestTargetID = A10000000000000000000006;
+					};
+				};
 			};
 			buildConfigurationList = A10000000000000000000023 /* Build configuration list for PBXProject "InventarioCasa" */;
 			developmentRegion = es;
@@ -103,12 +160,20 @@
 			projectRoot = "";
 			targets = (
 				A10000000000000000000006 /* InventarioCasa */,
+				A10000000000000000000037 /* InventarioCasaPruebasUI */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		A10000000000000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A1000000000000000000003B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -125,7 +190,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A10000000000000000000033 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A10000000000000000000035 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A10000000000000000000006 /* InventarioCasa */;
+			targetProxy = A10000000000000000000034 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		A10000000000000000000021 /* Debug */ = {
@@ -226,6 +306,36 @@
 			};
 			name = Release;
 		};
+		A10000000000000000000039 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 2.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jmortiz.inventario.pruebasui;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = InventarioCasa;
+			};
+			name = Debug;
+		};
+		A1000000000000000000003A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 2.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jmortiz.inventario.pruebasui;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = InventarioCasa;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -243,6 +353,15 @@
 			buildConfigurations = (
 				A10000000000000000000024 /* Debug */,
 				A10000000000000000000025 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A10000000000000000000038 /* Build configuration list for PBXNativeTarget "InventarioCasaPruebasUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000039 /* Debug */,
+				A1000000000000000000003A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

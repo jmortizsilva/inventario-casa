@@ -31,9 +31,14 @@ struct VistaRaiz: View {
             inventario = VistaPrevia.inventario()
             return
         }
+        // Para las pruebas de interfaz: SwiftData de verdad, pero vacío en cada arranque.
+        let enMemoria = ProcessInfo.processInfo.arguments.contains("-almacenEnMemoria")
+        #else
+        let enMemoria = false
         #endif
         do {
-            let nuevo = Inventario(almacen: try AlmacenSwiftData.enDisco())
+            let almacen = enMemoria ? try AlmacenSwiftData.enMemoria() : try AlmacenSwiftData.enDisco()
+            let nuevo = Inventario(almacen: almacen)
             try nuevo.cargar()
             inventario = nuevo
             falloAlAbrir = false
