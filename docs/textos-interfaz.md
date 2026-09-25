@@ -91,6 +91,14 @@ La categoría se añade porque puede haber el mismo producto en dos categorías.
 | Umbral (solo si el interruptor está activo) | Cuando queden {n} unidades o menos | Pasar a lista de compra con {n} unidades o menos |
 | Botones | Cancelar · Guardar | Cancelar · Guardar / Guardando... |
 
+Para VoiceOver, los dos selectores llevan etiqueta y valor por separado, para
+que el número no se oiga dos veces. El texto de la pantalla no cambia.
+
+| Selector | Etiqueta | Valor | Se oye |
+|---|---|---|---|
+| Unidades | Unidades | {n} | Unidades, 3, ajustable |
+| Umbral | Pasa a la lista con | {n} unidades o menos (1 unidad o menos; 0 unidades) | Pasa a la lista con, 2 unidades o menos, ajustable |
+
 Se quitan el contador de caracteres y el texto "Guardando...": guardar en el
 móvil es instantáneo.
 

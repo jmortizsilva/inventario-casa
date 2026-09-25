@@ -93,6 +93,19 @@ public enum Textos {
         }
         public static let listaAutomatica = "Añadir a la lista cuando queden pocas"
 
+        /// Lo que lee VoiceOver en los Stepper: etiqueta y valor por separado,
+        /// para que el número no se oiga dos veces («Unidades: 3, 3»).
+        public static let etiquetaUnidades = "Unidades"
+        public static func valorUnidades(_ n: Int) -> String { "\(n)" }
+        public static let etiquetaUmbral = "Pasa a la lista con"
+        public static func valorUmbral(_ n: Int) -> String {
+            switch n {
+            case 0: "0 unidades"
+            case 1: "1 unidad o menos"
+            default: "\(n) unidades o menos"
+            }
+        }
+
         public static func umbral(_ n: Int) -> String {
             switch n {
             case 0: "Cuando no quede ninguna"

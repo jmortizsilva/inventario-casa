@@ -42,17 +42,25 @@ struct FormularioProducto: View {
                 }
 
                 Section {
-                    Stepper(value: $cantidad, in: Limites.cantidad) {
-                        Text(Textos.Formulario.unidades(cantidad))
-                    }
+                    selector(
+                        visible: Textos.Formulario.unidades(cantidad),
+                        etiqueta: Textos.Formulario.etiquetaUnidades,
+                        valor: Textos.Formulario.valorUnidades(cantidad),
+                        numero: $cantidad,
+                        rango: Limites.cantidad
+                    )
                 }
 
                 Section {
                     Toggle(Textos.Formulario.listaAutomatica, isOn: $autoListaCompra)
                     if autoListaCompra {
-                        Stepper(value: $umbralCompra, in: Limites.umbralCompra) {
-                            Text(Textos.Formulario.umbral(umbralCompra))
-                        }
+                        selector(
+                            visible: Textos.Formulario.umbral(umbralCompra),
+                            etiqueta: Textos.Formulario.etiquetaUmbral,
+                            valor: Textos.Formulario.valorUmbral(umbralCompra),
+                            numero: $umbralCompra,
+                            rango: Limites.umbralCompra
+                        )
                     }
                 }
             }
@@ -71,6 +79,27 @@ struct FormularioProducto: View {
         }
         .onAppear(perform: rellenar)
         .alertaNoGuardado(isPresented: $errorAlGuardar)
+    }
+
+    /// Stepper con un texto para la vista y otro para VoiceOver. Ponerle
+    /// .accessibilityLabel a un Stepper no sustituye la etiqueta que saca de su
+    /// texto, la añade detrás («Unidades: 3, Unidades»), aunque ese texto esté
+    /// oculto; por eso el texto visible va fuera y el Stepper sin etiqueta a la vista.
+    private func selector(
+        visible: String,
+        etiqueta: String,
+        valor: String,
+        numero: Binding<Int>,
+        rango: ClosedRange<Int>
+    ) -> some View {
+        HStack {
+            Text(visible)
+                .accessibilityHidden(true)
+            Spacer()
+            Stepper(etiqueta, value: numero, in: rango)
+                .labelsHidden()
+                .accessibilityValue(valor)
+        }
     }
 
     private var titulo: String {

@@ -35,6 +35,15 @@ import Testing
         #expect(Textos.Formulario.umbral(2) == "Cuando queden 2 unidades o menos")
     }
 
+    @Test func steppersParaVoiceOver() {
+        #expect(Textos.Formulario.etiquetaUnidades == "Unidades")
+        #expect(Textos.Formulario.valorUnidades(3) == "3")
+        #expect(Textos.Formulario.etiquetaUmbral == "Pasa a la lista con")
+        #expect(Textos.Formulario.valorUmbral(0) == "0 unidades")
+        #expect(Textos.Formulario.valorUmbral(1) == "1 unidad o menos")
+        #expect(Textos.Formulario.valorUmbral(2) == "2 unidades o menos")
+    }
+
     @Test func anuncioDeAjusteSinCambioDeLista() {
         let antes = producto(cantidad: 5)
         let ajustado = antes.ajustandoCantidad(en: 1, ahora: despues)

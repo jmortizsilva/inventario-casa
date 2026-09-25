@@ -80,11 +80,11 @@ final class ProductosPruebasUI: XCTestCase {
         app.navigationBars.buttons["Añadir producto"].tap()
         XCTAssertTrue(app.navigationBars["Nuevo producto"].waitForExistence(timeout: 3))
         campoNombre.typeText("Lejía")
-        // Por posición: la etiqueta cambia con cada toque («Unidades: 1»…).
-        let unidades = app.steppers.element(boundBy: 0)
+        let unidades = app.steppers["Unidades"]
         unidades.buttons["Increment"].tap()
         unidades.buttons["Increment"].tap()
         unidades.buttons["Increment"].tap()
+        XCTAssertEqual(unidades.value as? String, "3")
         botonGuardar.tap()
 
         XCTAssertTrue(app.buttons["Lejía, 3 unidades"].waitForExistence(timeout: 3))
@@ -115,9 +115,11 @@ final class ProductosPruebasUI: XCTestCase {
         XCTAssertEqual(campoNombre.value as? String, "Arroz")
         XCTAssertFalse(app.keyboards.element.exists, "Al editar no debe abrirse el teclado")
 
-        app.steppers["Unidades: 3"].buttons["Increment"].tap()
+        let umbral = app.steppers["Pasa a la lista con"]
+        XCTAssertEqual(umbral.value as? String, "2 unidades o menos")
+        app.steppers["Unidades"].buttons["Increment"].tap()
         app.switches["Añadir a la lista cuando queden pocas"].switches.firstMatch.tap()
-        XCTAssertFalse(app.steppers["Cuando queden 2 unidades o menos"].exists)
+        XCTAssertFalse(umbral.exists)
         botonGuardar.tap()
 
         XCTAssertTrue(app.buttons["Arroz, 4 unidades"].waitForExistence(timeout: 3))

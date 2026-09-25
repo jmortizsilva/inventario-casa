@@ -8,6 +8,7 @@
 - XCUITest muestra los descendientes de un elemento aunque tenga `.accessibilityElement(children: .ignore)`: su árbol no es lo que recorre VoiceOver. Un botón dentro de una fila sale como otro elemento con la misma etiqueta y la consulta por etiqueta falla por ambigua; en las filas se usa un toque (`onTapGesture`) en lugar de un botón interior.
 - En las pruebas: esperar a que una alerta exista antes de pulsarla (un toque durante la animación se pierde) y usar `waitForNonExistence` para comprobar que algo desaparece (`waitForExistence` da verdadero mientras dura la animación).
 - Un `.frame` puesto por fuera de un botón no amplía la zona de toque: va dentro de la etiqueta, con `.contentShape`.
+- `.accessibilityLabel` sobre un `Stepper` no sustituye la etiqueta que saca de su texto: la añade detrás, aunque el texto esté oculto. Para separar lo que se ve de lo que se oye, el texto va fuera y el `Stepper` con `.labelsHidden()` (ver `FormularioProducto.selector`).
 - La lógica que decide (regla de la lista de la compra, validaciones, textos que se anuncian) va en `Paquetes/InventarioNucleo`, sin importar SwiftUI ni SwiftData, y se prueba con Swift Testing.
 - Las pruebas del paquete están en `Sources/InventarioNucleo/pruebas/`. El target principal las excluye en `Package.swift`.
 - Más adelante habrá app de Android y servidor propio: los casos de prueba de la lógica compartida se escriben en JSON (`pruebas/Recursos/`) para que los use también Kotlin.
