@@ -65,9 +65,10 @@ struct VistaCategorias: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .accessibilityElement(children: .ignore)
+        // Solo la etiqueta: el NavigationLink ya junta sus textos en un botón.
+        // Con .accessibilityElement(children: .ignore) aparecía un segundo botón
+        // anidado con la misma etiqueta.
         .accessibilityLabel(Textos.filaCategoria(categoria, productos: productos))
-        .accessibilityAddTraits(.isButton)
         .accessibilityAction(named: Textos.Botones.cambiarNombre) {
             formulario = .renombrar(categoria)
         }
