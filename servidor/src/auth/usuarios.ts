@@ -63,3 +63,7 @@ export function obtenerUsuarioPorId(id: number): Usuario | undefined {
     | Usuario
     | undefined;
 }
+
+export function existeUsuario(id: number): boolean {
+  return obtenerBd().prepare('SELECT 1 FROM usuarios WHERE id = ?').get(id) !== undefined;
+}

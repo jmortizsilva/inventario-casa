@@ -68,7 +68,7 @@ Borra la cuenta: correo, nombre, identificador del proveedor y sesiones.
   ellos. El inventario no guarda quién hizo cada cambio.
 - Si era la única persona del hogar, el hogar y su inventario se borran en el
   acto, sin los 30 días de `POST /hogar/salir`.
-- Se borran las invitaciones que creó y no se han usado.
+- Se borran las invitaciones que creó.
 
 **Cuentas de Apple:** Apple exige revocar el acceso al borrar la cuenta. La
 app pide a la persona que se identifique otra vez con Apple (sirve también de

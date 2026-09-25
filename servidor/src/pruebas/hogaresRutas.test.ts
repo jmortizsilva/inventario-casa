@@ -39,6 +39,17 @@ describe('rutas de /hogar', () => {
     expect(res.statusCode).toBe(401);
   });
 
+  it('con el token de una cuenta borrada: 401, aunque no haya caducado', async () => {
+    const ana = cabecera('Ana');
+    const { borrarCuenta } = await import('../cuenta/almacen');
+    const { obtenerBd } = await import('../db');
+    const { id } = obtenerBd().prepare("SELECT id FROM usuarios WHERE email = 'ana@ejemplo.com'").get() as { id: number };
+    borrarCuenta(id);
+
+    const res = await app.inject({ method: 'POST', url: '/hogar', headers: ana, payload: { nombre: 'Casa' } });
+    expect(res.statusCode).toBe(401);
+  });
+
   it('sin hogar devuelve null', async () => {
     const res = await app.inject({ method: 'GET', url: '/hogar', headers: cabecera('Ana') });
     expect(res.json()).toEqual({ hogar: null });

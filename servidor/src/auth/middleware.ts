@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { verificarTokenAcceso } from './tokenAcceso';
+import { existeUsuario } from './usuarios';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -15,7 +16,9 @@ export function crearExigirSesion(secreto: string) {
     const cabecera = request.headers.authorization;
     const token = cabecera?.startsWith('Bearer ') ? cabecera.slice('Bearer '.length) : undefined;
     const usuarioId = token ? verificarTokenAcceso(token, secreto) : undefined;
-    if (usuarioId === undefined) {
+    // El token de acceso no tiene estado y vale dos horas: sin mirar la tabla, una cuenta recién
+    // borrada podría seguir usándolo, por ejemplo para crear un hogar que ya no sería de nadie.
+    if (usuarioId === undefined || !existeUsuario(usuarioId)) {
       reply.code(401).send({ error: 'sesion invalida o caducada' });
       return;
     }

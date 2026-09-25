@@ -189,15 +189,20 @@ export function purgarHogaresVacios(ahora: Reloj = relojReal): number {
         )
         .all(limite) as { id: string }[]
     ).map((fila) => fila.id);
-    for (const id of ids) {
-      bd.prepare(
-        'DELETE FROM movimientos WHERE producto_id IN (SELECT id FROM productos WHERE hogar_id = ?)',
-      ).run(id);
-      bd.prepare('DELETE FROM productos WHERE hogar_id = ?').run(id);
-      bd.prepare('DELETE FROM categorias WHERE hogar_id = ?').run(id);
-      bd.prepare('DELETE FROM invitaciones WHERE hogar_id = ?').run(id);
-      bd.prepare('DELETE FROM hogares WHERE id = ?').run(id);
-    }
+    for (const id of ids) borrarHogar(id);
     return ids.length;
   })();
+}
+
+// Borra el hogar con su inventario y sus invitaciones. No mira si queda alguien dentro: eso lo
+// decide quien llama. Hay que llamarla dentro de una transacción.
+export function borrarHogar(hogarId: string): void {
+  const bd = obtenerBd();
+  bd.prepare(
+    'DELETE FROM movimientos WHERE producto_id IN (SELECT id FROM productos WHERE hogar_id = ?)',
+  ).run(hogarId);
+  bd.prepare('DELETE FROM productos WHERE hogar_id = ?').run(hogarId);
+  bd.prepare('DELETE FROM categorias WHERE hogar_id = ?').run(hogarId);
+  bd.prepare('DELETE FROM invitaciones WHERE hogar_id = ?').run(hogarId);
+  bd.prepare('DELETE FROM hogares WHERE id = ?').run(hogarId);
 }
