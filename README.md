@@ -7,7 +7,9 @@ Esta rama (`app-nativa`) es la versión nativa en Swift y SwiftUI. La versión a
 ## Estructura
 
 - `InventarioCasa/`: la app (vistas SwiftUI).
-- `Paquetes/InventarioNucleo/`: modelo y lógica sin interfaz, con sus pruebas en `pruebas/`.
+- `Paquetes/InventarioNucleo/`: paquete con dos módulos, cada uno con sus pruebas en `pruebas/`:
+  - `InventarioNucleo`: modelo y lógica sin interfaz.
+  - `InventarioAlmacen`: guardado en el móvil con SwiftData.
 
 ## Requisitos
 
