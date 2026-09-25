@@ -33,6 +33,10 @@ public enum Textos {
     // MARK: Botones y acciones
 
     public enum Botones {
+        /// Menú de Inventario, con Categoría y Producto.
+        public static let anadir = "Añadir"
+        public static let categoria = "Categoría"
+        public static let producto = "Producto"
         public static let anadirCategoria = "Añadir categoría"
         public static let anadirProducto = "Añadir producto"
         public static let cambiarNombre = "Cambiar nombre"
@@ -88,6 +92,9 @@ public enum Textos {
 
     public enum Formulario {
         public static let nombre = "Nombre"
+        public static let categoria = "Categoría"
+        /// Lo que muestra el selector de categoría antes de elegir.
+        public static let elegir = "Elegir"
         public static func unidades(_ n: Int) -> String {
             "Unidades: \(n)"
         }

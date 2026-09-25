@@ -29,7 +29,8 @@ La columna **Antes** es el texto de la app de Expo, cuando cambia.
 
 | Elemento | Texto | Antes |
 |---|---|---|
-| Botón de la barra | Añadir categoría | Añadir nueva categoría (botón flotante +) |
+| Botón de la barra | Añadir (menú: Categoría · Producto) | Añadir nueva categoría (botón flotante +) |
+| Menú, Producto | Desactivado si no hay categorías | |
 | Fila, lo que se lee | {categoria}, {n} productos | {categoria} |
 | Acción por defecto | Abre sus productos | |
 | Acción del rotor | Añadir producto | Añadir producto a {categoria} |
@@ -86,6 +87,7 @@ La categoría se añade porque puede haber el mismo producto en dos categorías.
 | Título al crear | Nuevo producto | Nuevo en {categoria} |
 | Título al editar | {producto} | Editar {producto} |
 | Campo | Nombre | Nombre del producto (con ejemplo "Ej: Arroz, Leche, Pan...") |
+| Selector, solo al crear desde el menú de Inventario | Categoría (sin elegir: Elegir). Guardar desactivado hasta elegir | |
 | Cantidad | Unidades: {n} | Seleccionar cantidad (rueda de 0 a 99) |
 | Interruptor | Añadir a la lista cuando queden pocas | Añadir automáticamente a la lista |
 | Umbral (solo si el interruptor está activo) | Cuando queden {n} unidades o menos | Pasar a lista de compra con {n} unidades o menos |

@@ -4,12 +4,13 @@ import InventarioNucleo
 /// Crear un producto o editarlo.
 struct FormularioProducto: View {
     enum Modo: Identifiable {
-        case nuevo(categoriaId: UUID)
+        /// Sin categoría (desde el menú Añadir de Inventario) se elige en el formulario.
+        case nuevo(categoriaId: UUID?)
         case editar(Producto)
 
         var id: String {
             switch self {
-            case .nuevo(let categoriaId): "nuevo-\(categoriaId)"
+            case .nuevo(let categoriaId): "nuevo-\(categoriaId?.uuidString ?? "sin-categoria")"
             case .editar(let producto): producto.id.uuidString
             }
         }
@@ -19,6 +20,7 @@ struct FormularioProducto: View {
     @Environment(Inventario.self) private var inventario
     @Environment(\.dismiss) private var cerrar
     @State private var nombre = ""
+    @State private var categoriaElegida: UUID?
     @State private var cantidad = 0
     @State private var autoListaCompra = true
     @State private var umbralCompra = Limites.umbralCompraPorDefecto
@@ -38,6 +40,18 @@ struct FormularioProducto: View {
                     if let errorNombre {
                         Text(errorNombre)
                             .foregroundStyle(.red)
+                    }
+                }
+
+                if pideCategoria {
+                    Section {
+                        // Empieza sin elegir: así nada acaba en una categoría por descuido.
+                        Picker(Textos.Formulario.categoria, selection: $categoriaElegida) {
+                            Text(Textos.Formulario.elegir).tag(UUID?.none)
+                            ForEach(inventario.categorias) { categoria in
+                                Text(categoria.nombre).tag(UUID?.some(categoria.id))
+                            }
+                        }
                     }
                 }
 
@@ -72,7 +86,7 @@ struct FormularioProducto: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(Textos.Botones.guardar, action: guardar)
-                        .disabled(Nombres.limpiar(nombre).isEmpty)
+                        .disabled(Nombres.limpiar(nombre).isEmpty || categoriaId == nil)
                 }
             }
             .onChange(of: nombre) { errorNombre = nil }
@@ -109,16 +123,21 @@ struct FormularioProducto: View {
         }
     }
 
-    private var categoriaId: UUID {
+    private var pideCategoria: Bool {
+        if case .nuevo(nil) = modo { true } else { false }
+    }
+
+    private var categoriaId: UUID? {
         switch modo {
-        case .nuevo(let categoriaId): categoriaId
+        case .nuevo: categoriaElegida
         case .editar(let producto): producto.categoriaId
         }
     }
 
     private func rellenar() {
         switch modo {
-        case .nuevo:
+        case .nuevo(let categoriaId):
+            categoriaElegida = categoriaId
             campoConFoco = true
         case .editar(let producto):
             // Al editar no se abre el teclado: casi siempre se viene a cambiar
@@ -132,10 +151,10 @@ struct FormularioProducto: View {
     }
 
     private func guardar() {
-        guard !Nombres.limpiar(nombre).isEmpty else { return }
+        guard !Nombres.limpiar(nombre).isEmpty, let categoriaId else { return }
         do {
             switch modo {
-            case .nuevo(let categoriaId):
+            case .nuevo:
                 let creado = try inventario.crearProducto(
                     nombre: nombre,
                     en: categoriaId,

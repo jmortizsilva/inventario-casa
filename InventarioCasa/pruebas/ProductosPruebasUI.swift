@@ -143,11 +143,48 @@ final class ProductosPruebasUI: XCTestCase {
         XCTAssertTrue(app.buttons["Aceite, 1 unidad, en la lista"].exists)
     }
 
+    func testAnadirProductoDesdeElMenuEligiendoCategoria() {
+        XCTAssertTrue(app.buttons["Nevera, 1 producto"].waitForExistence(timeout: 5))
+        app.navigationBars.buttons["Añadir"].tap()
+        app.buttons["Producto"].tap()
+        XCTAssertTrue(app.navigationBars["Nuevo producto"].waitForExistence(timeout: 3))
+
+        campoNombre.typeText("Queso")
+        XCTAssertFalse(botonGuardar.isEnabled, "Sin categoría no se puede guardar")
+
+        let selector = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Categoría")).firstMatch
+        XCTAssertTrue(selector.exists)
+        selector.tap()
+        let nevera = app.buttons["Nevera"]
+        XCTAssertTrue(nevera.waitForExistence(timeout: 3))
+        nevera.tap()
+        XCTAssertTrue(botonGuardar.isEnabled)
+        botonGuardar.tap()
+
+        XCTAssertTrue(app.buttons["Nevera, 2 productos"].waitForExistence(timeout: 3))
+    }
+
     func testAnadirProductoDesdeCategorias() {
         menu(de: "Limpieza, 0 productos", "Añadir producto")
         XCTAssertTrue(app.navigationBars["Nuevo producto"].waitForExistence(timeout: 3))
         campoNombre.typeText("Lejía")
         botonGuardar.tap()
         XCTAssertTrue(app.buttons["Limpieza, 1 producto"].waitForExistence(timeout: 3))
+    }
+}
+
+/// Sin categorías, el menú Añadir no deja elegir Producto.
+@MainActor
+final class MenuAnadirSinCategoriasPruebasUI: XCTestCase {
+    func testProductoDesactivado() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-almacenEnMemoria"]
+        app.launch()
+        let anadir = app.navigationBars.buttons["Añadir"]
+        XCTAssertTrue(anadir.waitForExistence(timeout: 5))
+        anadir.tap()
+        let producto = app.buttons["Producto"]
+        XCTAssertTrue(producto.waitForExistence(timeout: 3))
+        XCTAssertFalse(producto.isEnabled)
     }
 }

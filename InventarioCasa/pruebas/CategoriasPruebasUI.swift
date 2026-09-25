@@ -19,13 +19,21 @@ final class CategoriasPruebasUI: XCTestCase {
         app.launch()
     }
 
-    private var botonAnadir: XCUIElement { app.navigationBars.buttons["Añadir categoría"] }
+    private var botonAnadir: XCUIElement { app.navigationBars.buttons["Añadir"] }
     private var campoNombre: XCUIElement { app.textFields.firstMatch }
     private var botonGuardar: XCUIElement { app.navigationBars.buttons["Guardar"] }
 
-    private func crear(_ nombre: String) {
+    /// «Añadir» es un menú con Categoría y Producto.
+    private func abrirNuevaCategoria() {
         botonAnadir.tap()
+        let opcion = app.buttons["Categoría"]
+        XCTAssertTrue(opcion.waitForExistence(timeout: 3))
+        opcion.tap()
         XCTAssertTrue(campoNombre.waitForExistence(timeout: 3))
+    }
+
+    private func crear(_ nombre: String) {
+        abrirNuevaCategoria()
         campoNombre.typeText(nombre)
         botonGuardar.tap()
     }
@@ -52,8 +60,7 @@ final class CategoriasPruebasUI: XCTestCase {
 
     func testGuardarDesactivadoSinNombre() {
         abrir()
-        botonAnadir.tap()
-        XCTAssertTrue(campoNombre.waitForExistence(timeout: 3))
+        abrirNuevaCategoria()
         XCTAssertFalse(botonGuardar.isEnabled)
         campoNombre.typeText("   ")
         XCTAssertFalse(botonGuardar.isEnabled)
@@ -69,8 +76,7 @@ final class CategoriasPruebasUI: XCTestCase {
 
     func testCancelarNoCrea() {
         abrir()
-        botonAnadir.tap()
-        XCTAssertTrue(campoNombre.waitForExistence(timeout: 3))
+        abrirNuevaCategoria()
         campoNombre.typeText("Nevera")
         app.navigationBars.buttons["Cancelar"].tap()
         XCTAssertTrue(app.staticTexts["No hay categorías"].waitForExistence(timeout: 3))

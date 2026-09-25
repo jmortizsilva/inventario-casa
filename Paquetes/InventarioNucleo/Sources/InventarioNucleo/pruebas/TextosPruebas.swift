@@ -29,6 +29,14 @@ import Testing
         )
     }
 
+    @Test func menuAnadirYSelectorDeCategoria() {
+        #expect(Textos.Botones.anadir == "Añadir")
+        #expect(Textos.Botones.categoria == "Categoría")
+        #expect(Textos.Botones.producto == "Producto")
+        #expect(Textos.Formulario.categoria == "Categoría")
+        #expect(Textos.Formulario.elegir == "Elegir")
+    }
+
     @Test func umbral() {
         #expect(Textos.Formulario.umbral(0) == "Cuando no quede ninguna")
         #expect(Textos.Formulario.umbral(1) == "Cuando quede 1 unidad o menos")

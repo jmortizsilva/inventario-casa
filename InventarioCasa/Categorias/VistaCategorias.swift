@@ -19,10 +19,12 @@ struct VistaCategorias: View {
                     VistaProductos(categoriaId: id)
                 }
                 .toolbar {
-                    Button {
-                        formulario = .nueva
+                    Menu {
+                        Button(Textos.Botones.categoria) { formulario = .nueva }
+                        Button(Textos.Botones.producto) { nuevoProducto = .nuevo(categoriaId: nil) }
+                            .disabled(inventario.categorias.isEmpty)
                     } label: {
-                        Label(Textos.Botones.anadirCategoria, systemImage: "plus")
+                        Label(Textos.Botones.anadir, systemImage: "plus")
                     }
                 }
         }
