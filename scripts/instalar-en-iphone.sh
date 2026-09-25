@@ -1,11 +1,20 @@
 #!/bin/zsh
 # Compila la app, la instala en el iPhone emparejado (por cable o por Wi‑Fi) y
-# la abre. Hay que lanzarlo desde Terminal, no desde una sesión en segundo
-# plano: codesign necesita el llavero, y solo se desbloquea en la sesión
-# gráfica.
+# la abre. Sirve también por SSH.
+#
+# El certificado de desarrollo está en el llavero guardalo-firma, no en el de
+# inicio de sesión (ver docs/FIRMA-SIN-PANTALLA.md de Guardar Enlaces). Se
+# abre aquí, en la misma sesión que compila, y se pone en la lista de llaveros:
+# desbloquearlo antes en otra orden no basta, y codesign falla con
+# errSecInternalComponent.
 set -e
 
 cd "$(dirname "$0")/.."
+
+llavero=~/Library/Keychains/guardalo-firma.keychain-db
+security unlock-keychain -p "$(cat ~/.appstoreconnect/llavero-firma.txt)" "$llavero"
+security list-keychains -d user -s "$llavero" ~/Library/Keychains/login.keychain-db
+
 equipo="S92QZXCW54"
 salida="/tmp/inventario-iphone"
 
@@ -28,4 +37,7 @@ xcrun devicectl device install app --device "$dispositivo" \
   "$salida/Build/Products/Debug-iphoneos/InventarioCasa.app"
 
 echo "Abriendo…"
-xcrun devicectl device process launch --device "$dispositivo" com.jmortiz.inventario
+# Con el iPhone bloqueado no se puede abrir, pero la app ya está instalada.
+xcrun devicectl device process launch --device "$dispositivo" com.jmortiz.inventario >/dev/null 2>&1 \
+  && echo "Instalada y abierta." \
+  || echo "Instalada. No se ha podido abrir: el iPhone está bloqueado."

@@ -21,3 +21,6 @@ exportacion-firestore/
 
 # Dependencias del script de exportación
 node_modules/
+
+# Configuración local de Claude Code
+.claude/settings.local.json
