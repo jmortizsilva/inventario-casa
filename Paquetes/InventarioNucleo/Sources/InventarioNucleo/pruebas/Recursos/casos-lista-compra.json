@@ -1,0 +1,14 @@
+{
+  "descripcion": "Casos de la regla de la lista de la compra. Los usan las pruebas de iOS y los usará la app de Android.",
+  "casos": [
+    { "caso": "Automática, por debajo del umbral", "cantidad": 1, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": false, "borrado": false, "enLista": true },
+    { "caso": "Automática, justo en el umbral", "cantidad": 2, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": false, "borrado": false, "enLista": true },
+    { "caso": "Automática, por encima del umbral", "cantidad": 3, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": false, "borrado": false, "enLista": false },
+    { "caso": "Umbral 0 con 0 unidades", "cantidad": 0, "umbralCompra": 0, "autoListaCompra": true, "enListaCompraManual": false, "borrado": false, "enLista": true },
+    { "caso": "Umbral 0 con 1 unidad", "cantidad": 1, "umbralCompra": 0, "autoListaCompra": true, "enListaCompraManual": false, "borrado": false, "enLista": false },
+    { "caso": "Sin automática aunque no quede nada", "cantidad": 0, "umbralCompra": 2, "autoListaCompra": false, "enListaCompraManual": false, "borrado": false, "enLista": false },
+    { "caso": "Manual con muchas unidades", "cantidad": 50, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": true, "borrado": false, "enLista": true },
+    { "caso": "Manual sin automática", "cantidad": 10, "umbralCompra": 2, "autoListaCompra": false, "enListaCompraManual": true, "borrado": false, "enLista": true },
+    { "caso": "Borrado, aunque cumpla la regla", "cantidad": 0, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": true, "borrado": true, "enLista": false }
+  ]
+}

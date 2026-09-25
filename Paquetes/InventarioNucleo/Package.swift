@@ -18,7 +18,8 @@ let package = Package(
         .testTarget(
             name: "InventarioNucleoPruebas",
             dependencies: ["InventarioNucleo"],
-            path: "Sources/InventarioNucleo/pruebas"
+            path: "Sources/InventarioNucleo/pruebas",
+            resources: [.copy("Recursos")]
         ),
     ]
 )
