@@ -1,26 +1,20 @@
-node_modules/
-.expo/
-.expo-shared/
-dist/
-npm-debug.*
-*.jks
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+.build/
+.swiftpm/
+
+# Firma y credenciales
 *.p8
 *.p12
 *.key
 *.mobileprovision
-*.orig.*
-web-build/
 .env
-firebase-config.js
+
+# Exportaciones de Firestore sin anonimizar
+exportacion-firestore/
 
 # macOS
 .DS_Store
-
-# Debug
-*.log
-
-# VSCode
-.vscode/
-
-# PowerShell scripts (opcionales)
-*.ps1
