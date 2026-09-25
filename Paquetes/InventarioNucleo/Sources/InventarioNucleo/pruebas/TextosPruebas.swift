@@ -36,6 +36,7 @@ import Testing
 
     @Test func menuAnadirYSelectorDeCategoria() {
         #expect(Textos.Botones.anadir == "Añadir")
+        #expect(Textos.Botones.anadirMenu == "Añadir, menú")
         #expect(Textos.Botones.categoria == "Categoría")
         #expect(Textos.Botones.producto == "Producto")
         #expect(Textos.Formulario.categoria == "Categoría")

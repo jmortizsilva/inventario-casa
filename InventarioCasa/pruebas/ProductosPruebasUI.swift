@@ -156,7 +156,7 @@ final class ProductosPruebasUI: XCTestCase {
 
     func testAnadirProductoDesdeElMenuEligiendoCategoria() {
         XCTAssertTrue(app.buttons["Nevera, 1 producto"].waitForExistence(timeout: 5))
-        app.navigationBars.buttons["Añadir"].tap()
+        app.navigationBars.buttons["Añadir, menú"].tap()
         app.buttons["Producto"].tap()
         XCTAssertTrue(app.navigationBars["Nuevo producto"].waitForExistence(timeout: 3))
 
@@ -191,7 +191,7 @@ final class MenuAnadirSinCategoriasPruebasUI: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-almacenEnMemoria"]
         app.launch()
-        let anadir = app.navigationBars.buttons["Añadir"]
+        let anadir = app.navigationBars.buttons["Añadir, menú"]
         XCTAssertTrue(anadir.waitForExistence(timeout: 5))
         anadir.tap()
         let producto = app.buttons["Producto"]

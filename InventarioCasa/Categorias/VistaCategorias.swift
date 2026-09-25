@@ -26,6 +26,11 @@ struct VistaCategorias: View {
                     } label: {
                         Label(Textos.Botones.anadir, systemImage: "plus")
                     }
+                    // VoiceOver lo leía como un botón más. No hay rasgo público para
+                    // «abre un menú»: «botón desplegable» es para los selectores de
+                    // un valor, y un UIButton con menú de acciones se oye igual que
+                    // este. Por eso lo dice el nombre.
+                    .accessibilityLabel(Textos.Botones.anadirMenu)
                 }
         }
         .sheet(item: $formulario) { modo in

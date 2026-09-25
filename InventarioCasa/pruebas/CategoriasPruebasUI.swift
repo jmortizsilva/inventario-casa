@@ -19,7 +19,7 @@ final class CategoriasPruebasUI: XCTestCase {
         app.launch()
     }
 
-    private var botonAnadir: XCUIElement { app.navigationBars.buttons["Añadir"] }
+    private var botonAnadir: XCUIElement { app.navigationBars.buttons["Añadir, menú"] }
     private var campoNombre: XCUIElement { app.textFields.firstMatch }
     private var botonGuardar: XCUIElement { app.navigationBars.buttons["Guardar"] }
 
