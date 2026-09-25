@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A10000000000000000000010 /* InventarioNucleo in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000011 /* InventarioNucleo */; };
+		A10000000000000000000013 /* InventarioAlmacen in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000014 /* InventarioAlmacen */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000010 /* InventarioNucleo in Frameworks */,
+				A10000000000000000000013 /* InventarioAlmacen in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,6 +69,7 @@
 			name = InventarioCasa;
 			packageProductDependencies = (
 				A10000000000000000000011 /* InventarioNucleo */,
+				A10000000000000000000014 /* InventarioAlmacen */,
 			);
 			productName = InventarioCasa;
 			productReference = A10000000000000000000001 /* InventarioCasa.app */;
@@ -257,6 +260,10 @@
 		A10000000000000000000011 /* InventarioNucleo */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = InventarioNucleo;
+		};
+		A10000000000000000000014 /* InventarioAlmacen */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = InventarioAlmacen;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
