@@ -79,7 +79,9 @@ confirmación) y manda el `authorizationCode` que recibe:
 ```
 
 El servidor lo canjea con el identificador de la app de iOS y revoca el token
-en Apple **antes** de borrar nada. Las cuentas de Google no mandan cuerpo.
+en Apple **antes** de borrar nada. Las cuentas de Google mandan `{}` o nada.
+Ojo: con `Content-Type: application/json` y el cuerpo vacío, Fastify responde
+`400` antes de llegar a la ruta.
 
 → `200 {"ok": true}`.
 

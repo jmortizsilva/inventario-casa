@@ -83,8 +83,12 @@ export async function intercambiarCodigoGoogle(
 
 // Apple no da un client_secret fijo: hay que generar un JWT firmado con la clave privada ES256
 // del portal de Apple Developer, valido como mucho 6 meses (aqui se regenera en cada peticion,
-// con una vida de unos minutos, mas simple que cachearlo).
-function generarClientSecretApple(ahora: () => number = () => Date.now()): string {
+// con una vida de unos minutos, mas simple que cachearlo). `clientId` es el Services ID en el
+// inicio de sesion por navegador y el identificador de la app con los codigos de la app nativa.
+function generarClientSecretApple(
+  ahora: () => number = () => Date.now(),
+  clientId: string | undefined = config.apple.clientId,
+): string {
   const iat = Math.floor(ahora() / 1000);
   return firmarJwtEs256(
     {
@@ -92,7 +96,7 @@ function generarClientSecretApple(ahora: () => number = () => Date.now()): strin
       iat,
       exp: iat + 5 * 60,
       aud: 'https://appleid.apple.com',
-      sub: config.apple.clientId,
+      sub: clientId,
     },
     config.apple.keyId ?? '',
     config.apple.privateKey ?? '',
