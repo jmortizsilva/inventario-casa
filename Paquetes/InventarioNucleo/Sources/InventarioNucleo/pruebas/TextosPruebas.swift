@@ -39,7 +39,6 @@ import Testing
         #expect(Textos.Botones.categoria == "Categoría")
         #expect(Textos.Botones.producto == "Producto")
         #expect(Textos.Formulario.categoria == "Categoría")
-        #expect(Textos.Formulario.elegir == "Elegir")
     }
 
     @Test func umbral() {

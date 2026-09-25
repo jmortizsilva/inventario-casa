@@ -98,8 +98,6 @@ public enum Textos {
     public enum Formulario {
         public static let nombre = "Nombre"
         public static let categoria = "Categoría"
-        /// Lo que muestra el selector de categoría antes de elegir.
-        public static let elegir = "Elegir"
         public static func unidades(_ n: Int) -> String {
             "Unidades: \(n)"
         }

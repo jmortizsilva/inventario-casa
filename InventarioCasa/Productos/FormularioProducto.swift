@@ -129,26 +129,12 @@ struct FormularioProducto: View {
         }
     }
 
-    /// Sin opción «Elegir»: salía en el menú como una categoría más, marcada como
-    /// elegida. En iOS 18 se muestra como valor actual mientras no hay nada
-    /// elegido; en iOS 17 no hay forma de hacerlo sin que sea una opción, y el
-    /// valor queda vacío hasta elegir.
-    @ViewBuilder
+    /// Sin valor hasta elegir. Nada de opción «Elegir» con valor nulo: salía en
+    /// el menú como una categoría más, marcada como elegida.
     private var selectorCategoria: some View {
-        let opciones = ForEach(inventario.categorias) { categoria in
-            Text(categoria.nombre).tag(UUID?.some(categoria.id))
-        }
-        if #available(iOS 18, *) {
-            Picker(selection: $categoriaElegida) {
-                opciones
-            } label: {
-                Text(Textos.Formulario.categoria)
-            } currentValueLabel: {
-                Text(categoriaElegida.flatMap { inventario.categoria($0)?.nombre } ?? Textos.Formulario.elegir)
-            }
-        } else {
-            Picker(Textos.Formulario.categoria, selection: $categoriaElegida) {
-                opciones
+        Picker(Textos.Formulario.categoria, selection: $categoriaElegida) {
+            ForEach(inventario.categorias) { categoria in
+                Text(categoria.nombre).tag(UUID?.some(categoria.id))
             }
         }
     }
