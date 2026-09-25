@@ -44,12 +44,14 @@ caducado.
 La llama Apple, no las apps: es la dirección que va en *Server-to-Server
 Notification Endpoint* del App ID. El cuerpo es `{ "payload": "<JWT>" }`,
 firmado por Apple con las mismas claves que el token de inicio de sesión. Se
-comprueban la firma, el emisor y que `aud` sea la app de iOS. Su campo
-`events` es un JSON en texto con `type` y `sub`:
+comprueban la firma, el emisor y que `aud` sea la app de iOS o el Services ID.
+Su campo `events` trae `type` y `sub`; se acepta como objeto o como JSON en
+texto, porque la documentación de Apple enseña lo primero y hay quien ha
+recibido lo segundo. No se ha comprobado cuál llega aquí:
 
 | `type` | Qué hace |
 |---|---|
-| `account-delete` | Borra la cuenta, como `DELETE /cuenta` pero sin revocar nada en Apple |
+| `account-deleted` (o `account-delete`, el nombre antiguo) | Borra la cuenta, como `DELETE /cuenta` pero sin revocar nada en Apple |
 | `consent-revoked` | Cierra todas sus sesiones. La cuenta sigue |
 | `email-disabled`, `email-enabled` | Nada: el servidor no manda correos |
 

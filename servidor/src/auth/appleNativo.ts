@@ -83,28 +83,30 @@ export interface OpcionesVerificacion {
   obtenerClaves?: () => Promise<ClavePublicaApple[]>;
 }
 
+export type ResultadoFirma =
+  | { valido: true; cuerpo: Record<string, unknown> }
+  | { valido: false; motivo: string };
+
 /**
- * Comprueba el token y devuelve la identidad, o el motivo por el que no vale.
- *
- * Devuelve el motivo en vez de lanzar porque ninguno de estos casos es una averia del servidor:
- * son tokens que no sirven, y la ruta los contesta con un 400.
+ * Lo común a todo lo que firma Apple: que sea un JWT RS256 firmado con una de sus claves, emitido
+ * por Apple y para una de nuestras apps. Lo usan el token de inicio de sesión (que además comprueba
+ * caducidad y nonce) y los avisos de Apple, que no traen ninguna de las dos cosas.
  */
-export async function verificarTokenDeApple(
-  identityToken: string,
-  nonceEnClaro: string,
+export async function verificarFirmaDeApple(
+  token: string,
   opciones: OpcionesVerificacion,
-): Promise<ResultadoVerificacion> {
+): Promise<ResultadoFirma> {
   const ahora = opciones.ahora ?? (() => Date.now());
-  const partes = identityToken.split('.');
+  const partes = token.split('.');
   if (partes.length !== 3) {
     return { valido: false, motivo: 'el token no tiene forma de JWT' };
   }
 
   let cabecera: CabeceraJwt;
-  let cuerpo: CuerpoJwt;
+  let cuerpo: Record<string, unknown>;
   try {
     cabecera = decodificarParte(partes[0]) as CabeceraJwt;
-    cuerpo = decodificarParte(partes[1]) as CuerpoJwt;
+    cuerpo = decodificarParte(partes[1]) as Record<string, unknown>;
   } catch {
     return { valido: false, motivo: 'el token no se puede leer' };
   }
@@ -134,10 +136,30 @@ export async function verificarTokenDeApple(
     return { valido: false, motivo: 'el token no lo emitio Apple' };
   }
 
-  const audiencias = Array.isArray(cuerpo.aud) ? cuerpo.aud : [cuerpo.aud];
-  if (!audiencias.some((aud) => aud && opciones.audienciasValidas.includes(aud))) {
+  const aud = cuerpo.aud;
+  const audiencias = Array.isArray(aud) ? aud : [aud];
+  if (!audiencias.some((a) => typeof a === 'string' && opciones.audienciasValidas.includes(a))) {
     return { valido: false, motivo: 'el token es para otra aplicacion' };
   }
+
+  return { valido: true, cuerpo };
+}
+
+/**
+ * Comprueba el token y devuelve la identidad, o el motivo por el que no vale.
+ *
+ * Devuelve el motivo en vez de lanzar porque ninguno de estos casos es una averia del servidor:
+ * son tokens que no sirven, y la ruta los contesta con un 400.
+ */
+export async function verificarTokenDeApple(
+  identityToken: string,
+  nonceEnClaro: string,
+  opciones: OpcionesVerificacion,
+): Promise<ResultadoVerificacion> {
+  const ahora = opciones.ahora ?? (() => Date.now());
+  const firma = await verificarFirmaDeApple(identityToken, opciones);
+  if (!firma.valido) return firma;
+  const cuerpo = firma.cuerpo as CuerpoJwt;
 
   if (typeof cuerpo.exp !== 'number' || cuerpo.exp * 1000 <= ahora()) {
     return { valido: false, motivo: 'el token ha caducado' };

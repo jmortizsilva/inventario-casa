@@ -67,3 +67,10 @@ export function obtenerUsuarioPorId(id: number): Usuario | undefined {
 export function existeUsuario(id: number): boolean {
   return obtenerBd().prepare('SELECT 1 FROM usuarios WHERE id = ?').get(id) !== undefined;
 }
+
+export function buscarUsuarioPorProveedor(proveedor: string, idProveedor: string): number | undefined {
+  const fila = obtenerBd()
+    .prepare('SELECT id FROM usuarios WHERE proveedor = ? AND id_proveedor = ?')
+    .get(proveedor, idProveedor) as { id: number } | undefined;
+  return fila?.id;
+}

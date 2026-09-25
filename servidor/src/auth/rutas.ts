@@ -9,6 +9,7 @@ import {
   consumirCodigoCanje,
 } from './loginPendientes';
 import { verificarTokenDeApple } from './appleNativo';
+import { atenderAvisoDeApple, leerAvisoDeApple } from './avisosApple';
 import { crearExigirSesion } from './middleware';
 import {
   intercambiarCodigoApple,
@@ -265,6 +266,30 @@ export async function registrarRutasAuth(app: FastifyInstance): Promise<void> {
       }
 
       return respuestaDeSesion(iniciarSesion(usuario.id, null));
+    },
+  );
+
+  // Avisos de Apple (ver CONTRATO-API.md). Los manda Apple, no las apps: el aviso viene firmado y
+  // se comprueba entero antes de hacer nada.
+  app.post<{ Body: { payload?: unknown } }>(
+    '/auth/apple/avisos',
+    { config: { rateLimit: { max: 60, timeWindow: '1 minute' } } },
+    async (request, reply) => {
+      const payload = request.body?.payload;
+      if (typeof payload !== 'string' || payload.length === 0) {
+        return reply.code(400).send({ error: 'falta "payload"' });
+      }
+      // El aviso va para el App ID principal; se admite también el Services ID, que está agrupado
+      // con él.
+      const audiencias = [...config.apple.appIds, ...(config.apple.clientId ? [config.apple.clientId] : [])];
+      const lectura = await leerAvisoDeApple(payload, { audienciasValidas: audiencias });
+      if (!lectura.valido) {
+        request.log.warn({ motivo: lectura.motivo }, 'aviso de Apple no válido');
+        return reply.code(400).send({ error: lectura.motivo });
+      }
+      const consecuencia = atenderAvisoDeApple(lectura.aviso);
+      request.log.info({ tipo: lectura.aviso.tipo, consecuencia }, 'aviso de Apple');
+      return { ok: true };
     },
   );
 
