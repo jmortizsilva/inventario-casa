@@ -29,7 +29,7 @@ La columna **Antes** es el texto de la app de Expo, cuando cambia.
 
 | Elemento | Texto | Antes |
 |---|---|---|
-| Botón de la barra | Añadir (menú: Categoría · Producto). VoiceOver lee «Añadir, menú»: no hay rasgo público de menú, y «botón desplegable» es solo para selectores de un valor | Añadir nueva categoría (botón flotante +) |
+| Botón de la barra | Añadir (menú: Categoría · Producto) | Añadir nueva categoría (botón flotante +) |
 | Menú, Producto | Desactivado si no hay categorías | |
 | Fila, lo que se lee | {categoria}, {n} productos | {categoria} |
 | Acción por defecto | Abre sus productos | |

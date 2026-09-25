@@ -35,8 +35,6 @@ public enum Textos {
     public enum Botones {
         /// Menú de Inventario, con Categoría y Producto.
         public static let anadir = "Añadir"
-        /// Lo que lee VoiceOver en ese botón: no hay forma de marcarlo como menú.
-        public static let anadirMenu = "Añadir, menú"
         public static let categoria = "Categoría"
         public static let producto = "Producto"
         public static let anadirCategoria = "Añadir categoría"

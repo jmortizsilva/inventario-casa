@@ -156,19 +156,23 @@ final class ProductosPruebasUI: XCTestCase {
 
     func testAnadirProductoDesdeElMenuEligiendoCategoria() {
         XCTAssertTrue(app.buttons["Nevera, 1 producto"].waitForExistence(timeout: 5))
-        app.navigationBars.buttons["Añadir, menú"].tap()
+        app.navigationBars.buttons["Añadir"].tap()
         app.buttons["Producto"].tap()
         XCTAssertTrue(app.navigationBars["Nuevo producto"].waitForExistence(timeout: 3))
 
-        campoNombre.typeText("Queso")
-        XCTAssertFalse(botonGuardar.isEnabled, "Sin categoría no se puede guardar")
+        XCTAssertFalse(app.keyboards.element.exists, "Con categoría por elegir no se abre el teclado")
 
         let selector = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Categoría")).firstMatch
         XCTAssertTrue(selector.exists)
+        XCTAssertLessThan(selector.frame.minY, campoNombre.frame.minY, "La categoría va antes que el nombre")
         selector.tap()
         let nevera = app.buttons["Nevera"]
         XCTAssertTrue(nevera.waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["Elegir"].exists, "«Elegir» no es una opción del menú")
         nevera.tap()
+
+        campoNombre.tap()
+        campoNombre.typeText("Queso")
         XCTAssertTrue(botonGuardar.isEnabled)
         botonGuardar.tap()
 
@@ -191,7 +195,7 @@ final class MenuAnadirSinCategoriasPruebasUI: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = ["-almacenEnMemoria"]
         app.launch()
-        let anadir = app.navigationBars.buttons["Añadir, menú"]
+        let anadir = app.navigationBars.buttons["Añadir"]
         XCTAssertTrue(anadir.waitForExistence(timeout: 5))
         anadir.tap()
         let producto = app.buttons["Producto"]

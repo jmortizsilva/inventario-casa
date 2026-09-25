@@ -31,6 +31,15 @@ struct FormularioProducto: View {
     var body: some View {
         NavigationStack {
             Form {
+                // Si hay que elegir categoría, va primero y sin teclado abierto: con
+                // el teclado a la vista, VoiceOver pasaba del menú del selector al
+                // teclado que quedaba detrás.
+                if pideCategoria {
+                    Section {
+                        selectorCategoria
+                    }
+                }
+
                 Section {
                     TextField(Textos.Formulario.nombre, text: $nombre)
                         .focused($campoConFoco)
@@ -40,18 +49,6 @@ struct FormularioProducto: View {
                     if let errorNombre {
                         Text(errorNombre)
                             .foregroundStyle(.red)
-                    }
-                }
-
-                if pideCategoria {
-                    Section {
-                        // Empieza sin elegir: así nada acaba en una categoría por descuido.
-                        Picker(Textos.Formulario.categoria, selection: $categoriaElegida) {
-                            Text(Textos.Formulario.elegir).tag(UUID?.none)
-                            ForEach(inventario.categorias) { categoria in
-                                Text(categoria.nombre).tag(UUID?.some(categoria.id))
-                            }
-                        }
                     }
                 }
 
@@ -132,6 +129,30 @@ struct FormularioProducto: View {
         }
     }
 
+    /// Sin opción «Elegir»: salía en el menú como una categoría más, marcada como
+    /// elegida. En iOS 18 se muestra como valor actual mientras no hay nada
+    /// elegido; en iOS 17 no hay forma de hacerlo sin que sea una opción, y el
+    /// valor queda vacío hasta elegir.
+    @ViewBuilder
+    private var selectorCategoria: some View {
+        let opciones = ForEach(inventario.categorias) { categoria in
+            Text(categoria.nombre).tag(UUID?.some(categoria.id))
+        }
+        if #available(iOS 18, *) {
+            Picker(selection: $categoriaElegida) {
+                opciones
+            } label: {
+                Text(Textos.Formulario.categoria)
+            } currentValueLabel: {
+                Text(categoriaElegida.flatMap { inventario.categoria($0)?.nombre } ?? Textos.Formulario.elegir)
+            }
+        } else {
+            Picker(Textos.Formulario.categoria, selection: $categoriaElegida) {
+                opciones
+            }
+        }
+    }
+
     private var pideCategoria: Bool {
         if case .nuevo(nil) = modo { true } else { false }
     }
@@ -147,7 +168,8 @@ struct FormularioProducto: View {
         switch modo {
         case .nuevo(let categoriaId):
             categoriaElegida = categoriaId
-            campoConFoco = true
+            // Con categoría por elegir, el teclado esperaría a que se toque el nombre.
+            campoConFoco = categoriaId != nil
         case .editar(let producto):
             // Al editar no se abre el teclado: casi siempre se viene a cambiar
             // las unidades, y el teclado tapa el formulario y desordena el
