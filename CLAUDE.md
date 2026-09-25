@@ -8,6 +8,8 @@
 - XCUITest muestra los descendientes de un elemento aunque tenga `.accessibilityElement(children: .ignore)`: su árbol no es lo que recorre VoiceOver. Un botón dentro de una fila sale como otro elemento con la misma etiqueta y la consulta por etiqueta falla por ambigua; en las filas se usa un toque (`onTapGesture`) en lugar de un botón interior.
 - En las pruebas: esperar a que una alerta exista antes de pulsarla (un toque durante la animación se pierde) y usar `waitForNonExistence` para comprobar que algo desaparece (`waitForExistence` da verdadero mientras dura la animación).
 - Un `.frame` puesto por fuera de un botón no amplía la zona de toque: va dentro de la etiqueta, con `.contentShape`.
+- Las pruebas de importación (`ImportarPruebasUI`) escriben sus archivos en «En mi iPhone» del simulador: es la carpeta `File Provider Storage` del grupo `group.com.apple.FileProvider.LocalStorage`, que se encuentra desde `SIMULATOR_SHARED_RESOURCES_DIRECTORY`. El selector muestra los archivos con su extensión.
+- Formato de exportación: `Exportacion` en el núcleo, versión 1. Lo genera `scripts/exportar-firestore/convertir.js`; `pruebas/Recursos/exportacion-script.json` salió de ese script y fija que la app lo entiende. Si cambia el formato, se regenera.
 - `.accessibilityLabel` sobre un `Stepper` no sustituye la etiqueta que saca de su texto: la añade detrás, aunque el texto esté oculto. Para separar lo que se ve de lo que se oye, el texto va fuera y el `Stepper` con `.labelsHidden()` (ver `FormularioProducto.selector`).
 - La lógica que decide (regla de la lista de la compra, validaciones, textos que se anuncian) va en `Paquetes/InventarioNucleo`, sin importar SwiftUI ni SwiftData, y se prueba con Swift Testing.
 - Las pruebas del paquete están en `Sources/InventarioNucleo/pruebas/`. El target principal las excluye en `Package.swift`.
@@ -29,6 +31,11 @@ xcodebuild -project InventarioCasa.xcodeproj -scheme InventarioCasa \
 # Pruebas del paquete en el simulador (SwiftData del sistema de verdad)
 cd Paquetes/InventarioNucleo && xcodebuild test -scheme InventarioNucleo-Package \
   -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5'
+```
+
+```bash
+# Pruebas del script de exportación (sin conexión)
+cd scripts/exportar-firestore && npm test
 ```
 
 ```bash

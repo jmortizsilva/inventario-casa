@@ -1,0 +1,12 @@
+{
+  "name": "exportar-firestore",
+  "private": true,
+  "description": "Exporta los hogares de la app de Expo (Firestore) al formato de importación de la app nativa.",
+  "scripts": {
+    "exportar": "node exportar.js",
+    "test": "node --test pruebas/*.test.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0"
+  }
+}
