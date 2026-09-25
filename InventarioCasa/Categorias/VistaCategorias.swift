@@ -4,6 +4,7 @@ import InventarioNucleo
 struct VistaCategorias: View {
     @Environment(Inventario.self) private var inventario
     @State private var formulario: FormularioCategoria.Modo?
+    @State private var nuevoProducto: FormularioProducto.Modo?
     @State private var aEliminar: Categoria?
     @State private var errorAlGuardar = false
 
@@ -24,6 +25,9 @@ struct VistaCategorias: View {
         }
         .sheet(item: $formulario) { modo in
             FormularioCategoria(modo: modo)
+        }
+        .sheet(item: $nuevoProducto) { modo in
+            FormularioProducto(modo: modo)
         }
         .alert(
             aEliminar.map { Textos.Confirmacion.eliminar($0.nombre) } ?? "",
@@ -69,6 +73,9 @@ struct VistaCategorias: View {
         // Con .accessibilityElement(children: .ignore) aparecía un segundo botón
         // anidado con la misma etiqueta.
         .accessibilityLabel(Textos.filaCategoria(categoria, productos: productos))
+        .accessibilityAction(named: Textos.Botones.anadirProducto) {
+            nuevoProducto = .nuevo(categoriaId: categoria.id)
+        }
         .accessibilityAction(named: Textos.Botones.cambiarNombre) {
             formulario = .renombrar(categoria)
         }
@@ -76,6 +83,9 @@ struct VistaCategorias: View {
             aEliminar = categoria
         }
         .contextMenu {
+            Button(Textos.Botones.anadirProducto, systemImage: "plus") {
+                nuevoProducto = .nuevo(categoriaId: categoria.id)
+            }
             Button(Textos.Botones.cambiarNombre, systemImage: "pencil") {
                 formulario = .renombrar(categoria)
             }

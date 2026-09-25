@@ -115,8 +115,12 @@ final class CategoriasPruebasUI: XCTestCase {
         XCTAssertTrue(app.buttons["Despensa, 2 productos"].exists)
 
         menu(de: "Despensa, 2 productos", "Eliminar")
-        app.alerts["¿Eliminar Despensa?"].buttons["Eliminar"].tap()
-        XCTAssertFalse(app.buttons["Despensa, 2 productos"].waitForExistence(timeout: 2))
+        // Hay que esperar a la alerta: un toque durante su animación se pierde.
+        let otraVez = app.alerts["¿Eliminar Despensa?"]
+        XCTAssertTrue(otraVez.waitForExistence(timeout: 3))
+        otraVez.buttons["Eliminar"].tap()
+        // waitForExistence daría verdadero mientras dura la animación de borrado.
+        XCTAssertTrue(app.buttons["Despensa, 2 productos"].waitForNonExistence(timeout: 3))
         XCTAssertTrue(app.buttons["Nevera, 1 producto"].exists)
     }
 
