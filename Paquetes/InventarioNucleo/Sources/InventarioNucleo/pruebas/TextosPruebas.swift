@@ -27,6 +27,11 @@ import Testing
             Textos.filaCompra(producto("Pan", cantidad: 8, manual: true), categoria: "Despensa")
                 == "Pan, 8 unidades, Despensa, añadido a mano"
         )
+        #expect(
+            Textos.filaCompra(producto("Arroz", cantidad: 3), categoria: "Despensa", repuesto: true)
+                == "Arroz, 3 unidades, Despensa, repuesto"
+        )
+        #expect(Textos.repuesto == "Repuesto")
     }
 
     @Test func menuAnadirYSelectorDeCategoria() {

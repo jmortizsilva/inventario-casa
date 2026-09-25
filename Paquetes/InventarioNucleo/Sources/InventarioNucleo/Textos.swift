@@ -67,16 +67,21 @@ public enum Textos {
         return texto
     }
 
-    public static func filaCompra(_ producto: Producto, categoria: String) -> String {
+    /// `repuesto`: ya salió de la lista pero sigue a la vista mientras no se
+    /// deje la pestaña, para poder seguir sumando lo comprado.
+    public static func filaCompra(_ producto: Producto, categoria: String, repuesto: Bool = false) -> String {
         let estado = producto.cantidad == 0 ? agotado.lowercased() : unidades(producto.cantidad)
         var texto = "\(producto.nombre), \(estado), \(categoria)"
-        if producto.enListaCompraManual {
+        if repuesto {
+            texto += ", \(Self.repuesto.lowercased())"
+        } else if producto.enListaCompraManual {
             texto += ", añadido a mano"
         }
         return texto
     }
 
     public static let agotado = "Agotado"
+    public static let repuesto = "Repuesto"
 
     // MARK: Listas vacías
 

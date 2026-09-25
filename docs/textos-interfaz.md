@@ -67,9 +67,16 @@ Se quita la acción "Editar producto": es la misma que la acción por defecto.
 | Marca visible con 0 unidades | Agotado | ¡URGENTE! |
 | Acciones del rotor | Aumentar cantidad · Disminuir cantidad | igual |
 | Acción del rotor (solo si se añadió a mano) | Quitar de la lista | (no existía) |
+| Fila repuesta, lo que se lee | {producto}, {n} unidades, {categoria}, repuesto | (desaparecía) |
+| Fila repuesta, a la vista | Repuesto | |
 | Lista vacía, título | No falta nada | ¡Todo bien! No hay productos con pocas unidades |
 
 La categoría se añade porque puede haber el mismo producto en dos categorías.
+
+Lo que sale de la lista al reponerlo se queda a la vista, marcado como
+repuesto, mientras no se cambie de pestaña: así se pueden seguir sumando las
+unidades compradas y el foco de VoiceOver no salta. Si se vuelven a bajar las
+unidades, deja de estar repuesto. El orden no cambia durante la visita.
 
 ## Formulario de categoría
 

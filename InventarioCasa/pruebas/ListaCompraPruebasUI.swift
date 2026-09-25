@@ -49,7 +49,9 @@ final class ListaCompraPruebasUI: XCTestCase {
         }
     }
 
-    func testReponerSacaDeLaLista() {
+    /// Al reponer, la fila no desaparece mientras se siga en la pestaña: se
+    /// marca como repuesta y se pueden seguir sumando unidades.
+    func testReponerDejaLaFilaHastaSalirDeLaPestana() {
         abrir()
         irA("Compra")
         let aceite = app.buttons["Aceite, 1 unidad, Despensa"]
@@ -58,13 +60,46 @@ final class ListaCompraPruebasUI: XCTestCase {
         let dos = app.buttons["Aceite, 2 unidades, Despensa"]
         XCTAssertTrue(dos.waitForExistence(timeout: 3))
         dos.buttons["Aumentar cantidad"].tap()
-        XCTAssertTrue(app.buttons["Aceite, 2 unidades, Despensa"].waitForNonExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["1 producto"].exists)
+
+        let tres = app.buttons["Aceite, 3 unidades, Despensa, repuesto"]
+        XCTAssertTrue(tres.waitForExistence(timeout: 3))
+        XCTAssertTrue(tres.staticTexts["Repuesto"].exists)
+        XCTAssertTrue(app.staticTexts["1 producto"].exists, "La cabecera cuenta solo lo que falta")
+
+        tres.buttons["Aumentar cantidad"].tap()
+        XCTAssertTrue(app.buttons["Aceite, 4 unidades, Despensa, repuesto"].waitForExistence(timeout: 3))
 
         irA("Inventario")
-        XCTAssertTrue(app.buttons["Despensa, 2 productos"].waitForExistence(timeout: 3))
-        app.buttons["Despensa, 2 productos"].tap()
-        XCTAssertTrue(app.buttons["Aceite, 3 unidades"].waitForExistence(timeout: 3))
+        irA("Compra")
+        XCTAssertTrue(app.buttons["Leche, agotado, Nevera"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["Aceite, 4 unidades, Despensa, repuesto"].exists)
+    }
+
+    func testBajarLoRepuestoLoDevuelveALaLista() {
+        abrir()
+        irA("Compra")
+        let aceite = app.buttons["Aceite, 1 unidad, Despensa"]
+        XCTAssertTrue(aceite.waitForExistence(timeout: 3))
+        aceite.buttons["Aumentar cantidad"].tap()
+        app.buttons["Aceite, 2 unidades, Despensa"].buttons["Aumentar cantidad"].tap()
+        let repuesto = app.buttons["Aceite, 3 unidades, Despensa, repuesto"]
+        XCTAssertTrue(repuesto.waitForExistence(timeout: 3))
+        repuesto.buttons["Disminuir cantidad"].tap()
+        XCTAssertTrue(app.buttons["Aceite, 2 unidades, Despensa"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["2 productos"].exists)
+    }
+
+    func testElOrdenNoCambiaDuranteLaVisita() {
+        abrir()
+        irA("Compra")
+        let leche = app.buttons["Leche, agotado, Nevera"]
+        XCTAssertTrue(leche.waitForExistence(timeout: 3))
+        leche.buttons["Aumentar cantidad"].tap()
+        app.buttons["Leche, 1 unidad, Nevera"].buttons["Aumentar cantidad"].tap()
+        let lecheDos = app.buttons["Leche, 2 unidades, Nevera"]
+        XCTAssertTrue(lecheDos.waitForExistence(timeout: 3))
+        let aceite = app.buttons["Aceite, 1 unidad, Despensa"]
+        XCTAssertLessThan(lecheDos.frame.minY, aceite.frame.minY, "Leche sigue arriba aunque ya tenga más unidades")
     }
 
     func testAnadidoAManoSeVeYSePuedeQuitar() {
