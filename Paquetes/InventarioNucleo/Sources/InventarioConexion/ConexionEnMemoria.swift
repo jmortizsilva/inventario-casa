@@ -41,6 +41,24 @@ public final class ServidorEnMemoria {
         return usuario
     }
 
+    /// Un hogar de otra persona, con algo dentro y un código fijo para unirse.
+    /// Para `-servidorFalso`.
+    public func sembrarHogar(nombre: String, de persona: String, codigo: String, categoria: String, producto: String) {
+        let dueno = alta(email: "\(persona.lowercased())@ejemplo.com", nombre: persona, proveedor: "google")
+        guard let hogar = try? crearHogar(nombre: nombre, usuario: dueno.id) else { return }
+        invitaciones[codigo] = hogar.id
+        let ahora = Date().milisegundos
+        let categoriaId = UUID().uuidString.lowercased()
+        var lote = Api.Lote()
+        lote.categorias = [Api.Categoria(id: categoriaId, nombre: categoria, creado: ahora, modificado: ahora, borrado: false)]
+        lote.productos = [Api.Producto(
+            id: UUID().uuidString.lowercased(), categoriaId: categoriaId, nombre: producto, cantidad: 2,
+            cantidadFijadaEn: ahora, umbralCompra: 1, autoListaCompra: true, enListaCompraManual: false,
+            creado: ahora, modificado: ahora, borrado: false
+        )]
+        _ = try? enviar(lote, usuario: dueno.id)
+    }
+
     // MARK: Hogar
 
     func hogar(de usuario: Int) -> Hogar? {

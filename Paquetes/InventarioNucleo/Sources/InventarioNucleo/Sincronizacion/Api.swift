@@ -74,6 +74,12 @@ public enum Api {
         public var productos: [Producto] = []
         public var movimientos: [Movimiento] = []
 
+        public init(categorias: [Categoria] = [], productos: [Producto] = [], movimientos: [Movimiento] = []) {
+            self.categorias = categorias
+            self.productos = productos
+            self.movimientos = movimientos
+        }
+
         public var cuantos: Int { categorias.count + productos.count + movimientos.count }
         public var estaVacio: Bool { cuantos == 0 }
     }

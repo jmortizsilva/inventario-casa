@@ -7,6 +7,7 @@ struct VistaAjustes: View {
     @State private var mostrarManual = false
     @State private var elegirArchivo = false
     @State private var aviso: Aviso?
+    @State private var estadoCuenta = EstadoAjustesCuenta()
 
     struct Aviso: Identifiable {
         let id = UUID()
@@ -21,6 +22,7 @@ struct VistaAjustes: View {
     var body: some View {
         NavigationStack {
             List {
+                SeccionesCuenta(estado: estadoCuenta)
                 Section {
                     Button(Textos.Importacion.boton) { elegirArchivo = true }
                     Button(Textos.Botones.manual) { mostrarManual = true }
@@ -31,6 +33,7 @@ struct VistaAjustes: View {
                 }
             }
             .navigationTitle(Textos.Titulos.ajustes)
+            .modifier(PresentacionesCuenta(estado: estadoCuenta))
         }
         .sheet(isPresented: $mostrarManual) {
             VistaManual()
@@ -108,6 +111,8 @@ struct VistaManual: View {
 }
 
 #Preview {
+    let inventario = VistaPrevia.inventario()
     VistaAjustes()
-        .environment(VistaPrevia.inventario())
+        .environment(inventario)
+        .environment(VistaPrevia.cuenta(inventario))
 }

@@ -24,6 +24,9 @@ extension Textos {
         /// El botón de Apple lo pinta iOS con este mismo texto; el de Google
         /// se llama igual para que los dos se lean parecido.
         public static let iniciarConGoogle = "Iniciar sesión con Google"
+        /// Lo que dice el botón oficial de Apple en español. Solo se escribe
+        /// a mano en `-servidorFalso`, donde no se usa ese botón.
+        public static let iniciarConApple = "Iniciar sesión con Apple"
         public static let pistaIniciar = "Para compartir el inventario con tu casa"
         /// Se avisa de Safari porque iOS pregunta antes si se permite usar el
         /// dominio para iniciar sesión, y esa pregunta sale de la nada si no se ha dicho.
