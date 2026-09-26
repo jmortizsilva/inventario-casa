@@ -16,9 +16,16 @@ public enum ErrorInventario: Error, Equatable, Sendable {
 public final class Inventario {
     private let almacen: Almacen
     private let ahora: () -> Date
-    // Incluyen lo borrado: hará falta para sincronizar.
+    // Incluyen lo borrado: la sincronización tiene que enviar las bajas.
     private var todasCategorias: [UUID: Categoria] = [:]
     private var todosProductos: [UUID: Producto] = [:]
+
+    /// Lo que falta por enviar al servidor. Vacía mientras no haya hogar.
+    public private(set) var pendientes = Pendientes()
+    public private(set) var estado = EstadoSincronizacion.sinHogar
+
+    /// Unido a un hogar: cada cambio se anota para enviarlo.
+    public var conHogar: Bool { estado.hogarId != nil }
 
     public init(almacen: Almacen, ahora: @escaping () -> Date = Date.init) {
         self.almacen = almacen
@@ -29,6 +36,8 @@ public final class Inventario {
         do {
             let categorias = try almacen.cargarCategorias()
             let productos = try almacen.cargarProductos()
+            pendientes = try almacen.cargarPendientes()
+            estado = try almacen.cargarEstado()
             todasCategorias = Dictionary(uniqueKeysWithValues: categorias.map { ($0.id, $0) })
             todosProductos = Dictionary(uniqueKeysWithValues: productos.map { ($0.id, $0) })
         } catch {
@@ -68,7 +77,7 @@ public final class Inventario {
     public func crearCategoria(nombre: String) throws(ErrorInventario) -> Categoria {
         let limpio = try validar(nombre, entre: categorias.map(\.nombre))
         let nueva = Categoria(nombre: limpio, creado: ahora())
-        try guardar(categorias: [nueva])
+        try guardar(categorias: [nueva]) { $0.anotar(categoria: nueva.id) }
         return nueva
     }
 
@@ -80,7 +89,7 @@ public final class Inventario {
         guard limpio != categoria.nombre else { return categoria }
         categoria.nombre = limpio
         categoria.modificado = ahora()
-        try guardar(categorias: [categoria])
+        try guardar(categorias: [categoria]) { $0.anotar(categoria: id) }
         return categoria
     }
 
@@ -90,7 +99,10 @@ public final class Inventario {
             conProductos: Array(todosProductos.values),
             ahora: ahora()
         )
-        try guardar(categorias: [borrada], productos: productos)
+        try guardar(categorias: [borrada], productos: productos) { cola in
+            cola.anotar(categoria: id)
+            for producto in productos { cola.anotar(producto: producto.id) }
+        }
     }
 
     // MARK: Productos
@@ -113,7 +125,11 @@ public final class Inventario {
             autoListaCompra: autoListaCompra,
             creado: ahora()
         )
-        try guardar(productos: [nuevo])
+        // Las unidades de un producto nuevo se fijan: sin esto el servidor
+        // lo crearía con 0.
+        try guardar(productos: [nuevo]) {
+            $0.anotar(fijada: CantidadFijada(cantidad: nuevo.cantidad, en: nuevo.creado), producto: nuevo.id)
+        }
         return nuevo
     }
 
@@ -143,7 +159,13 @@ public final class Inventario {
             editado.modificado = momento
         }
         guard editado != original else { return original }
-        try guardar(productos: [editado])
+        try guardar(productos: [editado]) { cola in
+            if editado.cantidad != original.cantidad {
+                cola.anotar(fijada: CantidadFijada(cantidad: editado.cantidad, en: momento), producto: id)
+            } else {
+                cola.anotar(producto: id)
+            }
+        }
         return editado
     }
 
@@ -151,9 +173,15 @@ public final class Inventario {
     @discardableResult
     public func ajustarCantidad(_ id: UUID, en cambio: Int) throws(ErrorInventario) -> Producto {
         guard let original = producto(id) else { throw .noEncontrado }
-        let ajustado = original.ajustandoCantidad(en: cambio, ahora: ahora())
+        let momento = ahora()
+        let ajustado = original.ajustandoCantidad(en: cambio, ahora: momento)
         guard ajustado != original else { return original }
-        try guardar(productos: [ajustado])
+        // Se manda lo que cambió de verdad, no lo pedido: en 0, un «−1» no
+        // cambia nada aquí y tampoco tiene que restar en el servidor.
+        let movimiento = Movimiento(
+            productoId: id, cambio: ajustado.cantidad - original.cantidad, momento: momento
+        )
+        try guardar(productos: [ajustado]) { $0.anotar(movimiento) }
         return ajustado
     }
 
@@ -163,7 +191,7 @@ public final class Inventario {
         guard producto.enListaCompraManual != valor else { return producto }
         producto.enListaCompraManual = valor
         producto.modificado = ahora()
-        try guardar(productos: [producto])
+        try guardar(productos: [producto]) { $0.anotar(producto: id) }
         return producto
     }
 
@@ -172,7 +200,7 @@ public final class Inventario {
         let momento = ahora()
         producto.borrado = momento
         producto.modificado = momento
-        try guardar(productos: [producto])
+        try guardar(productos: [producto]) { $0.anotar(producto: id) }
     }
 
     // MARK: Importación
@@ -243,8 +271,89 @@ public final class Inventario {
             resultado.productos += 1
         }
 
-        try guardar(categorias: nuevasCategorias, productos: nuevosProductos)
+        try guardar(categorias: nuevasCategorias, productos: nuevosProductos) { cola in
+            for categoria in nuevasCategorias { cola.anotar(categoria: categoria.id) }
+            for producto in nuevosProductos {
+                cola.anotar(fijada: CantidadFijada(cantidad: producto.cantidad, en: momento), producto: producto.id)
+            }
+        }
         return resultado
+    }
+
+    // MARK: Sincronización
+
+    /// Productos sin borrar, para decir cuántos hay antes de unirse a un hogar.
+    public var cuantosProductos: Int {
+        todosProductos.values.count { !$0.estaBorrado }
+    }
+
+    /// El siguiente envío. Vacío si no queda nada en la cola.
+    public func loteParaEnviar(maximo: Int = Sincronizacion.maximoPorLote) -> Api.Lote {
+        Sincronizacion.lote(pendientes, categorias: todasCategorias, productos: todosProductos, maximo: maximo)
+    }
+
+    /// Tras la respuesta a `enviado`: saca de la cola lo confirmado y se queda
+    /// con la versión definitiva de cada cosa. No mueve la revisión.
+    public func confirmarEnvio(_ enviado: Api.Lote, respuesta: Api.RespuestaEnvio) throws(ErrorInventario) {
+        let cola = Sincronizacion.confirmar(
+            pendientes, enviado: enviado, categorias: todasCategorias, productos: todosProductos
+        )
+        let (categorias, productos) = Sincronizacion.fusionar(
+            categorias: respuesta.categorias,
+            productos: respuesta.productos,
+            en: (todasCategorias, todosProductos),
+            pendientes: cola
+        )
+        try guardarEnAlmacen(categorias: categorias, productos: productos, pendientes: cola, estado: nil)
+    }
+
+    /// Lo bajado con `GET /sincronizar`, y la revisión hasta la que llega.
+    public func aplicarNovedades(_ novedades: Api.Novedades) throws(ErrorInventario) {
+        let (categorias, productos) = Sincronizacion.fusionar(
+            categorias: novedades.categorias,
+            productos: novedades.productos,
+            en: (todasCategorias, todosProductos),
+            pendientes: pendientes
+        )
+        var nuevo = estado
+        nuevo.revision = novedades.revision
+        try guardarEnAlmacen(categorias: categorias, productos: productos, pendientes: nil, estado: nuevo)
+    }
+
+    /// Empezar a sincronizar con un hogar, recién creado o recién unido.
+    ///
+    /// Con `conservando`, todo lo del iPhone entra en la cola. Las unidades se
+    /// fijan con la hora de su último cambio aquí y no con la de ahora: si se
+    /// vuelve a un hogar donde otra persona las cambió después, gana lo de
+    /// ella en lugar de lo que se quedó en este iPhone al salir.
+    ///
+    /// Sin `conservando`, el iPhone se vacía y el inventario llega entero del hogar.
+    public func unirAHogar(_ hogarId: String, conservando: Bool) throws(ErrorInventario) {
+        let estadoNuevo = EstadoSincronizacion(hogarId: hogarId, revision: 0)
+        guard conservando else {
+            do {
+                try almacen.vaciar(estado: estadoNuevo)
+            } catch {
+                throw .guardado(String(describing: error))
+            }
+            todasCategorias = [:]
+            todosProductos = [:]
+            pendientes = Pendientes()
+            estado = estadoNuevo
+            return
+        }
+        var cola = Pendientes()
+        for categoria in categorias { cola.anotar(categoria: categoria.id) }
+        for producto in todosProductos.values where !producto.estaBorrado {
+            cola.anotar(fijada: CantidadFijada(cantidad: producto.cantidad, en: producto.modificado), producto: producto.id)
+        }
+        try guardarEnAlmacen(categorias: [], productos: [], pendientes: cola, estado: estadoNuevo)
+    }
+
+    /// Al salir del hogar o cerrar sesión: el inventario se queda en el iPhone
+    /// y deja de sincronizarse. Lo que no se envió se pierde para el hogar.
+    public func separarDelHogar() throws(ErrorInventario) {
+        try guardarEnAlmacen(categorias: [], productos: [], pendientes: Pendientes(), estado: .sinHogar)
     }
 
     // MARK: Auxiliares
@@ -256,14 +365,39 @@ public final class Inventario {
         }
     }
 
-    private func guardar(categorias: [Categoria] = [], productos: [Producto] = []) throws(ErrorInventario) {
+    /// `anotar` dice qué entra en la cola. Solo se usa si hay hogar, y la cola
+    /// nueva se guarda en la misma operación que el cambio.
+    private func guardar(
+        categorias: [Categoria] = [],
+        productos: [Producto] = [],
+        anotar: (inout Pendientes) -> Void = { _ in }
+    ) throws(ErrorInventario) {
         guard !categorias.isEmpty || !productos.isEmpty else { return }
+        var cola: Pendientes?
+        if conHogar {
+            var nueva = pendientes
+            anotar(&nueva)
+            cola = nueva
+        }
+        try guardarEnAlmacen(categorias: categorias, productos: productos, pendientes: cola, estado: nil)
+    }
+
+    /// Lo único que escribe en el almacén. Primero el almacén y solo si sale
+    /// bien lo que ve la interfaz.
+    private func guardarEnAlmacen(
+        categorias: [Categoria],
+        productos: [Producto],
+        pendientes: Pendientes?,
+        estado: EstadoSincronizacion?
+    ) throws(ErrorInventario) {
         do {
-            try almacen.guardar(categorias: categorias, productos: productos)
+            try almacen.guardar(categorias: categorias, productos: productos, pendientes: pendientes, estado: estado)
         } catch {
             throw .guardado(String(describing: error))
         }
         for c in categorias { todasCategorias[c.id] = c }
         for p in productos { todosProductos[p.id] = p }
+        if let pendientes { self.pendientes = pendientes }
+        if let estado { self.estado = estado }
     }
 }

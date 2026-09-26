@@ -12,6 +12,11 @@ public final class AlmacenSwiftData: Almacen {
         try AlmacenSwiftData(configuracion: ModelConfiguration("Inventario"))
     }
 
+    /// Para probar la migración sobre un fichero de verdad.
+    static func enFichero(_ url: URL) throws -> AlmacenSwiftData {
+        try AlmacenSwiftData(configuracion: ModelConfiguration(url: url))
+    }
+
     /// Para pruebas: se pierde al cerrar.
     public static func enMemoria() throws -> AlmacenSwiftData {
         try AlmacenSwiftData(configuracion: ModelConfiguration(isStoredInMemoryOnly: true))
@@ -19,7 +24,7 @@ public final class AlmacenSwiftData: Almacen {
 
     private init(configuracion: ModelConfiguration) throws {
         contenedor = try ModelContainer(
-            for: Schema(versionedSchema: EsquemaV1.self),
+            for: Schema(versionedSchema: EsquemaV2.self),
             migrationPlan: PlanMigracion.self,
             configurations: configuracion
         )
@@ -47,7 +52,22 @@ public final class AlmacenSwiftData: Almacen {
         try contexto.fetch(FetchDescriptor<ProductoGuardado>()).map(\.comoProducto)
     }
 
-    public func guardar(categorias: [Categoria], productos: [Producto]) throws {
+    public func cargarPendientes() throws -> Pendientes {
+        guard let fila = try filaSincronizacion() else { return Pendientes() }
+        return try JSONDecoder().decode(Pendientes.self, from: fila.pendientes)
+    }
+
+    public func cargarEstado() throws -> EstadoSincronizacion {
+        guard let fila = try filaSincronizacion() else { return .sinHogar }
+        return EstadoSincronizacion(hogarId: fila.hogarId, revision: fila.revision)
+    }
+
+    public func guardar(
+        categorias: [Categoria],
+        productos: [Producto],
+        pendientes: Pendientes?,
+        estado: EstadoSincronizacion?
+    ) throws {
         do {
             for categoria in categorias {
                 if let existente = try buscarCategoria(categoria.id) {
@@ -63,11 +83,44 @@ public final class AlmacenSwiftData: Almacen {
                     contexto.insert(ProductoGuardado(producto))
                 }
             }
+            if pendientes != nil || estado != nil {
+                let fila = try filaSincronizacion() ?? {
+                    let nueva = SincronizacionGuardada(hogarId: nil, revision: 0, pendientes: try JSONEncoder().encode(Pendientes()))
+                    contexto.insert(nueva)
+                    return nueva
+                }()
+                if let pendientes { fila.pendientes = try JSONEncoder().encode(pendientes) }
+                if let estado {
+                    fila.hogarId = estado.hogarId
+                    fila.revision = estado.revision
+                }
+            }
             try contexto.save()
         } catch {
             contexto.rollback()
             throw error
         }
+    }
+
+    public func vaciar(estado: EstadoSincronizacion) throws {
+        do {
+            try contexto.delete(model: CategoriaGuardada.self)
+            try contexto.delete(model: ProductoGuardado.self)
+            try contexto.delete(model: SincronizacionGuardada.self)
+            contexto.insert(SincronizacionGuardada(
+                hogarId: estado.hogarId, revision: estado.revision, pendientes: try JSONEncoder().encode(Pendientes())
+            ))
+            try contexto.save()
+        } catch {
+            contexto.rollback()
+            throw error
+        }
+    }
+
+    private func filaSincronizacion() throws -> SincronizacionGuardada? {
+        var descriptor = FetchDescriptor<SincronizacionGuardada>()
+        descriptor.fetchLimit = 1
+        return try contexto.fetch(descriptor).first
     }
 
     private func buscarCategoria(_ id: UUID) throws -> CategoriaGuardada? {
