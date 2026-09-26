@@ -287,9 +287,9 @@ Hoja con título **Tu hogar**.
 «Ahora no» deja la sesión iniciada sin hogar; los dos botones siguen en
 Ajustes.
 
-«Tu nombre» sale relleno con el que da Google, y vacío con Apple, que no lo
-da. Crear y Unirme están desactivados mientras falte un nombre. Si la cuenta
-ya tiene nombre guardado en el servidor, el campo no sale.
+«Tu nombre» solo sale si la cuenta todavía no tiene nombre, que es lo que
+pasa con Apple. Con Google se usa el de la cuenta, que se cambia desde
+Ajustes. Crear y Unirme están desactivados mientras falte.
 
 ### Crear hogar
 
@@ -326,6 +326,10 @@ entrado en el hogar y las dos respuestas son definitivas.
 |---|---|---|
 | Inventario de este iPhone | Hay {n} categorías y {n} productos en este iPhone. ¿Los añades a {hogar}? Si no, se eliminan de este iPhone. | Añadirlos · Eliminarlos |
 
+Solo se nombra lo que no es cero («Hay 3 categorías en este iPhone»). Si solo
+hay categorías, todo va en femenino: «¿Las añades…?», «Añadirlas»,
+«Eliminarlas».
+
 ### Ajustes, con sesión
 
 | Elemento | Texto |
@@ -338,7 +342,7 @@ entrado en el hogar y las dos respuestas son definitivas.
 | Encabezado de sección | Cuenta |
 | Texto | Sesión iniciada como {correo} |
 | … con el correo oculto de Apple | Sesión iniciada con Apple |
-| Estado | Todo enviado · {n} cambios sin enviar · Sin conexión, {n} cambios sin enviar |
+| Estado | Todo enviado · {n} cambios sin enviar · Sin conexión · Sin conexión, {n} cambios sin enviar |
 | Botón | Cerrar sesión |
 | Botón | Eliminar cuenta |
 | Sesión caducada | La sesión ha caducado. Vuelve a iniciarla. |
@@ -381,7 +385,13 @@ Apple se añade «Apple te pedirá que confirmes.», porque después sale su hoj
 | Nombre cambiado | Guardado, {nombre} |
 | Sesión cerrada | Sesión cerrada |
 | Cuenta eliminada | Cuenta eliminada |
-| Error al salir, cerrar sesión o eliminar | No se ha {hecho}. {causa} |
+| Error al salir | No has salido del hogar. {causa} |
+| Error al invitar | No se ha creado el código. {causa} |
+| Error al cambiar tu nombre | No se ha guardado el nombre. {causa} |
+| Error al eliminar la cuenta | No se ha eliminado la cuenta. {causa} |
+
+Cerrar sesión no tiene error: si el servidor no contesta, la sesión se
+cierra en el iPhone igual.
 
 Causas propias de eliminar cuenta: «Apple no ha confirmado. Prueba otra vez.» ·
 «No se pudo hablar con Apple. Prueba más tarde.»

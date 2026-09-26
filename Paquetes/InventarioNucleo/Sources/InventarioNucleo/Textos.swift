@@ -277,5 +277,6 @@ public enum Textos {
             titulo: "Eliminar",
             texto: "Eliminar una categoría elimina también sus productos."
         ),
+        apartadoCompartir,
     ]
 }
