@@ -1,0 +1,97 @@
+#!/bin/zsh
+# Archiva, exporta y sube la app a TestFlight, sin abrir Xcode. Copiado de
+# Guardar Enlaces (app-ios-nativa/publicar), que ya funciona así.
+#
+#    scripts/publicar/publicar             # sube la compilación siguiente
+#    scripts/publicar/publicar --solo-ipa  # se queda en el .ipa, sin subir
+#
+# Lo que tiene que estar:
+#   - El llavero guardalo-firma, con el certificado de distribución del equipo
+#     (el mismo que usa Guardar Enlaces; ver su docs/FIRMA-SIN-PANTALLA.md).
+#   - El perfil «Inventario AppStore» instalado. Se creó por la API el
+#     26 de septiembre de 2026 (POST /v1/profiles, IOS_APP_STORE, con el
+#     certificado 2GNUJ59SCD) y caduca con el certificado, el 20 de febrero
+#     de 2027. Si se activa una capacidad nueva en el App ID, el perfil deja de
+#     valer y hay que crear otro: a los de Expo les pasó al activar Sign in
+#     with Apple.
+#
+# El número de compilación se pregunta a Apple y no se commitea: lo único que
+# exige es que no se repita. La versión visible (MARKETING_VERSION) se cambia a
+# mano en el proyecto, porque esa sí es una decisión.
+set -euo pipefail
+
+cd "$(dirname "$0")/../.."
+
+solo_ipa=0
+[[ "${1:-}" == "--solo-ipa" ]] && solo_ipa=1
+
+clave_api=2V5QGQLFXK
+emisor_api=f313d445-9ae7-4b5d-a10f-65aa272f36f1
+salida=.build-publicar
+
+# Se abre aquí, en la misma sesión que firma: desbloquearlo antes en otra orden
+# no basta y codesign falla con errSecInternalComponent.
+llavero=~/Library/Keychains/guardalo-firma.keychain-db
+security unlock-keychain -p "$(cat ~/.appstoreconnect/llavero-firma.txt)" "$llavero"
+security list-keychains -d user -s "$llavero" ~/Library/Keychains/login.keychain-db
+
+# Que no se suba nada que no pase las pruebas del núcleo. Las de interfaz tardan
+# varios minutos y no van aquí: se pasan antes, a mano.
+echo "== Pruebas del núcleo =="
+(cd Paquetes/InventarioNucleo && swift test) > /tmp/inventario-publicar-pruebas.log 2>&1 || {
+  echo "Las pruebas no pasan. Mira /tmp/inventario-publicar-pruebas.log" >&2
+  exit 1
+}
+echo "   pasan"
+
+echo
+echo "== Número de compilación =="
+ultimo=$(scripts/publicar/ultima-compilacion.py "$clave_api" "$emisor_api" com.jmortiz.inventario)
+siguiente=$((ultimo + 1))
+echo "   la última en App Store Connect es la $ultimo, sube la $siguiente"
+
+echo
+echo "== Archivando =="
+rm -rf "$salida"
+xcodebuild -project InventarioCasa.xcodeproj \
+  -scheme InventarioCasa \
+  -configuration Release \
+  -destination 'generic/platform=iOS' \
+  -archivePath "$salida/InventarioCasa.xcarchive" \
+  -derivedDataPath "$salida/datos" \
+  DEVELOPMENT_TEAM=S92QZXCW54 \
+  CODE_SIGN_STYLE=Manual \
+  CODE_SIGN_IDENTITY="iPhone Distribution" \
+  PROVISIONING_PROFILE_SPECIFIER="Inventario AppStore" \
+  CURRENT_PROJECT_VERSION="$siguiente" \
+  -quiet \
+  archive
+
+echo
+echo "== Exportando el .ipa =="
+xcodebuild -exportArchive \
+  -archivePath "$salida/InventarioCasa.xcarchive" \
+  -exportPath "$salida/ipa" \
+  -exportOptionsPlist scripts/publicar/opciones-exportar.plist \
+  -quiet
+
+ipa=$(find "$salida/ipa" -name "*.ipa" | head -1)
+echo "   $ipa"
+
+if [[ $solo_ipa -eq 1 ]]; then
+  echo
+  echo "Hecho. Sin subir, como se pidió."
+  exit 0
+fi
+
+echo
+echo "== Subiendo a App Store Connect =="
+xcrun altool --upload-app \
+  --type ios \
+  --file "$ipa" \
+  --apiKey "$clave_api" \
+  --apiIssuer "$emisor_api"
+
+echo
+echo "Subida la compilación $siguiente."
+echo "Tarda unos minutos en aparecer en TestFlight: Apple la procesa antes."

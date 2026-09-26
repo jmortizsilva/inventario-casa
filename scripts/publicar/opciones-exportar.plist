@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>teamID</key>
+	<string>S92QZXCW54</string>
+	<!-- Manual y con el perfil dicho por su nombre, como en Guardar Enlaces: la
+	     firma automática necesita que xcodebuild entre en el portal, y por SSH
+	     eso falla. El perfil se creó por la API (ver la cabecera de publicar). -->
+	<key>signingStyle</key>
+	<string>manual</string>
+	<key>signingCertificate</key>
+	<string>iPhone Distribution: Jose María Ortiz Silva (S92QZXCW54)</string>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>com.jmortiz.inventario</key>
+		<string>Inventario AppStore</string>
+	</dict>
+	<key>uploadSymbols</key>
+	<true/>
+	<!-- El número de compilación lo pone el script; que Xcode no lo cambie. -->
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
+</dict>
+</plist>
