@@ -2,12 +2,26 @@ import { FastifyInstance } from 'fastify';
 import { config } from '../config';
 import { crearExigirSesion } from '../auth/middleware';
 import { obtenerUsuarioPorId } from '../auth/usuarios';
-import { borrarCuenta } from './almacen';
+import { limpiarNombre } from '../hogares/almacen';
+import { borrarCuenta, cambiarNombre } from './almacen';
 import { revocarAccesoApple } from './revocarApple';
 
 // Rutas de /cuenta (ver CONTRATO-API.md).
 export async function registrarRutasCuenta(app: FastifyInstance): Promise<void> {
   const exigirSesion = crearExigirSesion(config.tokenSecreto ?? '');
+
+  app.put<{ Body: { nombre?: unknown } | undefined }>(
+    '/cuenta/nombre',
+    { preHandler: exigirSesion },
+    async (request, reply) => {
+      const nombre = limpiarNombre(request.body?.nombre);
+      if (!nombre) {
+        return reply.code(400).send({ error: 'nombre vacío o de más de 100 letras' });
+      }
+      cambiarNombre(request.usuarioId!, nombre);
+      return { usuario: obtenerUsuarioPorId(request.usuarioId!) };
+    },
+  );
 
   app.delete<{ Body: { codigoApple?: unknown } | undefined }>(
     '/cuenta',

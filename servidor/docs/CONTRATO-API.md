@@ -62,6 +62,20 @@ token no es válido.
 
 ## Cuenta
 
+### `PUT /cuenta/nombre`
+
+El nombre con el que la ven las demás personas del hogar. Apple no lo da, y
+el de Google se puede cambiar aquí.
+
+```json
+{ "nombre": "Ana" }
+```
+
+→ `200 { "usuario": { "id", "email", "nombre", "proveedor" } }`. `400` si está
+vacío o pasa de 100 letras; se limpian los espacios como en los nombres de
+hogar. Un inicio de sesión posterior con Google no lo sobrescribe: el del
+proveedor solo se usa si no había ninguno.
+
 ### `DELETE /cuenta`
 
 Borra la cuenta: correo, nombre, identificador del proveedor y sesiones.

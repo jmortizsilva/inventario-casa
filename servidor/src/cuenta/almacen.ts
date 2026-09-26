@@ -28,3 +28,9 @@ export function borrarCuenta(usuarioId: number): boolean {
     return true;
   })();
 }
+
+// Devuelve false si la cuenta no existía. El nombre llega ya limpio y validado.
+export function cambiarNombre(usuarioId: number, nombre: string): boolean {
+  const resultado = obtenerBd().prepare('UPDATE usuarios SET nombre = ? WHERE id = ?').run(nombre, usuarioId);
+  return resultado.changes === 1;
+}

@@ -126,6 +126,7 @@ aditivos, `Authorization: Bearer` en todo lo que no es `/auth/`. Irá entero en
 | `POST /hogar/salir` | Salir |
 | `GET /sincronizar?desde=<revisión>` | Categorías, productos y unidades cambiados después de esa revisión |
 | `POST /sincronizar` | Cambios del móvil: categorías, productos y movimientos de unidades |
+| `PUT /cuenta/nombre` | El nombre con el que te ven en el hogar |
 | `DELETE /cuenta` | Borrar la cuenta |
 | `POST /auth/apple/avisos` | Avisos de Apple: cuenta borrada o app quitada del Apple ID |
 

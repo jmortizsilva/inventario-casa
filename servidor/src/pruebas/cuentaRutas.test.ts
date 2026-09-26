@@ -172,3 +172,36 @@ describe('DELETE /cuenta', () => {
     expect(existeUsuario(ana.id)).toBe(true);
   });
 });
+
+describe('PUT /cuenta/nombre', () => {
+  it('guarda el nombre limpio y devuelve el usuario', async () => {
+    const ana = crear('apple');
+    const res = await app.inject({
+      method: 'PUT', url: '/cuenta/nombre', headers: ana.headers, payload: { nombre: '  Ana   María ' },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().usuario).toMatchObject({ id: ana.id, nombre: 'Ana María', proveedor: 'apple' });
+  });
+
+  it('vacío o de más de 100 letras: 400', async () => {
+    const ana = crear('google');
+    for (const nombre of ['   ', 'a'.repeat(101), 42]) {
+      const res = await app.inject({ method: 'PUT', url: '/cuenta/nombre', headers: ana.headers, payload: { nombre } });
+      expect(res.statusCode).toBe(400);
+    }
+  });
+
+  it('sin sesión: 401', async () => {
+    const res = await app.inject({ method: 'PUT', url: '/cuenta/nombre', payload: { nombre: 'Ana' } });
+    expect(res.statusCode).toBe(401);
+  });
+
+  it('volver a entrar con Google no pisa el nombre elegido', async () => {
+    const ana = crear('google');
+    await app.inject({ method: 'PUT', url: '/cuenta/nombre', headers: ana.headers, payload: { nombre: 'Anita' } });
+    const otraVez = obtenerOCrearUsuario({
+      proveedor: 'google', idProveedor: 'sub-google', email: 'google@ejemplo.com', nombre: 'Ana López', emailVerificado: true,
+    })!;
+    expect(otraVez.nombre).toBe('Anita');
+  });
+});
