@@ -2,7 +2,8 @@
 
 Cuentas, hogares compartidos y sincronización. Node + Fastify + SQLite, con
 contenedor y base de datos propios. Diseño en [`docs/SERVIDOR.md`](../docs/SERVIDOR.md);
-contrato de la API en [`docs/CONTRATO-API.md`](docs/CONTRATO-API.md).
+contrato de la API en [`docs/CONTRATO-API.md`](docs/CONTRATO-API.md); despliegue en
+[`docs/DESPLIEGUE.md`](docs/DESPLIEGUE.md).
 
 La autenticación sale del backend de Guárdalo (Guardar Enlaces), adaptada: solo
 el modo `deeplink`, el nombre que da el proveedor y Apple contra

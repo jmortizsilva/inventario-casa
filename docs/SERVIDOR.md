@@ -126,9 +126,8 @@ aditivos, `Authorization: Bearer` en todo lo que no es `/auth/`. Irá entero en
    pruebas. Sin tocar el VPS.
 2. **Sincronización en el servidor**, con pruebas y con casos en JSON que
    usen también las apps (como `casos-lista-compra.json`).
-3. **Despliegue en el VPS.** Hace falta acceso SSH, el subdominio en Caddy,
-   la dirección de vuelta en Google Cloud y activar Sign in with Apple para
-   `com.jmortiz.inventario`.
+3. **Despliegue en el VPS.** Hecho el 26 de septiembre de 2026: ver
+   [`servidor/docs/DESPLIEGUE.md`](../servidor/docs/DESPLIEGUE.md).
 4. **App:** entrar, hogar e invitaciones, y sincronización. Los textos, antes,
    para revisarlos.
 5. **Android**, más adelante, contra el mismo contrato.
