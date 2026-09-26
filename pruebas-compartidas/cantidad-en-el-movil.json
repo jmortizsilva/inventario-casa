@@ -1,0 +1,12 @@
+{
+  "descripcion": "Unidades que muestra una app mientras tiene cambios sin enviar: las del servidor más los movimientos pendientes, o la fijada pendiente más los movimientos posteriores. Es la misma cuenta que cantidad.json, acotada al final a 0–999. Fechas en milisegundos.",
+  "casos": [
+    { "caso": "Sin nada pendiente, lo del servidor", "servidor": 4, "fijada": null, "movimientos": [], "cantidad": 4 },
+    { "caso": "Movimientos sin enviar se suman a lo del servidor", "servidor": 4, "fijada": null, "movimientos": [ { "cambio": 1, "momento": 100 }, { "cambio": 1, "momento": 110 } ], "cantidad": 6 },
+    { "caso": "Una fijada sin enviar manda sobre lo del servidor", "servidor": 4, "fijada": { "cantidad": 10, "en": 200 }, "movimientos": [], "cantidad": 10 },
+    { "caso": "Con fijada, solo cuentan los movimientos posteriores", "servidor": 4, "fijada": { "cantidad": 10, "en": 200 }, "movimientos": [ { "cambio": -1, "momento": 150 }, { "cambio": -1, "momento": 250 } ], "cantidad": 9 },
+    { "caso": "Movimiento en el mismo milisegundo que la fijada no cuenta", "servidor": 0, "fijada": { "cantidad": 3, "en": 200 }, "movimientos": [ { "cambio": 1, "momento": 200 } ], "cantidad": 3 },
+    { "caso": "No baja de 0", "servidor": 1, "fijada": null, "movimientos": [ { "cambio": -1, "momento": 100 }, { "cambio": -1, "momento": 110 } ], "cantidad": 0 },
+    { "caso": "No pasa de 999", "servidor": 998, "fijada": null, "movimientos": [ { "cambio": 1, "momento": 100 }, { "cambio": 1, "momento": 110 } ], "cantidad": 999 }
+  ]
+}
