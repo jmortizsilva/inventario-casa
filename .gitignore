@@ -24,3 +24,6 @@ node_modules/
 
 # Configuración local de Claude Code
 .claude/settings.local.json
+
+# Salida de scripts/publicar
+.build-publicar/
