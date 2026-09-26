@@ -270,8 +270,11 @@ en Ajustes, y se puede reintentar o usar sin cuenta.
 | Pista añadida al de Google | Se abre Safari para confirmar tu cuenta |
 | Error (debajo, y se anuncia) | No se ha iniciado sesión. {causa} |
 
-Causas: «Sin conexión.» · «El servidor no responde. Prueba más tarde.» Si la
-persona cancela en Apple o en Safari, no se dice nada: lo ha decidido ella.
+Causas: «Sin conexión.» · «El servidor no responde. Prueba más tarde.» ·
+«Tu cuenta no ha dado ningún correo, y hace falta.» · «No se aceptó el inicio
+de sesión. Prueba otra vez.» Las dos últimas son las que manda el servidor
+cuando el proveedor no da correo o no acepta el código. Si la persona cancela
+en Apple o en Safari, no se dice nada: lo ha decidido ella.
 
 ### Justo después de iniciar sesión, sin hogar
 

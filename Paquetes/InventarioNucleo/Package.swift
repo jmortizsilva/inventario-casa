@@ -8,6 +8,7 @@ let package = Package(
     products: [
         .library(name: "InventarioNucleo", targets: ["InventarioNucleo"]),
         .library(name: "InventarioAlmacen", targets: ["InventarioAlmacen"]),
+        .library(name: "InventarioConexion", targets: ["InventarioConexion"]),
     ],
     targets: [
         // Las pruebas viven en `pruebas/`, junto al código que prueban,
@@ -32,6 +33,18 @@ let package = Package(
             name: "InventarioAlmacenPruebas",
             dependencies: ["InventarioAlmacen"],
             path: "Sources/InventarioAlmacen/pruebas"
+        ),
+        // Red, sesión y llavero. Sin SwiftUI: lo que necesita pantalla
+        // (las hojas de Apple y de Safari) vive en la app.
+        .target(
+            name: "InventarioConexion",
+            dependencies: ["InventarioNucleo"],
+            exclude: ["pruebas"]
+        ),
+        .testTarget(
+            name: "InventarioConexionPruebas",
+            dependencies: ["InventarioConexion"],
+            path: "Sources/InventarioConexion/pruebas"
         ),
     ]
 )

@@ -59,6 +59,13 @@ public enum Api {
         public let productoId: String
         public let cambio: Int
         public let momento: Int64
+
+        public init(id: String, productoId: String, cambio: Int, momento: Int64) {
+            self.id = id
+            self.productoId = productoId
+            self.cambio = cambio
+            self.momento = momento
+        }
     }
 
     /// Lo que se manda en `POST /sincronizar`.
@@ -75,6 +82,12 @@ public enum Api {
         public let tipo: String
         public let id: String
         public let motivo: String
+
+        public init(tipo: String, id: String, motivo: String) {
+            self.tipo = tipo
+            self.id = id
+            self.motivo = motivo
+        }
     }
 
     /// Lo que responde `POST /sincronizar`: la versión definitiva de todo lo
@@ -84,6 +97,13 @@ public enum Api {
         public let productos: [Producto]
         public let rechazados: [Rechazado]
         public let revision: Int
+
+        public init(categorias: [Categoria], productos: [Producto], rechazados: [Rechazado], revision: Int) {
+            self.categorias = categorias
+            self.productos = productos
+            self.rechazados = rechazados
+            self.revision = revision
+        }
     }
 
     /// Lo que responde `GET /sincronizar`.
@@ -92,6 +112,13 @@ public enum Api {
         public let productos: [Producto]
         public let revision: Int
         public let masDisponible: Bool
+
+        public init(categorias: [Categoria], productos: [Producto], revision: Int, masDisponible: Bool) {
+            self.categorias = categorias
+            self.productos = productos
+            self.revision = revision
+            self.masDisponible = masDisponible
+        }
     }
 }
 

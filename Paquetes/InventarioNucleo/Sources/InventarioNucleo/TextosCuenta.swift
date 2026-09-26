@@ -189,11 +189,17 @@ extension Textos {
         case servidorNoResponde
         case appleNoConfirma
         case sinHablarConApple
+        /// Al iniciar sesión: la cuenta no dio correo, y sin él no se crea.
+        case sinCorreo
+        /// Al iniciar sesión: Google o Apple no aceptaron el código.
+        case proveedorRechaza
 
         public var texto: String {
             switch self {
             case .sinConexion: "Sin conexión."
             case .servidorNoResponde: "El servidor no responde. Prueba más tarde."
+            case .sinCorreo: "Tu cuenta no ha dado ningún correo, y hace falta."
+            case .proveedorRechaza: "No se aceptó el inicio de sesión. Prueba otra vez."
             case .appleNoConfirma: "Apple no ha confirmado. Prueba otra vez."
             case .sinHablarConApple: "No se pudo hablar con Apple. Prueba más tarde."
             }

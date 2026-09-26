@@ -96,6 +96,14 @@ import Testing
         #expect(Textos.AnunciosCuenta.salido("Casa") == "Has salido de Casa")
         #expect(Textos.ErroresCuenta.noIniciada(.sinConexion) == "No se ha iniciado sesión. Sin conexión.")
         #expect(
+            Textos.ErroresCuenta.noIniciada(.sinCorreo)
+                == "No se ha iniciado sesión. Tu cuenta no ha dado ningún correo, y hace falta."
+        )
+        #expect(
+            Textos.ErroresCuenta.noIniciada(.proveedorRechaza)
+                == "No se ha iniciado sesión. No se aceptó el inicio de sesión. Prueba otra vez."
+        )
+        #expect(
             Textos.ErroresCuenta.cuentaNoEliminada(.appleNoConfirma)
                 == "No se ha eliminado la cuenta. Apple no ha confirmado. Prueba otra vez."
         )

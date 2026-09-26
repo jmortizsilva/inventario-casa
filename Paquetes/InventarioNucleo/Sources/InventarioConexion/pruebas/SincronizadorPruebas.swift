@@ -1,0 +1,195 @@
+import Foundation
+import Testing
+import InventarioNucleo
+@testable import InventarioConexion
+
+/// Un reloj para todos los iPhone de la prueba, que avanza un segundo cada
+/// vez que se consulta. Sin él todo pasa en el mismo milisegundo, y el
+/// servidor resuelve los empates quedándose con lo que ya tenía: un toque
+/// justo al crear el producto no contaría, y un borrado no ganaría.
+@MainActor
+private final class RelojCompartido {
+    private var actual = Date(timeIntervalSince1970: 1_750_000_000)
+    func ahora() -> Date {
+        actual = actual.addingTimeInterval(1)
+        return actual
+    }
+}
+
+/// Un iPhone: su inventario, su conexión y su sincronizador.
+@MainActor
+private struct Iphone {
+    let inventario: Inventario
+    let conexion: ConexionEnMemoria
+    let sincronizador: Sincronizador
+
+    init(servidor: ServidorEnMemoria, reloj: RelojCompartido) {
+        inventario = Inventario(almacen: AlmacenEnMemoria(), ahora: { reloj.ahora() })
+        conexion = ConexionEnMemoria(servidor: servidor)
+        sincronizador = Sincronizador(inventario: inventario, conexion: conexion)
+    }
+
+    func sincronizar() async throws { try await sincronizador.sincronizar() }
+
+    func cantidad(_ nombre: String) -> Int? {
+        inventario.categorias.lazy
+            .flatMap { self.inventario.productos(en: $0.id) }
+            .first { $0.nombre == nombre }?.cantidad
+    }
+
+    func producto(_ nombre: String) -> Producto? {
+        inventario.categorias.lazy.flatMap { self.inventario.productos(en: $0.id) }.first { $0.nombre == nombre }
+    }
+}
+
+/// Ana crea un hogar con lo que tenía en su iPhone y Luis se une vaciando el suyo.
+@MainActor
+private func hogarDeAnaYLuis() async throws
+    -> (ana: Iphone, luis: Iphone, servidor: ServidorEnMemoria, reloj: RelojCompartido)
+{
+    let servidor = ServidorEnMemoria()
+    let reloj = RelojCompartido()
+    let ana = Iphone(servidor: servidor, reloj: reloj)
+    let luis = Iphone(servidor: servidor, reloj: reloj)
+
+    let despensa = try ana.inventario.crearCategoria(nombre: "Despensa")
+    try ana.inventario.crearProducto(nombre: "Arroz", en: despensa.id, cantidad: 3)
+    _ = try await ana.conexion.entrar(conCodigoDeCanje: "ana@ejemplo.com")
+    let hogar = try await ana.conexion.crearHogar(nombre: "Casa")
+    try ana.inventario.unirAHogar(hogar.id, conservando: true)
+    try await ana.sincronizar()
+
+    _ = try await luis.conexion.entrar(conCodigoDeCanje: "luis@ejemplo.com")
+    let invitacion = try await ana.conexion.invitar()
+    let mismo = try await luis.conexion.unirse(codigo: invitacion.codigo)
+    try luis.inventario.unirAHogar(mismo.id, conservando: false)
+    try await luis.sincronizar()
+    return (ana, luis, servidor, reloj)
+}
+
+@MainActor
+@Suite struct SincronizadorPruebas {
+    @Test func loDeAnaLlegaALuis() async throws {
+        let (ana, luis, _, _) = try await hogarDeAnaYLuis()
+        #expect(ana.inventario.pendientes.estaVacia)
+        #expect(luis.inventario.categorias.map(\.nombre) == ["Despensa"])
+        #expect(luis.cantidad("Arroz") == 3)
+    }
+
+    @Test func dosPersonasRestandoALaVezRestanLasDos() async throws {
+        let (ana, luis, _, _) = try await hogarDeAnaYLuis()
+        let arroz = try #require(ana.producto("Arroz"))
+
+        try ana.inventario.ajustarCantidad(arroz.id, en: -1)
+        try luis.inventario.ajustarCantidad(arroz.id, en: -1)
+        try await ana.sincronizar()
+        try await luis.sincronizar()
+        try await ana.sincronizar()
+
+        #expect(ana.cantidad("Arroz") == 1)
+        #expect(luis.cantidad("Arroz") == 1)
+    }
+
+    @Test func sinConexionLosCambiosEsperanEnLaCola() async throws {
+        let (ana, luis, servidor, _) = try await hogarDeAnaYLuis()
+        let arroz = try #require(ana.producto("Arroz"))
+
+        servidor.sinConexion = true
+        try ana.inventario.ajustarCantidad(arroz.id, en: 1)
+        await #expect(throws: ErrorConexion.sinConexion) { try await ana.sincronizar() }
+        #expect(ana.inventario.pendientes.cuantos == 1)
+        #expect(ana.cantidad("Arroz") == 4)
+
+        servidor.sinConexion = false
+        try await ana.sincronizar()
+        try await luis.sincronizar()
+        #expect(ana.inventario.pendientes.estaVacia)
+        #expect(luis.cantidad("Arroz") == 4)
+    }
+
+    @Test func fijarDesdeLaFichaSustituyeYLosToquesPosterioresSeSuman() async throws {
+        let (ana, luis, _, _) = try await hogarDeAnaYLuis()
+        let arroz = try #require(ana.producto("Arroz"))
+
+        try ana.inventario.editarProducto(
+            arroz.id, nombre: "Arroz", cantidad: 10, umbralCompra: arroz.umbralCompra, autoListaCompra: true
+        )
+        try await ana.sincronizar()
+        try await luis.sincronizar()
+        try luis.inventario.ajustarCantidad(arroz.id, en: -1)
+        try await luis.sincronizar()
+        try await ana.sincronizar()
+
+        #expect(ana.cantidad("Arroz") == 9)
+        #expect(luis.cantidad("Arroz") == 9)
+    }
+
+    @Test func gananLosCambiosMasRecientes() async throws {
+        let (ana, luis, _, _) = try await hogarDeAnaYLuis()
+        let despensa = try #require(ana.inventario.categorias.first)
+
+        try ana.inventario.renombrarCategoria(despensa.id, a: "Alacena")
+        try luis.inventario.renombrarCategoria(despensa.id, a: "Armario")
+        try await ana.sincronizar()
+        try await luis.sincronizar()
+        try await ana.sincronizar()
+
+        #expect(ana.inventario.categorias.map(\.nombre) == ["Armario"])
+        #expect(luis.inventario.categorias.map(\.nombre) == ["Armario"])
+    }
+
+    @Test func borrarUnaCategoriaBorraSusProductosEnElOtroIphone() async throws {
+        let (ana, luis, _, _) = try await hogarDeAnaYLuis()
+        let despensa = try #require(ana.inventario.categorias.first)
+
+        try ana.inventario.borrarCategoria(despensa.id)
+        try await ana.sincronizar()
+        try await luis.sincronizar()
+
+        #expect(luis.inventario.categorias.isEmpty)
+        #expect(luis.inventario.listaCompra.isEmpty)
+    }
+
+    @Test func alUnirseConservandoSeJuntaConLoDelHogar() async throws {
+        let (ana, _, servidor, reloj) = try await hogarDeAnaYLuis()
+        let eva = Iphone(servidor: servidor, reloj: reloj)
+        let limpieza = try eva.inventario.crearCategoria(nombre: "Limpieza")
+        try eva.inventario.crearProducto(nombre: "Lejía", en: limpieza.id, cantidad: 1)
+
+        _ = try await eva.conexion.entrar(conCodigoDeCanje: "eva@ejemplo.com")
+        let hogar = try await eva.conexion.unirse(codigo: try await ana.conexion.invitar().codigo)
+        try eva.inventario.unirAHogar(hogar.id, conservando: true)
+        try await eva.sincronizar()
+        try await ana.sincronizar()
+
+        #expect(eva.inventario.categorias.map(\.nombre) == ["Despensa", "Limpieza"])
+        #expect(ana.inventario.categorias.map(\.nombre) == ["Despensa", "Limpieza"])
+        #expect(ana.cantidad("Lejía") == 1)
+    }
+
+    @Test func sinHogarNoHaceNada() async throws {
+        let iphone = Iphone(servidor: ServidorEnMemoria(), reloj: RelojCompartido())
+        try iphone.inventario.crearCategoria(nombre: "Despensa")
+        try await iphone.sincronizar() // sin sesión ni hogar: no llama a nada
+        #expect(iphone.inventario.pendientes.estaVacia)
+    }
+
+    @Test func muchosCambiosVanEnVariosEnvios() async throws {
+        let (ana, luis, _, _) = try await hogarDeAnaYLuis()
+        let arroz = try #require(ana.producto("Arroz"))
+        for _ in 0..<5 { try ana.inventario.ajustarCantidad(arroz.id, en: 1) }
+
+        // Envío a envío hasta vaciar la cola, como haría con más de 1000.
+        var vueltas = 0
+        while !ana.inventario.loteParaEnviar(maximo: 2).estaVacio {
+            let lote = ana.inventario.loteParaEnviar(maximo: 2)
+            let respuesta = try await ana.conexion.enviar(lote)
+            try ana.inventario.confirmarEnvio(lote, respuesta: respuesta)
+            vueltas += 1
+        }
+        try await luis.sincronizar()
+
+        #expect(vueltas == 3)
+        #expect(luis.cantidad("Arroz") == 8)
+    }
+}
