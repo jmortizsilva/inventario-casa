@@ -220,3 +220,179 @@ Casos en los que el texto cambia además del número:
 | Eliminar categoría con 1 producto | También se eliminará su producto. |
 | Categoría eliminada con 1 producto | Eliminada, {categoria}, con 1 producto |
 | Categoría eliminada sin productos | Eliminada, {categoria} |
+
+## Cuenta y hogar (fase 4)
+
+Revisados el 26 de septiembre de 2026, antes de escribir las pantallas.
+
+Lo que está entre corchetes es para VoiceOver y no se ve. «Pista» es lo que
+VoiceOver dice después de una pausa. `{correo}`, `{hogar}`, `{codigo}`,
+`{fecha}` y `{n}` cambian.
+
+### Vocabulario nuevo
+
+| Palabra | Uso |
+|---|---|
+| Iniciar sesión · Cerrar sesión | Con la cuenta. El botón de Apple lo pinta iOS y dice «Iniciar sesión con Apple»: el de Google dice lo mismo para que los dos se llamen igual. |
+| Hogar | El inventario compartido y las personas que lo comparten. |
+| Código | El de invitación. Nunca «token» ni «clave». |
+| Unirse | Entrar en el hogar de otra persona con su código. |
+| Salir | Dejar el hogar. El inventario se queda en el iPhone. |
+| Eliminar cuenta | Borrarla del servidor. Nunca «darse de baja». |
+
+### Bienvenida (la primera vez que se abre la app)
+
+Pantalla entera, sin pestañas detrás. Sale una sola vez: después, la sesión
+se inicia desde Ajustes.
+
+| Elemento | Texto |
+|---|---|
+| Título | Inventario Casa |
+| Texto | Lleva la cuenta de lo que hay en casa y de lo que falta comprar. |
+| Texto | Con cuenta, compartes el inventario con tu casa y lo tienes en varios dispositivos. Sin cuenta, la app funciona igual, pero todo se queda en este iPhone. |
+| Botón (del sistema) | Iniciar sesión con Apple |
+| Botón | Iniciar sesión con Google |
+| Botón | Usar sin cuenta |
+| Texto, debajo | Puedes iniciar sesión más tarde desde Ajustes. |
+
+Si falla el inicio de sesión, el error sale debajo de los botones, igual que
+en Ajustes, y se puede reintentar o usar sin cuenta.
+
+### Ajustes, sin sesión
+
+| Elemento | Texto |
+|---|---|
+| Encabezado de sección | Cuenta |
+| Texto | Sin cuenta, el inventario se guarda solo en este iPhone. |
+| Botón (del sistema) | Iniciar sesión con Apple |
+| Botón | Iniciar sesión con Google |
+| Pista de los dos | Para compartir el inventario con tu casa |
+| Pista añadida al de Google | Se abre Safari para confirmar tu cuenta |
+| Error (debajo, y se anuncia) | No se ha iniciado sesión. {causa} |
+
+Causas: «Sin conexión.» · «El servidor no responde. Prueba más tarde.» Si la
+persona cancela en Apple o en Safari, no se dice nada: lo ha decidido ella.
+
+### Justo después de iniciar sesión, sin hogar
+
+Hoja con título **Tu hogar**.
+
+| Elemento | Texto |
+|---|---|
+| Texto | Un hogar es un inventario compartido. Crea el tuyo o únete al de otra persona con su código. |
+| Botón | Crear hogar |
+| Botón | Unirme con un código |
+| Botón | Ahora no |
+
+«Ahora no» deja la sesión iniciada sin hogar; los dos botones siguen en
+Ajustes.
+
+«Tu nombre» sale relleno con el que da Google, y vacío con Apple, que no lo
+da. Crear y Unirme están desactivados mientras falte un nombre. Si la cuenta
+ya tiene nombre guardado en el servidor, el campo no sale.
+
+### Crear hogar
+
+| Elemento | Texto |
+|---|---|
+| Título | Nuevo hogar |
+| Campo | Nombre del hogar |
+| Campo | Tu nombre |
+| Pista de «Tu nombre» | Así te verán las demás personas del hogar |
+| Texto, si hay algo en el iPhone | Tu inventario de este iPhone pasa al hogar: {n} categorías y {n} productos. |
+| Botones | Cancelar · Crear |
+| Anuncio | Hogar creado, {hogar} |
+| Error | No se ha creado el hogar. {causa} |
+
+### Unirme con un código
+
+| Elemento | Texto |
+|---|---|
+| Título | Unirme a un hogar |
+| Campo | Código |
+| Campo | Tu nombre |
+| Pista de «Tu nombre» | Así te verán las demás personas del hogar |
+| Texto | Pide el código a alguien del hogar. |
+| Botones | Cancelar · Unirme |
+| Anuncio | Unido al hogar, {hogar} |
+| Código que no vale | Ese código no sirve. Puede que haya caducado o que ya se haya usado. |
+| Demasiados intentos | Demasiados intentos. Prueba dentro de una hora. |
+| Otro error | No te has unido. {causa} |
+
+Si había algo en el iPhone, al unirse sale una alerta sin Cancelar: ya se ha
+entrado en el hogar y las dos respuestas son definitivas.
+
+| Título | Mensaje | Botones |
+|---|---|---|
+| Inventario de este iPhone | Hay {n} categorías y {n} productos en este iPhone. ¿Los añades a {hogar}? Si no, se eliminan de este iPhone. | Añadirlos · Eliminarlos |
+
+### Ajustes, con sesión
+
+| Elemento | Texto |
+|---|---|
+| Encabezado de sección | {hogar} |
+| Fila | En el hogar: Ana y Luis |
+| Botón | Cambiar tu nombre |
+| Botón | Invitar a alguien |
+| Botón | Salir del hogar |
+| Encabezado de sección | Cuenta |
+| Texto | Sesión iniciada como {correo} |
+| … con el correo oculto de Apple | Sesión iniciada con Apple |
+| Estado | Todo enviado · {n} cambios sin enviar · Sin conexión, {n} cambios sin enviar |
+| Botón | Cerrar sesión |
+| Botón | Eliminar cuenta |
+| Sesión caducada | La sesión ha caducado. Vuelve a iniciarla. |
+
+Sin hogar, en lugar de la primera sección: encabezado «Hogar», texto «No estás
+en ningún hogar.» y los botones «Crear hogar» y «Unirme con un código».
+
+### Invitar
+
+| Título | Mensaje | Botones |
+|---|---|---|
+| Código de invitación | {codigo}. Sirve una vez y caduca el {fecha}. | Compartir · Aceptar |
+
+El código se muestra tal cual; quien lo necesite letra a letra lo lee con
+el rotor de VoiceOver. {fecha} se escribe «3 de octubre».
+
+Texto que se comparte: «Únete a mi hogar en Inventario Casa con el código
+{codigo}. Caduca el {fecha}.»
+
+### Confirmaciones
+
+| Cuándo | Título | Mensaje | Botones |
+|---|---|---|---|
+| Salir del hogar | ¿Salir de {hogar}? | El inventario se queda en este iPhone, pero deja de compartirse. Para volver hará falta otro código. | Salir · Cancelar |
+| … si es la última persona | ¿Salir de {hogar}? | Eres la única persona del hogar: se eliminará del servidor dentro de 30 días. El inventario se queda en este iPhone. | Salir · Cancelar |
+| Cerrar sesión con cambios sin enviar | ¿Cerrar sesión? | Hay {n} cambios sin enviar. Si cierras sesión, se quedan solo en este iPhone. | Cerrar sesión · Cancelar |
+| Eliminar cuenta | ¿Eliminar tu cuenta? | Se eliminan tu cuenta y tus datos del servidor. {hogar sigue o no}. El inventario se queda en este iPhone. | Eliminar cuenta · Cancelar |
+
+Cerrar sesión sin cambios pendientes no pregunta. En «Eliminar cuenta», la
+frase del hogar es «El hogar sigue para las demás personas.» o, si es la
+última, «El hogar {hogar} y su inventario también se eliminan.». Con cuenta de
+Apple se añade «Apple te pedirá que confirmes.», porque después sale su hoja.
+
+### Anuncios y errores
+
+| Cuándo | Anuncio |
+|---|---|
+| Sesión iniciada | Sesión iniciada |
+| Salir del hogar | Has salido de {hogar} |
+| Nombre cambiado | Guardado, {nombre} |
+| Sesión cerrada | Sesión cerrada |
+| Cuenta eliminada | Cuenta eliminada |
+| Error al salir, cerrar sesión o eliminar | No se ha {hecho}. {causa} |
+
+Causas propias de eliminar cuenta: «Apple no ha confirmado. Prueba otra vez.» ·
+«No se pudo hablar con Apple. Prueba más tarde.»
+
+La sincronización no anuncia nada: ni al enviar ni cuando llegan cambios de
+otra persona. Con cada toque de más o menos sonaría algo. Lo que no se ha
+podido enviar se ve en el estado de Ajustes.
+
+### Manual, apartado nuevo
+
+**Compartir con tu casa.** En Ajustes, inicia sesión y crea un hogar. Con
+Invitar a alguien sale un código: quien lo escriba en Unirme con un código
+comparte el inventario contigo. Los cambios llegan a todos cuando hay
+conexión; sin ella, la app funciona igual y los envía después.

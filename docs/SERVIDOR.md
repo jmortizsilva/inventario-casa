@@ -33,9 +33,18 @@ servidor por el contrato de la API y no por código compartido.
 
 ### 3. Cuenta opcional
 
-Sin cuenta, la app funciona como ahora, solo en el móvil. Al entrar por
-primera vez, lo que ya haya en el móvil pasa a ser un hogar nuevo en el
-servidor. Para unirse al hogar de otra persona hace falta su invitación.
+Sin cuenta, la app funciona como ahora, solo en el móvil. La primera vez que
+se abre, una pantalla ofrece iniciar sesión con Apple o con Google, o usar la
+app sin cuenta; después, la sesión se inicia desde Ajustes.
+
+Al iniciar sesión sin hogar se pregunta si crear uno, con lo que ya haya en el
+móvil, o unirse al de otra persona con su invitación. Corregido el 26 de
+septiembre de 2026: antes decía que lo del móvil pasaba solo a un hogar
+nuevo, y quien iniciara sesión para unirse al hogar de su pareja se
+encontraría con uno propio del que tendría que salir primero.
+
+Cada persona pone su nombre al crear un hogar o unirse a uno: Apple no lo da,
+y su correo puede ser una dirección oculta que no dice quién es.
 
 ### 4. Hogares, miembros e invitaciones
 
