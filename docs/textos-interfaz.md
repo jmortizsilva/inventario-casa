@@ -440,3 +440,52 @@ podido enviar se ve en el estado de Ajustes.
 Invitar a alguien sale un código: quien lo escriba en Unirme con un código
 comparte el inventario contigo. Los cambios llegan a todos cuando hay
 conexión; sin ella, la app funciona igual y los envía después.
+
+## Notificaciones
+
+Revisados el 27 de septiembre de 2026. Los de las notificaciones los compone
+el servidor (`servidor/src/avisos/textos.ts`), que es quien sabe qué ha
+cambiado: valen igual para iOS y Android.
+
+### Ajustes
+
+Sección nueva, solo con sesión y hogar. Los cinco interruptores empiezan
+desactivados; el primero que se active pide permiso a iOS. Si se deniega,
+el interruptor vuelve a quedar desactivado y sale el aviso de abajo.
+
+| Elemento | Texto |
+|---|---|
+| Encabezado | Notificaciones |
+| Interruptor | Productos nuevos |
+| Interruptor | Categorías nuevas |
+| Interruptor | Lo que entra en la lista |
+| Interruptor | Lo que sale de la lista |
+| Interruptor | Personas nuevas en el hogar |
+| Pie | Solo avisa de lo que hacen las demás personas del hogar. |
+| Sin permiso de iOS | Las notificaciones están desactivadas para Inventario Casa en Ajustes del iPhone. |
+| Botón, sin permiso | Abrir Ajustes |
+
+### Las notificaciones
+
+Título: el nombre del hogar. Una por tipo de cambio y por envío (la app
+agrupa sus cambios dos segundos), nunca a quien hizo el cambio. Con varios,
+se nombran hasta dos y el resto se cuenta.
+
+| Cuándo | Cuerpo |
+|---|---|
+| Producto nuevo | Ana ha añadido Leche |
+| … varios | Ana ha añadido Leche y 3 productos más |
+| Categoría nueva | Ana ha añadido la categoría Limpieza |
+| … varias | Ana ha añadido la categoría Limpieza y 2 más |
+| Entra en la lista | A la lista: Leche |
+| … varios | A la lista: Leche, Pan y 2 más |
+| Sale de la lista | Fuera de la lista: Leche |
+| … varios | Fuera de la lista: Leche, Pan y 2 más |
+| Alguien se une | Luis se ha unido al hogar |
+| … sin nombre | Alguien se ha unido al hogar |
+
+Lo de la lista no dice quién: casi siempre entra sola, al bajar las
+unidades, y «Ana ha puesto Leche en la lista» sería falso.
+
+Concordancias: «y 1 producto más», «y 1 más»; con dos nombres y nada más,
+«A la lista: Leche y Pan».

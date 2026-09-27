@@ -1,5 +1,5 @@
 {
-  "descripcion": "Casos de la regla de la lista de la compra. Los usan las pruebas de iOS y los usará la app de Android.",
+  "descripcion": "Casos de la regla de la lista de la compra (un producto está en la lista si se añadió a mano, o si tiene la lista automática y le quedan tantas unidades como su umbral o menos). Los usan las pruebas de iOS y del servidor, y los usará la app de Android.",
   "casos": [
     { "caso": "Automática, por debajo del umbral", "cantidad": 1, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": false, "borrado": false, "enLista": true },
     { "caso": "Automática, justo en el umbral", "cantidad": 2, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": false, "borrado": false, "enLista": true },

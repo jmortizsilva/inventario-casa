@@ -23,3 +23,12 @@ func producto(
         creado: instante
     )
 }
+
+/// Un fichero de `pruebas-compartidas/`, en la raíz del repositorio. Se lee
+/// por ruta: el simulador ve el disco del Mac.
+func rutaCompartida(_ nombre: String, desde fichero: String = #filePath) -> URL {
+    var url = URL(fileURLWithPath: fichero)
+    // pruebas → InventarioNucleo → Sources → paquete → Paquetes → raíz
+    for _ in 0..<6 { url = url.deletingLastPathComponent() }
+    return url.appending(path: "pruebas-compartidas/\(nombre)")
+}

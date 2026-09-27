@@ -21,15 +21,7 @@ struct CasoCantidadMovil: Decodable, CustomTestStringConvertible, Sendable {
 /// simulador ve el disco del Mac.
 private func cargarCasosCantidadMovil() throws -> [CasoCantidadMovil] {
     struct Fichero: Decodable { let casos: [CasoCantidadMovil] }
-    let raiz = URL(fileURLWithPath: #filePath)
-        .deletingLastPathComponent() // pruebas
-        .deletingLastPathComponent() // InventarioNucleo
-        .deletingLastPathComponent() // Sources
-        .deletingLastPathComponent() // InventarioNucleo (paquete)
-        .deletingLastPathComponent() // Paquetes
-        .deletingLastPathComponent() // raíz del repositorio
-    let url = raiz.appending(path: "pruebas-compartidas/cantidad-en-el-movil.json")
-    return try JSONDecoder().decode(Fichero.self, from: Data(contentsOf: url)).casos
+    return try JSONDecoder().decode(Fichero.self, from: Data(contentsOf: rutaCompartida("cantidad-en-el-movil.json"))).casos
 }
 
 @Suite struct CantidadVisiblePruebas {

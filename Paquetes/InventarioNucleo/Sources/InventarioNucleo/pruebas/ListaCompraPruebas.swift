@@ -18,11 +18,9 @@ private struct FicheroCasos: Decodable {
     let casos: [CasoListaCompra]
 }
 
+/// En `pruebas-compartidas/`, fuera del paquete: los usa también el servidor.
 private func cargarCasos() throws -> [CasoListaCompra] {
-    let url = try #require(
-        Bundle.module.url(forResource: "casos-lista-compra", withExtension: "json", subdirectory: "Recursos")
-    )
-    return try JSONDecoder().decode(FicheroCasos.self, from: Data(contentsOf: url)).casos
+    try JSONDecoder().decode(FicheroCasos.self, from: Data(contentsOf: rutaCompartida("lista-compra.json"))).casos
 }
 
 @Suite struct ListaCompraPruebas {
