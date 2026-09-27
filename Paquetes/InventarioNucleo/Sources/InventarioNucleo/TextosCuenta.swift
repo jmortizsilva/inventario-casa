@@ -244,6 +244,8 @@ extension Textos {
         public static func noInvitado(_ causa: Causa) -> String { "No se ha creado el código. \(causa.texto)" }
         public static func nombreNoGuardado(_ causa: Causa) -> String { "No se ha guardado el nombre. \(causa.texto)" }
         public static func cuentaNoEliminada(_ causa: Causa) -> String { "No se ha eliminado la cuenta. \(causa.texto)" }
+        /// Al activar o desactivar una notificación.
+        public static func avisoNoGuardado(_ causa: Causa) -> String { "No se ha guardado. \(causa.texto)" }
     }
 
     public static let apartadoCompartir = Apartado(
@@ -279,5 +281,22 @@ extension Textos {
             "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
         ]
         return "\(partes.day ?? 1) de \(meses[(partes.month ?? 1) - 1])"
+    }
+}
+
+extension Textos {
+    /// La sección de Ajustes. Lo que dice cada notificación lo compone el
+    /// servidor (`servidor/src/avisos/textos.ts`).
+    public enum Notificaciones {
+        public static let encabezado = "Notificaciones"
+        public static let productosNuevos = "Productos nuevos"
+        public static let categoriasNuevas = "Categorías nuevas"
+        public static let entraEnLista = "Lo que entra en la lista"
+        public static let saleDeLista = "Lo que sale de la lista"
+        public static let personasNuevas = "Personas nuevas en el hogar"
+        public static let pie = "Solo avisa de lo que hacen las demás personas del hogar."
+        public static let desactivadas =
+            "Las notificaciones están desactivadas para Inventario Casa en Ajustes del iPhone."
+        public static let abrirAjustes = "Abrir Ajustes"
     }
 }

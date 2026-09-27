@@ -63,3 +63,26 @@ public struct Invitacion: Codable, Equatable, Sendable {
         self.caducaEn = caducaEn
     }
 }
+
+/// Qué notificaciones quiere recibir la cuenta (`GET/PUT /cuenta/avisos`).
+public struct Avisos: Codable, Equatable, Sendable {
+    public var productosNuevos = false
+    public var categoriasNuevas = false
+    public var entraEnLista = false
+    public var saleDeLista = false
+    public var personasNuevas = false
+
+    public init() {}
+
+    public var algunoActivo: Bool {
+        productosNuevos || categoriasNuevas || entraEnLista || saleDeLista || personasNuevas
+    }
+}
+
+/// Dónde se instaló la app: decide a qué servidor de Apple van sus notificaciones.
+public enum EntornoAvisos: String, Codable, Sendable {
+    /// TestFlight y App Store.
+    case produccion
+    /// Compilada desde Xcode.
+    case desarrollo
+}

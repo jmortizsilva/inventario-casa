@@ -149,3 +149,26 @@ import Testing
         #expect(EnlaceInvitacion.url(codigo: "K7PX3MQA").absoluteString == "https://inventario.jmortiz.es/unirse/K7PX3MQA")
     }
 }
+
+@Suite struct TextosNotificacionesPruebas {
+    @Test func seccionDeAjustes() {
+        #expect(Textos.Notificaciones.encabezado == "Notificaciones")
+        #expect(
+            [
+                Textos.Notificaciones.productosNuevos, Textos.Notificaciones.categoriasNuevas,
+                Textos.Notificaciones.entraEnLista, Textos.Notificaciones.saleDeLista,
+                Textos.Notificaciones.personasNuevas,
+            ] == [
+                "Productos nuevos", "Categorías nuevas", "Lo que entra en la lista",
+                "Lo que sale de la lista", "Personas nuevas en el hogar",
+            ]
+        )
+        #expect(Textos.Notificaciones.pie == "Solo avisa de lo que hacen las demás personas del hogar.")
+        #expect(
+            Textos.Notificaciones.desactivadas
+                == "Las notificaciones están desactivadas para Inventario Casa en Ajustes del iPhone."
+        )
+        #expect(Textos.Notificaciones.abrirAjustes == "Abrir Ajustes")
+        #expect(Textos.ErroresCuenta.avisoNoGuardado(.sinConexion) == "No se ha guardado. Sin conexión.")
+    }
+}

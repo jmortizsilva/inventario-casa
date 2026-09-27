@@ -28,6 +28,9 @@ public final class ServidorEnMemoria {
 
     /// Para simular que no hay red.
     public var sinConexion = false
+    /// Preferencias de notificaciones por usuario, y dispositivos registrados (token → usuario).
+    public internal(set) var avisos: [Int: Avisos] = [:]
+    public internal(set) var dispositivos: [String: Int] = [:]
 
     public init() {}
 
@@ -307,6 +310,23 @@ public final class ConexionEnMemoria: Conexion {
         }
         servidor.eliminar(usuario: id)
         usuario = nil
+    }
+
+    public func avisos() async throws(ErrorConexion) -> Avisos {
+        servidor.avisos[try conSesion()] ?? Avisos()
+    }
+
+    public func cambiarAvisos(_ avisos: Avisos) async throws(ErrorConexion) -> Avisos {
+        servidor.avisos[try conSesion()] = avisos
+        return avisos
+    }
+
+    public func registrarDispositivo(_ token: String, entorno: EntornoAvisos) async throws(ErrorConexion) {
+        servidor.dispositivos[token] = try conSesion()
+    }
+
+    public func quitarDispositivo(_ token: String) async throws(ErrorConexion) {
+        if servidor.dispositivos[token] == (try conSesion()) { servidor.dispositivos[token] = nil }
     }
 
     public func enviar(_ lote: Api.Lote) async throws(ErrorConexion) -> Api.RespuestaEnvio {

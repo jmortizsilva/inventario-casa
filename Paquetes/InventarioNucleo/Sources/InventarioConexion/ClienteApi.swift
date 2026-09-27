@@ -86,6 +86,28 @@ public struct ClienteApi: Sendable {
         let _: Vacia = try await pedir("DELETE", "cuenta", cuerpo: cuerpo, token: token)
     }
 
+    // MARK: Notificaciones
+
+    public func avisos(token: String) async throws(ErrorConexion) -> Avisos {
+        try await pedir("GET", "cuenta/avisos", token: token)
+    }
+
+    public func cambiarAvisos(_ avisos: Avisos, token: String) async throws(ErrorConexion) -> Avisos {
+        try await pedir("PUT", "cuenta/avisos", cuerpo: avisos, token: token)
+    }
+
+    public func registrarDispositivo(_ dispositivo: String, entorno: EntornoAvisos, token: String) async throws(ErrorConexion) {
+        let _: Vacia = try await pedir(
+            "PUT", "dispositivos",
+            cuerpo: ["token": dispositivo, "plataforma": "ios", "entorno": entorno.rawValue],
+            token: token
+        )
+    }
+
+    public func quitarDispositivo(_ dispositivo: String, token: String) async throws(ErrorConexion) {
+        let _: Vacia = try await pedir("DELETE", "dispositivos/\(dispositivo)", cuerpo: [String: String](), token: token)
+    }
+
     // MARK: Sincronización
 
     public func enviar(_ lote: Api.Lote, token: String) async throws(ErrorConexion) -> Api.RespuestaEnvio {

@@ -30,6 +30,14 @@ final class Cuenta {
     /// ocupa de «Tu hogar» y de la alerta del inventario.
     var enBienvenida = false
 
+    /// Lo que quiere recibir esta cuenta. Nil hasta que se pregunta al servidor.
+    private(set) var avisos: Avisos?
+    /// iOS tiene denegadas las notificaciones de la app: se dice en Ajustes.
+    private(set) var permisoDenegado = false
+    private let permiso: PermisoNotificaciones
+    /// El de APNs de este iPhone, para quitarlo al cerrar sesión.
+    private var tokenDispositivo: String?
+
     let inventario: Inventario
     /// El botón oficial de Apple abre la hoja del sistema, que las pruebas de
     /// interfaz no pueden manejar. Con `-servidorFalso` se usa uno normal.
@@ -58,8 +66,10 @@ final class Cuenta {
         pedirCodigoGoogle: @escaping (URL) async -> Login.Resultado,
         pedirIdentidadApple: @escaping (String) async -> ResultadoApple,
         usaBotonAppleDelSistema: Bool = true,
+        permiso: PermisoNotificaciones = .sistema,
         ahora: @escaping () -> Date = Date.init
     ) {
+        self.permiso = permiso
         self.inventario = inventario
         self.usaBotonAppleDelSistema = usaBotonAppleDelSistema
         self.conexion = conexion
@@ -99,6 +109,7 @@ final class Cuenta {
             usuario = recuperado
             await actualizarHogar()
             await sincronizar()
+            await cargarAvisos()
         case .sinConexion(let guardado):
             usuario = guardado
             sinConexion = true
@@ -179,6 +190,7 @@ final class Cuenta {
     /// Lo que no se envió se queda en el iPhone y deja de sincronizarse.
     func cerrarSesion() async {
         programada?.cancel()
+        await olvidarDispositivo()
         await conexion.cerrarSesion()
         try? inventario.separarDelHogar()
         usuario = nil
@@ -329,11 +341,85 @@ final class Cuenta {
             return Textos.ErroresCuenta.cuentaNoEliminada(causa)
         }
         programada?.cancel()
+        // El servidor ya ha borrado los dispositivos de la cuenta.
+        tokenDispositivo = nil
+        avisos = nil
         try? inventario.separarDelHogar()
         usuario = nil
         hogar = nil
         anunciar(Textos.AnunciosCuenta.cuentaEliminada)
         return nil
+    }
+
+    // MARK: Notificaciones
+
+    #if DEBUG
+    private static let entorno = EntornoAvisos.desarrollo
+    #else
+    private static let entorno = EntornoAvisos.produccion
+    #endif
+
+    /// Al abrir Ajustes. Si hay alguna activada, se vuelve a pedir el token:
+    /// iOS puede cambiarlo, y así el servidor tiene siempre el último.
+    func cargarAvisos() async {
+        guard conSesion else { return }
+        guard let cargados = try? await conexion.avisos() else { return }
+        avisos = cargados
+        guard cargados.algunoActivo else { return }
+        switch await permiso.estado() {
+        case .concedido:
+            permisoDenegado = false
+            permiso.registrar()
+        case .denegado:
+            permisoDenegado = true
+        case .sinPreguntar:
+            break
+        }
+    }
+
+    /// Activar pide permiso a iOS si aún no se ha pedido. Si se deniega, el
+    /// interruptor se queda como estaba y se dice por qué.
+    func cambiarAviso(_ cual: WritableKeyPath<Avisos, Bool>, a valor: Bool) async {
+        guard var nuevos = avisos else { return }
+        if valor {
+            switch await permiso.estado() {
+            case .denegado:
+                permisoDenegado = true
+                return
+            case .sinPreguntar:
+                guard await permiso.pedir() else {
+                    permisoDenegado = true
+                    return
+                }
+            case .concedido:
+                break
+            }
+            permisoDenegado = false
+            permiso.registrar()
+        }
+        nuevos[keyPath: cual] = valor
+        do {
+            avisos = try await conexion.cambiarAvisos(nuevos)
+        } catch {
+            anunciar(Textos.ErroresCuenta.avisoNoGuardado(error.causa))
+        }
+    }
+
+    /// Lo llama el delegado de la app cuando iOS da el token.
+    func recibirToken(_ token: String) async {
+        tokenDispositivo = token
+        guard conSesion else { return }
+        try? await conexion.registrarDispositivo(token, entorno: Self.entorno)
+    }
+
+    /// Antes de cerrar sesión: después ya no hay sesión con la que pedirlo, y
+    /// este iPhone seguiría recibiendo las notificaciones de la cuenta.
+    private func olvidarDispositivo() async {
+        if let token = tokenDispositivo {
+            try? await conexion.quitarDispositivo(token)
+        }
+        tokenDispositivo = nil
+        avisos = nil
     }
 
     // MARK: Sincronizar

@@ -21,6 +21,12 @@ public protocol Conexion: AnyObject {
     func cambiarNombre(_ nombre: String) async throws(ErrorConexion) -> Usuario
     func eliminarCuenta(codigoApple: String?) async throws(ErrorConexion)
 
+    func avisos() async throws(ErrorConexion) -> Avisos
+    func cambiarAvisos(_ avisos: Avisos) async throws(ErrorConexion) -> Avisos
+    /// El token de APNs de este iPhone. Hay que quitarlo antes de cerrar sesión: después ya no hay con qué pedirlo.
+    func registrarDispositivo(_ token: String, entorno: EntornoAvisos) async throws(ErrorConexion)
+    func quitarDispositivo(_ token: String) async throws(ErrorConexion)
+
     func enviar(_ lote: Api.Lote) async throws(ErrorConexion) -> Api.RespuestaEnvio
     func novedades(desde revision: Int) async throws(ErrorConexion) -> Api.Novedades
 }
@@ -96,6 +102,32 @@ public final class ConexionServidor: Conexion {
         }
         // La cuenta ya no existe: no hay sesión que cerrar en el servidor.
         await sesion.olvidar()
+    }
+
+    public func avisos() async throws(ErrorConexion) -> Avisos {
+        let cliente = self.cliente
+        return try await sesion.conToken { token throws(ErrorConexion) in try await cliente.avisos(token: token) }
+    }
+
+    public func cambiarAvisos(_ avisos: Avisos) async throws(ErrorConexion) -> Avisos {
+        let cliente = self.cliente
+        return try await sesion.conToken { token throws(ErrorConexion) in
+            try await cliente.cambiarAvisos(avisos, token: token)
+        }
+    }
+
+    public func registrarDispositivo(_ dispositivo: String, entorno: EntornoAvisos) async throws(ErrorConexion) {
+        let cliente = self.cliente
+        try await sesion.conToken { token throws(ErrorConexion) in
+            try await cliente.registrarDispositivo(dispositivo, entorno: entorno, token: token)
+        }
+    }
+
+    public func quitarDispositivo(_ dispositivo: String) async throws(ErrorConexion) {
+        let cliente = self.cliente
+        try await sesion.conToken { token throws(ErrorConexion) in
+            try await cliente.quitarDispositivo(dispositivo, token: token)
+        }
     }
 
     public func enviar(_ lote: Api.Lote) async throws(ErrorConexion) -> Api.RespuestaEnvio {

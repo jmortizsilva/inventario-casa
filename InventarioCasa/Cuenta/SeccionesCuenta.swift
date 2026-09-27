@@ -54,6 +54,9 @@ struct SeccionesCuenta: View {
     var body: some View {
         if let usuario = cuenta.usuario {
             seccionHogar
+            if cuenta.hogar != nil {
+                SeccionNotificaciones()
+            }
             Section(Textos.Sesion.encabezado) {
                 Text(Textos.Sesion.iniciadaComo(usuario.email))
                 if cuenta.inventario.conHogar {
@@ -116,6 +119,43 @@ struct SeccionesCuenta: View {
             }
             estado.ocupado = false
         }
+    }
+}
+
+/// Qué notificaciones recibir. Cada interruptor se guarda en el servidor al
+/// tocarlo: es él quien decide a quién avisar.
+private struct SeccionNotificaciones: View {
+    @Environment(Cuenta.self) private var cuenta
+    @Environment(\.openURL) private var abrir
+
+    var body: some View {
+        Section {
+            interruptor(Textos.Notificaciones.productosNuevos, \.productosNuevos)
+            interruptor(Textos.Notificaciones.categoriasNuevas, \.categoriasNuevas)
+            interruptor(Textos.Notificaciones.entraEnLista, \.entraEnLista)
+            interruptor(Textos.Notificaciones.saleDeLista, \.saleDeLista)
+            interruptor(Textos.Notificaciones.personasNuevas, \.personasNuevas)
+            if cuenta.permisoDenegado {
+                Text(Textos.Notificaciones.desactivadas)
+                Button(Textos.Notificaciones.abrirAjustes) {
+                    if let url = URL(string: UIApplication.openNotificationSettingsURLString) { abrir(url) }
+                }
+            }
+        } header: {
+            Text(Textos.Notificaciones.encabezado)
+        } footer: {
+            Text(Textos.Notificaciones.pie)
+        }
+        .task { await cuenta.cargarAvisos() }
+    }
+
+    private func interruptor(_ texto: String, _ cual: WritableKeyPath<Avisos, Bool>) -> some View {
+        Toggle(texto, isOn: Binding(
+            get: { cuenta.avisos?[keyPath: cual] ?? false },
+            set: { valor in Task { await cuenta.cambiarAviso(cual, a: valor) } }
+        ))
+        // Hasta saber qué hay en el servidor, no se puede cambiar.
+        .disabled(cuenta.avisos == nil)
     }
 }
 

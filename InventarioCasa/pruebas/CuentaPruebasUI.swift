@@ -223,6 +223,48 @@ final class CuentaPruebasUI: XCTestCase {
         XCTAssertTrue(app.buttons["Nevera, 2 productos"].waitForExistence(timeout: 45))
     }
 
+    // MARK: Notificaciones
+
+    private func crearHogarConGoogle(_ extra: [String] = []) {
+        abrir(extra)
+        irAAjustes()
+        pulsar("Iniciar sesión con Google")
+        pulsar("Crear hogar")
+        escribir("Casa", en: "Nombre del hogar")
+        app.navigationBars["Nuevo hogar"].buttons["Crear"].tap()
+        XCTAssertTrue(app.navigationBars["Nuevo hogar"].waitForNonExistence(timeout: 5))
+    }
+
+    /// El interruptor de verdad está dentro de la fila: tocar la fila no lo cambia.
+    private func interruptor(_ nombre: String) -> XCUIElement {
+        let fila = app.switches[nombre]
+        XCTAssertTrue(fila.waitForExistence(timeout: 5), "No aparece \(nombre)")
+        return fila
+    }
+
+    func testActivarUnaNotificacion() {
+        crearHogarConGoogle()
+        let productos = interruptor("Productos nuevos")
+        XCTAssertEqual(productos.value as? String, "0")
+        XCTAssertTrue(app.staticTexts["Solo avisa de lo que hacen las demás personas del hogar."].exists)
+        productos.switches.firstMatch.tap()
+        // Se activa al contestar el servidor, no al tocar.
+        wait(for: [expectation(for: NSPredicate(format: "value == '1'"), evaluatedWith: productos)], timeout: 5)
+        XCTAssertFalse(app.staticTexts["Las notificaciones están desactivadas para Inventario Casa en Ajustes del iPhone."].exists)
+    }
+
+    func testSinPermisoSeDiceYNoSeActiva() {
+        crearHogarConGoogle(["-sinPermisoNotificaciones"])
+        let productos = interruptor("Productos nuevos")
+        productos.switches.firstMatch.tap()
+        XCTAssertTrue(
+            app.staticTexts["Las notificaciones están desactivadas para Inventario Casa en Ajustes del iPhone."]
+                .waitForExistence(timeout: 5)
+        )
+        XCTAssertTrue(app.buttons["Abrir Ajustes"].exists)
+        XCTAssertEqual(productos.value as? String, "0")
+    }
+
     // MARK: Cuenta
 
     func testEliminarCuenta() {

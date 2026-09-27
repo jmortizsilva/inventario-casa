@@ -112,6 +112,7 @@ struct VistaRaiz: View {
                 try nuevo.cargar()
             }
             cuenta = crearCuenta(nuevo, argumentos: argumentos)
+            if let cuenta { DelegadoApp.actual?.conectar(cuenta) }
             inventario = nuevo
             falloAlAbrir = false
         } catch {
@@ -137,6 +138,22 @@ struct VistaRaiz: View {
         cuenta?.enBienvenida = false
     }
 
+    #if DEBUG
+    /// Sin la alerta del sistema, que las pruebas no controlan. Concedido,
+    /// o denegado con -sinPermisoNotificaciones. El token es inventado.
+    private static func permisoFalso(denegado: Bool) -> PermisoNotificaciones {
+        PermisoNotificaciones(
+            estado: { denegado ? .denegado : .concedido },
+            pedir: { !denegado },
+            registrar: {
+                if let delegado = DelegadoApp.actual {
+                    delegado.application(UIApplication.shared, didRegisterForRemoteNotificationsWithDeviceToken: Data(repeating: 0xab, count: 32))
+                }
+            }
+        )
+    }
+    #endif
+
     private func crearCuenta(_ inventario: Inventario, argumentos: [String]) -> Cuenta {
         #if DEBUG
         // Para las pruebas de interfaz: un servidor en memoria, con el hogar
@@ -157,7 +174,8 @@ struct VistaRaiz: View {
                 conexion: ConexionEnMemoria(servidor: servidor),
                 pedirCodigoGoogle: { _ in .exito(codigoDeCanje: "ana@ejemplo.com") },
                 pedirIdentidadApple: { _ in .exito(identityToken: "x7k2mq@privaterelay.appleid.com", codigo: "codigo") },
-                usaBotonAppleDelSistema: false
+                usaBotonAppleDelSistema: false,
+                permiso: Self.permisoFalso(denegado: argumentos.contains("-sinPermisoNotificaciones"))
             )
         }
         #endif
