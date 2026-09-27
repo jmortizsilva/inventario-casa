@@ -14,7 +14,7 @@ struct VistaListaCompra: View {
     var body: some View {
         NavigationStack {
             contenido
-                .navigationTitle(Textos.Titulos.listaCompra)
+                .tituloConHogar(Textos.Titulos.listaCompra)
         }
         .onAppear { orden = inventario.listaCompra.map(\.id) }
         .onDisappear { orden = [] }
@@ -119,6 +119,8 @@ struct VistaListaCompra: View {
 }
 
 #Preview {
+    let inventario = VistaPrevia.inventario()
     VistaListaCompra()
-        .environment(VistaPrevia.inventario())
+        .environment(inventario)
+        .environment(VistaPrevia.cuenta(inventario))
 }

@@ -10,7 +10,9 @@ import Observation
 @Observable
 final class Cuenta {
     private(set) var usuario: Usuario?
-    private(set) var hogar: Hogar?
+    private(set) var hogar: Hogar? {
+        didSet { recordarHogar() }
+    }
     private(set) var sinConexion = false
     private(set) var sesionCaducada = false
     /// Tras iniciar sesión sin hogar: la hoja «Tu hogar».
@@ -57,6 +59,25 @@ final class Cuenta {
     }
 
     var conSesion: Bool { usuario != nil }
+
+    /// Para los títulos. Sin conexión todavía no se ha preguntado al servidor,
+    /// así que se usa el último conocido, si es del hogar en el que sigue el iPhone.
+    var nombreDelHogar: String? {
+        guard let id = inventario.estado.hogarId else { return nil }
+        if let hogar, hogar.id == id { return hogar.nombre }
+        guard let recordado = UserDefaults.standard.dictionary(forKey: Self.claveHogar),
+              recordado["id"] as? String == id
+        else { return nil }
+        return recordado["nombre"] as? String
+    }
+
+    private static let claveHogar = "ultimoHogar"
+
+    private func recordarHogar() {
+        if let hogar {
+            UserDefaults.standard.set(["id": hogar.id, "nombre": hogar.nombre], forKey: Self.claveHogar)
+        }
+    }
     var pendientes: Int { inventario.pendientes.cuantos }
 
     // MARK: Arranque

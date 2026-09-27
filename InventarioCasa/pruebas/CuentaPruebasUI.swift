@@ -80,7 +80,7 @@ final class CuentaPruebasUI: XCTestCase {
 
     // MARK: Hogar
 
-    func testCrearHogarInvitarYSalir() {
+    func testCrearHogarInvitarYSalir() throws {
         abrir()
         crearCategoria("Despensa")
         irAAjustes()
@@ -97,6 +97,16 @@ final class CuentaPruebasUI: XCTestCase {
         XCTAssertTrue(app.navigationBars["Nuevo hogar"].waitForNonExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["En el hogar: Ana"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Todo enviado"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Ajustes - Casa"].exists)
+        app.tabBars.buttons["Inventario"].tap()
+        let barra = app.navigationBars["Inventario - Casa"]
+        XCTAssertTrue(barra.waitForExistence(timeout: 3))
+        // En la barra, el título antes que el botón: es el orden en que los recorre VoiceOver.
+        let etiquetas = barra.descendants(matching: .any).allElementsBoundByIndex.map(\.label)
+        let titulo = try XCTUnwrap(etiquetas.firstIndex(of: "Inventario - Casa"))
+        let anadir = try XCTUnwrap(etiquetas.firstIndex(of: "Añadir"))
+        XCTAssertLessThan(titulo, anadir)
+        app.tabBars.buttons["Ajustes"].tap()
 
         pulsar("Invitar a alguien")
         responderAlerta("Código de invitación", "Aceptar")
@@ -127,6 +137,8 @@ final class CuentaPruebasUI: XCTestCase {
         XCTAssertTrue(app.staticTexts["Sesión iniciada con Apple"].exists)
         app.tabBars.buttons["Inventario"].tap()
         XCTAssertTrue(app.buttons["Nevera, 1 producto"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["Compra"].tap()
+        XCTAssertTrue(app.navigationBars["Lista de la compra - Casa de Luis"].waitForExistence(timeout: 3))
     }
 
     func testUnirseConCosasEnElIphonePregunta() {

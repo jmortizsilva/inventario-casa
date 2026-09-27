@@ -11,7 +11,7 @@ struct VistaCategorias: View {
     var body: some View {
         NavigationStack {
             contenido
-                .navigationTitle(Textos.Titulos.inventario)
+                .tituloConHogar(Textos.Titulos.inventario)
                 // Con el título grande, VoiceOver leía antes el botón de la barra que
                 // el título, porque el título se dibuja debajo. En la barra va primero.
                 .navigationBarTitleDisplayMode(.inline)
@@ -116,11 +116,15 @@ struct VistaCategorias: View {
 }
 
 #Preview("Con categorías") {
+    let inventario = VistaPrevia.inventario()
     VistaCategorias()
-        .environment(VistaPrevia.inventario())
+        .environment(inventario)
+        .environment(VistaPrevia.cuenta(inventario))
 }
 
 #Preview("Vacía") {
+    let inventario = VistaPrevia.inventario(vacio: true)
     VistaCategorias()
-        .environment(VistaPrevia.inventario(vacio: true))
+        .environment(inventario)
+        .environment(VistaPrevia.cuenta(inventario))
 }

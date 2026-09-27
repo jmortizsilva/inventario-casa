@@ -10,6 +10,11 @@ import Testing
         #expect(Textos.Sesion.iniciadaComo("x7k2mq@privaterelay.appleid.com") == "Sesión iniciada con Apple")
     }
 
+    @Test func titulosConElHogar() {
+        #expect(Textos.titulo("Inventario", hogar: "Casa") == "Inventario - Casa")
+        #expect(Textos.titulo("Lista de la compra", hogar: nil) == "Lista de la compra")
+    }
+
     @Test func estadoDeLaSincronizacion() {
         #expect(Textos.estadoSincronizacion(pendientes: 0, sinConexion: false) == "Todo enviado")
         #expect(Textos.estadoSincronizacion(pendientes: 1, sinConexion: false) == "1 cambio sin enviar")
@@ -77,7 +82,8 @@ import Testing
         #expect(
             Textos.ConfirmacionCuenta.eliminarCuentaMensaje(hogar: "Casa", ultimaPersona: true, conApple: true)
                 == "Se eliminan tu cuenta y tus datos del servidor. El hogar Casa y su inventario también se eliminan. "
-                + "El inventario se queda en este iPhone. Apple te pedirá que confirmes."
+                + "El inventario se queda en este iPhone. Para confirmarlo, Apple te pedirá que inicies sesión otra vez. "
+                + "No se abre ninguna sesión nueva: es solo para poder eliminarla."
         )
         #expect(
             Textos.ConfirmacionCuenta.eliminarCuentaMensaje(hogar: "Casa", ultimaPersona: false, conApple: false)

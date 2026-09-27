@@ -87,7 +87,7 @@ struct SeccionesCuenta: View {
     @ViewBuilder
     private var seccionHogar: some View {
         if let hogar = cuenta.hogar {
-            Section(hogar.nombre) {
+            Section(Textos.Hogar.encabezado) {
                 Text(Textos.Hogar.personas(hogar.miembros.map { $0.nombre ?? $0.email }))
                 Button(Textos.Hogar.invitar, action: invitar)
                     .disabled(estado.ocupado)
@@ -96,7 +96,7 @@ struct SeccionesCuenta: View {
                     .disabled(estado.ocupado)
             }
         } else {
-            Section(Textos.Hogar.encabezadoSinHogar) {
+            Section(Textos.Hogar.encabezado) {
                 Text(Textos.Hogar.sinHogar)
                 Button(Textos.Hogar.crear) { estado.hoja = .crear }
                 Button(Textos.Hogar.unirmeConCodigo) { estado.hoja = .unirse }

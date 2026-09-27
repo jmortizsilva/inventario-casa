@@ -44,6 +44,15 @@ extension Textos {
         }
     }
 
+    // MARK: Títulos
+
+    /// «Inventario - Casa». Primero la pantalla, que es lo que distingue una
+    /// de otra; el hogar es el mismo en todas. Guion entre espacios: VoiceOver
+    /// hace una pausa y no lo nombra.
+    public static func titulo(_ pantalla: String, hogar: String?) -> String {
+        hogar.map { "\(pantalla) - \($0)" } ?? pantalla
+    }
+
     // MARK: Estado de la sincronización
 
     public static func estadoSincronizacion(pendientes n: Int, sinConexion: Bool) -> String {
@@ -59,7 +68,7 @@ extension Textos {
     // MARK: Hogar
 
     public enum Hogar {
-        public static let encabezadoSinHogar = "Hogar"
+        public static let encabezado = "Hogar"
         public static let sinHogar = "No estás en ningún hogar."
         public static let tituloElegir = "Tu hogar"
         public static let explicacion =
@@ -168,7 +177,12 @@ extension Textos {
             }
             partes.append("El inventario se queda en este iPhone.")
             if conApple {
-                partes.append("Apple te pedirá que confirmes.")
+                // La hoja de Apple dice «iniciar sesión» y no se puede cambiar:
+                // sin avisar, parece que se va a entrar y no a eliminar.
+                partes.append(
+                    "Para confirmarlo, Apple te pedirá que inicies sesión otra vez. "
+                        + "No se abre ninguna sesión nueva: es solo para poder eliminarla."
+                )
             }
             return partes.joined(separator: " ")
         }

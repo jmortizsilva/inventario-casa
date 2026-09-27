@@ -32,7 +32,7 @@ struct VistaAjustes: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle(Textos.Titulos.ajustes)
+            .tituloConHogar(Textos.Titulos.ajustes)
             .modifier(PresentacionesCuenta(estado: estadoCuenta))
         }
         .sheet(isPresented: $mostrarManual) {

@@ -21,9 +21,14 @@ La columna **Antes** es el texto de la app de Expo, cuando cambia.
 
 | Pestaña | Título de la pantalla | Antes |
 |---|---|---|
-| Inventario | Inventario | Inventario Casa, {hogar} |
-| Compra | Lista de la compra | |
-| Ajustes | Ajustes | |
+| Inventario | Inventario · con hogar: Inventario - {hogar} | Inventario Casa, {hogar} |
+| Compra | Lista de la compra · con hogar: Lista de la compra - {hogar} | |
+| Ajustes | Ajustes · con hogar: Ajustes - {hogar} | |
+
+Primero la pantalla, que es lo que distingue una de otra. Guion entre
+espacios: VoiceOver hace una pausa y no lo nombra. Si no cabe en una línea,
+el título pasa a dos; no se corta con «…». Sin conexión se usa el último
+nombre conocido del hogar.
 
 ## Categorías (pestaña Inventario)
 
@@ -337,7 +342,7 @@ hay categorías, todo va en femenino: «¿Las añades…?», «Añadirlas»,
 
 | Elemento | Texto |
 |---|---|
-| Encabezado de sección | {hogar} |
+| Encabezado de sección | Hogar (el nombre ya está en el título) |
 | Fila | En el hogar: Ana y Luis |
 | Botón | Cambiar tu nombre |
 | Botón | Invitar a alguien |
@@ -377,7 +382,9 @@ Texto que se comparte: «Únete a mi hogar en Inventario Casa con el código
 Cerrar sesión sin cambios pendientes no pregunta. En «Eliminar cuenta», la
 frase del hogar es «El hogar sigue para las demás personas.» o, si es la
 última, «El hogar {hogar} y su inventario también se eliminan.». Con cuenta de
-Apple se añade «Apple te pedirá que confirmes.», porque después sale su hoja.
+Apple se añade «Para confirmarlo, Apple te pedirá que inicies sesión otra vez.
+No se abre ninguna sesión nueva: es solo para poder eliminarla.», porque
+después sale su hoja, que dice «iniciar sesión» y no se puede cambiar.
 
 ### Anuncios y errores
 
