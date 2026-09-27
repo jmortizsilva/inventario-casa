@@ -137,9 +137,19 @@ extension Textos {
             "\(codigo). Sirve una vez y caduca el \(fecha(caduca, zona: zona))."
         }
 
+        /// El enlace primero y al final de su línea: así las apps de mensajes
+        /// lo reconocen y lo hacen pulsable. El código va también por si el
+        /// enlace no abre la app.
         public static func textoCompartido(codigo: String, caduca: Date, zona: TimeZone = .current) -> String {
-            "Únete a mi hogar en Inventario Casa con el código \(codigo). Caduca el \(fecha(caduca, zona: zona))."
+            "Únete a mi hogar en Inventario Casa: \(EnlaceInvitacion.url(codigo: codigo).absoluteString)\n"
+                + "Si no se abre la app, escribe el código \(codigo) en Ajustes, Unirme con un código. "
+                + "Caduca el \(fecha(caduca, zona: zona))."
         }
+
+        /// Al abrir el enlace sin sesión.
+        public static let iniciaParaUnirte = "Para unirte a un hogar, inicia sesión."
+        public static func yaEnHogarTitulo(_ hogar: String) -> String { "Ya estás en \(hogar)" }
+        public static let yaEnHogarMensaje = "Para unirte a otro, sal antes de este."
     }
 
     // MARK: Confirmaciones de cuenta y hogar

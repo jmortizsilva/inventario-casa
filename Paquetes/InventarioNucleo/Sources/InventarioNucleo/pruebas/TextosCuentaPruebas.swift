@@ -65,8 +65,13 @@ import Testing
         )
         #expect(
             Textos.Invitacion.textoCompartido(codigo: "K7PX3MQA", caduca: caduca, zona: madrid)
-                == "Únete a mi hogar en Inventario Casa con el código K7PX3MQA. Caduca el 3 de octubre."
+                == "Únete a mi hogar en Inventario Casa: https://inventario.jmortiz.es/unirse/K7PX3MQA\n"
+                + "Si no se abre la app, escribe el código K7PX3MQA en Ajustes, Unirme con un código. "
+                + "Caduca el 3 de octubre."
         )
+        #expect(Textos.Invitacion.iniciaParaUnirte == "Para unirte a un hogar, inicia sesión.")
+        #expect(Textos.Invitacion.yaEnHogarTitulo("Casa") == "Ya estás en Casa")
+        #expect(Textos.Invitacion.yaEnHogarMensaje == "Para unirte a otro, sal antes de este.")
     }
 
     @Test func confirmaciones() {
@@ -117,5 +122,30 @@ import Testing
 
     @Test func elManualExplicaCompartir() {
         #expect(Textos.manual.last?.titulo == "Compartir con tu casa")
+    }
+}
+
+@Suite struct EnlaceInvitacionPruebas {
+    @Test func leeElCodigo() {
+        #expect(EnlaceInvitacion.codigo(de: URL(string: "https://inventario.jmortiz.es/unirse/K7PX3MQA")!) == "K7PX3MQA")
+        #expect(EnlaceInvitacion.codigo(de: URL(string: "https://inventario.jmortiz.es/unirse/k7px3mqa")!) == "K7PX3MQA")
+        #expect(EnlaceInvitacion.codigo(de: URL(string: "https://inventario.jmortiz.es/unirse/K7PX3MQA/")!) == "K7PX3MQA")
+    }
+
+    @Test func loQueNoEsUnaInvitacionNoSeLee() {
+        for texto in [
+            "https://otro.ejemplo.com/unirse/K7PX3MQA",
+            "http://inventario.jmortiz.es/unirse/K7PX3MQA",
+            "https://inventario.jmortiz.es/hogar/K7PX3MQA",
+            "https://inventario.jmortiz.es/unirse/",
+            "https://inventario.jmortiz.es/unirse/K7PX%3Cb%3E",
+            "https://inventario.jmortiz.es/unirse/K7PX3MQA/otra",
+        ] {
+            #expect(EnlaceInvitacion.codigo(de: URL(string: texto)!) == nil, "\(texto)")
+        }
+    }
+
+    @Test func formaElEnlace() {
+        #expect(EnlaceInvitacion.url(codigo: "K7PX3MQA").absoluteString == "https://inventario.jmortiz.es/unirse/K7PX3MQA")
     }
 }

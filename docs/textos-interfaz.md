@@ -367,8 +367,32 @@ en ningún hogar.» y los botones «Crear hogar» y «Unirme con un código».
 El código se muestra tal cual; quien lo necesite letra a letra lo lee con
 el rotor de VoiceOver. {fecha} se escribe «3 de octubre».
 
-Texto que se comparte: «Únete a mi hogar en Inventario Casa con el código
-{codigo}. Caduca el {fecha}.»
+Texto que se comparte, con el enlace al final de su línea para que las apps
+de mensajes lo hagan pulsable:
+
+> Únete a mi hogar en Inventario Casa: https://inventario.jmortiz.es/unirse/{codigo}
+> Si no se abre la app, escribe el código {codigo} en Ajustes, Unirme con un código. Caduca el {fecha}.
+
+### Abrir el enlace de invitación
+
+| Situación | Qué pasa |
+|---|---|
+| Con sesión y sin hogar | Se abre «Unirme a un hogar» con el código escrito. Hay que pulsar Unirme |
+| Sin sesión | Hoja «Unirme a un hogar» con «Para unirte a un hogar, inicia sesión.» y los botones de Apple y Google; al iniciar sesión, sigue con el código escrito |
+| Ya en un hogar | Alerta «Ya estás en {hogar}», mensaje «Para unirte a otro, sal antes de este.», botón Aceptar |
+| Primera vez, con la bienvenida | Primero la bienvenida; al iniciar sesión, sigue a «Unirme a un hogar» con el código |
+
+Página web, si se abre sin la app. Dice «móvil» y no «iPhone»: servirá
+también para Android.
+
+| Elemento | Texto |
+|---|---|
+| Título de la pestaña | Invitación a Inventario Casa |
+| Encabezado | Te han invitado a un hogar |
+| Párrafo | Abre este enlace en el móvil donde tengas Inventario Casa y se abrirá la invitación. |
+| Párrafo | O escribe este código en la app, en Ajustes, Unirme con un código: |
+| Código, en grande | {codigo} |
+| Párrafo | El código sirve una vez y caduca a los 7 días. |
 
 ### Confirmaciones
 

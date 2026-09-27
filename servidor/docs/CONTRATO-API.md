@@ -147,6 +147,21 @@ Ocho caracteres de `ABCDEFGHJKMNPQRSTUVWXYZ23456789` (sin 0/O ni 1/I/L), válido
 7 días y un solo uso. Lo puede crear cualquier miembro. `409` si no está en un
 hogar.
 
+### Enlace de invitación: `GET /unirse/:codigo`
+
+`https://inventario.jmortiz.es/unirse/K7PX3MQA`. Lo comparte la app junto al
+código. Con la app instalada lo abre la app (enlace universal en iOS; en
+Android, App Link) y rellena el código; hay que pulsar Unirme igualmente.
+Sin la app, el servidor responde una página HTML con el código y cómo usarlo.
+
+La página no comprueba si el código vale: sería una forma de probar códigos
+sin el límite de intentos de `POST /hogar/unirse`. Solo acepta letras y
+números (hasta 16); con otra cosa, la página sale sin código.
+
+`GET /.well-known/apple-app-site-association` dice a iOS que `/unirse/*` es
+de la app `S92QZXCW54.com.jmortiz.inventario`. La app de Android necesitará
+`/.well-known/assetlinks.json` con la misma ruta.
+
 ### `POST /hogar/unirse`
 
 ```json
