@@ -335,3 +335,34 @@ private func indice<T: Identifiable>(_ elementos: [T]) -> [T.ID: T] {
         #expect(categorias.isEmpty)
     }
 }
+
+@Suite struct EliminarEsDefinitivoPruebas {
+    @Test func unBorradoDelServidorGanaAunqueHayaCambiosEnLaCola() {
+        let despensa = Categoria(nombre: "Despensa", creado: instante)
+        var local = producto("Legía", cantidad: 2, categoriaId: despensa.id)
+        local.nombre = "Legía."
+        var cola = Pendientes()
+        cola.anotar(producto: local.id)
+        cola.anotar(categoria: despensa.id)
+        let borrado = Api.Producto(local, fijada: nil)
+        let productoBorrado = Api.Producto(
+            id: borrado.id, categoriaId: borrado.categoriaId, nombre: "Legía", cantidad: 2, cantidadFijadaEn: nil,
+            umbralCompra: borrado.umbralCompra, autoListaCompra: true, enListaCompraManual: false,
+            creado: borrado.creado, modificado: despues.milisegundos, borrado: true
+        )
+        let categoriaBorrada = Api.Categoria(
+            id: despensa.id.uuidString.lowercased(), nombre: "Despensa", creado: instante.milisegundos,
+            modificado: despues.milisegundos, borrado: true
+        )
+
+        let (categorias, productos) = Sincronizacion.fusionar(
+            categorias: [categoriaBorrada],
+            productos: [productoBorrado],
+            en: ([despensa.id: despensa], [local.id: local]),
+            pendientes: cola
+        )
+
+        #expect(categorias.first?.estaBorrada == true)
+        #expect(productos.first?.estaBorrado == true)
+    }
+}

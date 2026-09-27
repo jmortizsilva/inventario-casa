@@ -182,6 +182,9 @@ function aplicarCategoria(hogarId: string, nueva: CategoriaEntrante, productosTo
   const bd = obtenerBd();
   const existente = bd.prepare('SELECT * FROM categorias WHERE id = ?').get(nueva.id) as FilaCategoria | undefined;
   if (existente && existente.hogar_id !== hogarId) return 'no_aplicable';
+  // Eliminar es definitivo: nada que llegue después la revive, aunque traiga una hora más
+  // reciente. Quien la manda no se había enterado del borrado; recibe la versión borrada.
+  if (existente?.borrado === 1) return undefined;
   if (!ganaLaNueva(existente?.modificado, nueva.modificado)) return undefined;
 
   const revision = siguienteRevision(hogarId);
@@ -213,6 +216,9 @@ function aplicarProducto(hogarId: string, nuevo: ProductoEntrante): Motivo | und
     | { hogar_id: string; borrado: number }
     | undefined;
   if (!categoria || categoria.hogar_id !== hogarId) return 'sin_categoria';
+  // Eliminar es definitivo, como en las categorías: así volvió «Legía.» cuando otro iPhone,
+  // sin saber que estaba borrada, mandó una edición posterior.
+  if (existente?.borrado === 1) return undefined;
 
   // En una categoría borrada solo puede quedar borrado, llegue cuando llegue.
   const borrado = nuevo.borrado || categoria.borrado === 1;
@@ -265,10 +271,12 @@ function aplicarProducto(hogarId: string, nuevo: ProductoEntrante): Motivo | und
 // cuenta doble, pero tampoco es un error: el móvil puede reenviar un lote que no vio confirmado.
 function aplicarMovimiento(hogarId: string, movimiento: MovimientoEntrante): boolean {
   const bd = obtenerBd();
-  const producto = bd.prepare('SELECT hogar_id FROM productos WHERE id = ?').get(movimiento.productoId) as
-    | { hogar_id: string }
+  const producto = bd.prepare('SELECT hogar_id, borrado FROM productos WHERE id = ?').get(movimiento.productoId) as
+    | { hogar_id: string; borrado: number }
     | undefined;
   if (!producto || producto.hogar_id !== hogarId) return false;
+  // Sobre algo borrado no cuenta, pero tampoco es un error: quien toca no lo sabía.
+  if (producto.borrado === 1) return true;
   const existente = bd.prepare('SELECT producto_id FROM movimientos WHERE id = ?').get(movimiento.id) as
     | { producto_id: string }
     | undefined;

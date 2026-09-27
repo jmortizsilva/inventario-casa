@@ -154,6 +154,30 @@ describe('borrar una categoría', () => {
   });
 });
 
+describe('eliminar es definitivo', () => {
+  it('un producto borrado no vuelve con una edición posterior de quien no se enteró', () => {
+    aplicar({ categorias: [cat('c1', 10)], productos: [prod('p1', 10, { cantidad: 2, cantidadFijadaEn: 10 })] });
+    aplicar({ productos: [prod('p1', 20, { borrado: true })] });
+
+    // El otro iPhone suma dos y edita el nombre, más tarde que el borrado.
+    const r = aplicar({
+      productos: [prod('p1', 30, { nombre: 'Legía.', cantidad: 5, cantidadFijadaEn: 30 })],
+      movimientos: [mov('m1', 1, 25), mov('m2', 1, 26)],
+    });
+
+    expect(r.rechazados).toEqual([]);
+    expect(r.productos).toEqual([expect.objectContaining({ id: 'p1', borrado: true, nombre: 'Arroz', cantidad: 2 })]);
+    expect(novedadesDesde(hogar, 0, 10).productos[0]).toMatchObject({ borrado: true, cantidad: 2 });
+  });
+
+  it('una categoría borrada no vuelve', () => {
+    aplicar({ categorias: [cat('c1', 10)] });
+    aplicar({ categorias: [cat('c1', 20, { borrado: true })] });
+    const r = aplicar({ categorias: [cat('c1', 30, { nombre: 'Alacena' })] });
+    expect(r.categorias[0]).toMatchObject({ borrado: true, nombre: 'Despensa' });
+  });
+});
+
 describe('novedades por revisión', () => {
   it('solo lo cambiado después, con páginas', () => {
     const primera = aplicar({ categorias: [cat('c1', 10)], productos: [prod('p1', 10)] });

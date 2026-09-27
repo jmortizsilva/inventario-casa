@@ -134,8 +134,10 @@ public enum Sincronizacion {
     ) -> (categorias: [Categoria], productos: [Producto]) {
         var categorias: [Categoria] = []
         for recibida in recibidas {
+            // Un borrado entra aunque haya cambios en la cola: eliminar es
+            // definitivo y el servidor no va a aceptar esos cambios.
             guard let id = UUID(uuidString: recibida.id),
-                  !pendientes.categorias.contains(id)
+                  recibida.borrado || !pendientes.categorias.contains(id)
             else { continue }
             let local = locales.categorias[id]
             let nueva = Categoria(
@@ -161,8 +163,8 @@ public enum Sincronizacion {
             )
 
             let nuevo: Producto
-            if pendientes.productos.contains(id), let local {
-                nuevo = local.fijandoCantidadSinTocarFecha(cantidad)
+            if pendientes.productos.contains(id), !recibido.borrado, let local {
+                nuevo = local.fijandoCantidad(cantidad)
             } else {
                 nuevo = Producto(
                     id: id,
@@ -187,17 +189,5 @@ public enum Sincronizacion {
     private static func borrado(_ estaBorrado: Bool, local: Date?, modificado: Int64) -> Date? {
         guard estaBorrado else { return nil }
         return local ?? Date(milisegundos: modificado)
-    }
-}
-
-extension Producto {
-    /// Las unidades que llegan del servidor no son un cambio de quien usa el
-    /// iPhone: no mueven `modificado`, o ganarían al servidor en el siguiente
-    /// envío sin que nadie las hubiera tocado.
-    func fijandoCantidadSinTocarFecha(_ nueva: Int) -> Producto {
-        let modificado = self.modificado
-        var copia = fijandoCantidad(nueva, ahora: modificado)
-        copia.modificado = modificado
-        return copia
     }
 }

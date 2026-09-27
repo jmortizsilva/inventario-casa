@@ -44,18 +44,23 @@ public struct Producto: Identifiable, Hashable, Codable, Sendable {
 
 extension Producto {
     /// Para los botones de más y menos. Si el valor no cambia (ya está en 0 o
-    /// en el máximo), el producto se devuelve intacto y no cuenta como modificado.
-    public func ajustandoCantidad(en cambio: Int, ahora: Date) -> Producto {
-        fijandoCantidad(cantidad + cambio, ahora: ahora)
+    /// en el máximo), el producto se devuelve intacto.
+    public func ajustandoCantidad(en cambio: Int) -> Producto {
+        fijandoCantidad(cantidad + cambio)
     }
 
     /// Para la pantalla de edición, donde se elige el valor final.
-    public func fijandoCantidad(_ nueva: Int, ahora: Date) -> Producto {
+    ///
+    /// No toca `modificado`: las unidades se sincronizan con su propia hora
+    /// (movimientos y fijaciones). Moviéndolo, un producto al que solo se le
+    /// había dado a «+» parecía recién editado y le ganaba al servidor a
+    /// cambios de otra persona, incluido un borrado: así volvió «Legía.»
+    /// tras borrarla desde otro iPhone.
+    public func fijandoCantidad(_ nueva: Int) -> Producto {
         let acotada = Limites.cantidad.acotar(nueva)
         guard acotada != cantidad else { return self }
         var copia = self
         copia.cantidad = acotada
-        copia.modificado = ahora
         return copia
     }
 

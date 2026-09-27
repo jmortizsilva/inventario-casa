@@ -193,3 +193,40 @@ private func hogarDeAnaYLuis() async throws
         #expect(luis.cantidad("Arroz") == 8)
     }
 }
+
+/// Lo que pasó con «Legía.»: una persona la borra y la otra, sin enterarse,
+/// suma unidades y cambia el nombre. Tiene que quedar borrada en los dos.
+@MainActor
+@Suite struct EliminarEsDefinitivoEnDosIphonePruebas {
+    @Test func loBorradoNoVuelve() async throws {
+        let (ana, luis, _, _) = try await hogarDeAnaYLuis()
+        let arroz = try #require(ana.producto("Arroz"))
+
+        try luis.inventario.borrarProducto(arroz.id)
+        try await luis.sincronizar()
+
+        // Ana no se ha enterado: suma dos y cambia el nombre.
+        try ana.inventario.ajustarCantidad(arroz.id, en: 1)
+        try ana.inventario.ajustarCantidad(arroz.id, en: 1)
+        let enAna = try #require(ana.producto("Arroz"))
+        try ana.inventario.editarProducto(
+            arroz.id, nombre: "Arroz largo", cantidad: enAna.cantidad, umbralCompra: enAna.umbralCompra, autoListaCompra: true
+        )
+        try await ana.sincronizar()
+        try await luis.sincronizar()
+
+        #expect(ana.producto("Arroz largo") == nil)
+        #expect(ana.producto("Arroz") == nil)
+        #expect(luis.producto("Arroz") == nil)
+        #expect(luis.producto("Arroz largo") == nil)
+        #expect(ana.inventario.pendientes.estaVacia)
+    }
+
+    @Test func tocarMasYMenosNoMueveLaFechaDelProducto() async throws {
+        let (ana, _, _, _) = try await hogarDeAnaYLuis()
+        let antes = try #require(ana.producto("Arroz"))
+        try ana.inventario.ajustarCantidad(antes.id, en: 1)
+        #expect(ana.producto("Arroz")?.modificado == antes.modificado)
+        #expect(ana.inventario.pendientes.productos.isEmpty)
+    }
+}

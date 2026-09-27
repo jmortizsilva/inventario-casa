@@ -53,7 +53,11 @@ import Testing
         let editado = try inventario.editarProducto(
             arroz.id, nombre: "Arroz", cantidad: 6, umbralCompra: arroz.umbralCompra, autoListaCompra: true
         )
-        #expect(inventario.pendientes.fijadas[arroz.id] == CantidadFijada(cantidad: 6, en: editado.modificado))
+        let fijada = try #require(inventario.pendientes.fijadas[arroz.id])
+        #expect(fijada.cantidad == 6)
+        #expect(fijada.en > arroz.creado)
+        // Solo cambiaron las unidades, que llevan su hora aparte: el producto no.
+        #expect(editado.modificado == arroz.modificado)
     }
 
     @Test func editarOtraCosaNoTocaLaFijadaAnterior() throws {

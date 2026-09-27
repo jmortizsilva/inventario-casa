@@ -79,6 +79,13 @@ lógico, envío y recepción por lotes), con dos diferencias:
   unidades desde la ficha sí es un valor final. El núcleo ya separa las dos
   operaciones (`ajustarCantidad` y `fijarCantidad`).
 
+**Eliminar es definitivo** (27 de septiembre de 2026). Con «gana el último»,
+un iPhone que no se había enterado de un borrado lo deshacía al mandar una
+edición posterior, y así volvió un producto borrado. Ahora un borrado no se
+deshace sincronizando. Las unidades tampoco mueven la hora de modificación
+del producto: van con su propia hora, y moviéndola, un producto al que solo
+se le había dado a «+» parecía recién editado.
+
 Consecuencia a aceptar: si dos personas crean «Leche» en la misma categoría
 sin conexión, aparecen las dos. El servidor no fusiona nada por su cuenta; se
 ve y se elimina una.

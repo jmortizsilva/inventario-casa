@@ -23,25 +23,27 @@ import Testing
     }
 
     @Test func ajustarCantidad() {
-        let p = producto(cantidad: 5).ajustandoCantidad(en: 1, ahora: despues)
+        let original = producto(cantidad: 5)
+        let p = original.ajustandoCantidad(en: 1)
         #expect(p.cantidad == 6)
-        #expect(p.modificado == despues)
+        // Las unidades van con su propia hora: la del producto no se mueve.
+        #expect(p.modificado == original.modificado)
     }
 
     @Test func noBajaDeCeroNiCuentaComoCambio() {
         let original = producto(cantidad: 0)
-        let p = original.ajustandoCantidad(en: -1, ahora: despues)
+        let p = original.ajustandoCantidad(en: -1)
         #expect(p == original)
     }
 
     @Test func noPasaDelMaximo() {
         let original = producto(cantidad: 999)
-        #expect(original.ajustandoCantidad(en: 1, ahora: despues) == original)
+        #expect(original.ajustandoCantidad(en: 1) == original)
     }
 
     @Test func fijarCantidadYUmbral() {
         let p = producto(cantidad: 5)
-            .fijandoCantidad(2, ahora: despues)
+            .fijandoCantidad(2)
             .fijandoUmbralCompra(25, ahora: despues)
         #expect(p.cantidad == 2)
         #expect(p.umbralCompra == 20)

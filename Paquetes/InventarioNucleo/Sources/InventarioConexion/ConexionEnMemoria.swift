@@ -132,7 +132,10 @@ public final class ServidorEnMemoria {
                 continue
             }
             categoriasTocadas.append(nueva.id)
-            if let existente = categorias[nueva.id], nueva.modificado <= existente.api.modificado { continue }
+            // Eliminar es definitivo, como en el servidor.
+            if let existente = categorias[nueva.id], existente.api.borrado || nueva.modificado <= existente.api.modificado {
+                continue
+            }
             categorias[nueva.id] = (nueva, hogar, siguienteRevision(hogar))
             if nueva.borrado {
                 for (id, producto) in productos where producto.guardado.api.categoriaId == nueva.id && !producto.guardado.api.borrado {
@@ -154,6 +157,7 @@ public final class ServidorEnMemoria {
             }
             productosTocados.insert(nuevo.id)
             let existente = productos[nuevo.id]?.guardado
+            if existente?.api.borrado == true { continue }
             let gana = existente.map { nuevo.modificado > $0.api.modificado } ?? true
             let fijadaGana = nuevo.cantidadFijadaEn.map { $0 > (existente?.fijadaEn ?? -1) } ?? false
             // Lo que se guarda es la fila sin la fijada, con la cantidad que ya
@@ -175,7 +179,9 @@ public final class ServidorEnMemoria {
                 rechazados.append(.init(tipo: "movimiento", id: movimiento.id, motivo: "no_aplicable"))
                 continue
             }
-            if movimientos[movimiento.id] == nil { movimientos[movimiento.id] = movimiento }
+            if !producto.guardado.api.borrado, movimientos[movimiento.id] == nil {
+                movimientos[movimiento.id] = movimiento
+            }
             productosTocados.insert(movimiento.productoId)
         }
 

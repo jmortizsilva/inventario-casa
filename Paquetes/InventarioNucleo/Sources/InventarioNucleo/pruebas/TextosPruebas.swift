@@ -58,20 +58,20 @@ import Testing
 
     @Test func anuncioDeAjusteSinCambioDeLista() {
         let antes = producto(cantidad: 5)
-        let ajustado = antes.ajustandoCantidad(en: 1, ahora: despues)
+        let ajustado = antes.ajustandoCantidad(en: 1)
         #expect(Textos.Anuncios.ajusteCantidad(antes: antes, despues: ajustado, cambio: 1) == "6 unidades")
     }
 
     @Test func anuncioDeAjusteQueEntraOSaleDeLaLista() {
         let tres = producto(cantidad: 3, umbral: 2)
-        let dos = tres.ajustandoCantidad(en: -1, ahora: despues)
+        let dos = tres.ajustandoCantidad(en: -1)
         #expect(Textos.Anuncios.ajusteCantidad(antes: tres, despues: dos, cambio: -1) == "2 unidades, añadido a la lista")
         #expect(Textos.Anuncios.ajusteCantidad(antes: dos, despues: tres, cambio: 1) == "3 unidades, fuera de la lista")
     }
 
     @Test func anuncioDeAjusteManualNoCambiaLaLista() {
         let antes = producto(cantidad: 3, umbral: 2, manual: true)
-        let ajustado = antes.ajustandoCantidad(en: -1, ahora: despues)
+        let ajustado = antes.ajustandoCantidad(en: -1)
         #expect(Textos.Anuncios.ajusteCantidad(antes: antes, despues: ajustado, cambio: -1) == "2 unidades")
     }
 

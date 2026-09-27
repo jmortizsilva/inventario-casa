@@ -28,7 +28,7 @@ private let instante = Date(timeIntervalSince1970: 1_750_000_000)
         let producto = Producto(categoriaId: UUID(), nombre: "Leche", cantidad: 1, creado: instante)
         try almacen.guardar(categorias: [], productos: [producto])
 
-        let cambiado = producto.fijandoCantidad(7, ahora: instante.addingTimeInterval(60))
+        let cambiado = producto.fijandoCantidad(7)
         try almacen.guardar(categorias: [], productos: [cambiado])
 
         #expect(try almacen.reabrir().cargarProductos() == [cambiado])

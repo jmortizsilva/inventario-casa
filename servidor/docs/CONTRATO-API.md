@@ -288,6 +288,13 @@ lleguen después a esa categoría (se aceptan y se devuelven ya borrados). Así
 nadie se queda con productos sueltos de una categoría que otra persona
 eliminó.
 
+**Eliminar es definitivo.** Una categoría o un producto borrados no vuelven
+por una sincronización, aunque llegue una versión sin borrar con hora más
+reciente: la manda alguien que no se había enterado del borrado. Se acepta
+sin rechazarlo y se devuelve la versión borrada. Los movimientos sobre un
+producto borrado tampoco cuentan. (Decidido el 27 de septiembre de 2026, tras
+volver un producto borrado desde otro iPhone.)
+
 Nombres repetidos: el servidor no fusiona nada. Si dos personas crean
 «Leche» en la misma categoría sin conexión, quedan las dos.
 

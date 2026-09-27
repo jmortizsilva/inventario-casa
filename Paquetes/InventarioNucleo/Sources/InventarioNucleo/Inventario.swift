@@ -148,7 +148,7 @@ public final class Inventario {
         let momento = ahora()
 
         var editado = original
-            .fijandoCantidad(cantidad, ahora: momento)
+            .fijandoCantidad(cantidad)
             .fijandoUmbralCompra(umbralCompra, ahora: momento)
         if editado.nombre != limpio {
             editado.nombre = limpio
@@ -174,7 +174,7 @@ public final class Inventario {
     public func ajustarCantidad(_ id: UUID, en cambio: Int) throws(ErrorInventario) -> Producto {
         guard let original = producto(id) else { throw .noEncontrado }
         let momento = ahora()
-        let ajustado = original.ajustandoCantidad(en: cambio, ahora: momento)
+        let ajustado = original.ajustandoCantidad(en: cambio)
         guard ajustado != original else { return original }
         // Se manda lo que cambió de verdad, no lo pedido: en 0, un «−1» no
         // cambia nada aquí y tampoco tiene que restar en el servidor.
