@@ -80,7 +80,17 @@ APPLE_CLIENT_ID=com.jmortizsilva.inventario.web
 APPLE_TEAM_ID=S92QZXCW54
 APPLE_KEY_ID=SKA74TT72C
 APPLE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIGT...\n-----END PRIVATE KEY-----
+APNS_KEY_ID=PXDB7UHZL9
+APNS_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIGT...\n-----END PRIVATE KEY-----
+APNS_TOPIC=com.jmortiz.inventario
 ```
+
+- `APNS_*` es la clave de notificaciones, distinta de la de Sign in with
+  Apple. Solo de producción y limitada a la app: las notificaciones llegan
+  a TestFlight y a la App Store, no a lo compilado desde Xcode. Se creó así
+  porque el equipo ya tenía el máximo de claves de notificaciones «de
+  equipo» (serán las que creó EAS para las versiones de Expo). Sin estas
+  variables el servidor arranca, avisa y no manda notificaciones.
 
 - `APPLE_APP_ID` no está: vale por defecto `com.jmortiz.inventario`.
 - `APPLE_PRIVATE_KEY` va en una sola línea, con `\n` donde el `.p8` tiene
@@ -100,6 +110,8 @@ APPLE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIGT...\n-----END PRIVATE KEY----
 | Apple, App ID `com.jmortiz.inventario` | Sign in with Apple, como App ID principal |
 | Apple, Services ID `com.jmortizsilva.inventario.web` | Dominio `inventario.jmortiz.es`, vuelta `https://inventario.jmortiz.es/auth/callback/apple` |
 | Apple, clave `SKA74TT72C` | Sign in with Apple, asociada al App ID |
+| Apple, clave `PXDB7UHZL9` | Notificaciones (APNs), producción, limitada a `com.jmortiz.inventario` |
+| Apple, App ID | Associated Domains (`applinks:inventario.jmortiz.es`) y notificaciones |
 
 Para saber si las credenciales sirven, sin entrar: el `client_id` de la
 redirección tiene que ser el de verdad.
