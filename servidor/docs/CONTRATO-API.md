@@ -76,6 +76,46 @@ vacío o pasa de 100 letras; se limpian los espacios como en los nombres de
 hogar. Un inicio de sesión posterior con Google no lo sobrescribe: el del
 proveedor solo se usa si no había ninguno.
 
+### Notificaciones: `GET /cuenta/avisos` y `PUT /cuenta/avisos`
+
+Qué quiere recibir cada persona. Todo empieza en `false`.
+
+```json
+{ "productosNuevos": false, "categoriasNuevas": false, "entraEnLista": true,
+  "saleDeLista": false, "personasNuevas": false }
+```
+
+`PUT` admite solo los que cambian y devuelve todos. `400` si alguno no es
+booleano.
+
+### `PUT /dispositivos` y `DELETE /dispositivos/:token`
+
+Dónde mandar las notificaciones de esta cuenta.
+
+```json
+{ "token": "<token de APNs en hexadecimal>", "plataforma": "ios", "entorno": "produccion" }
+```
+
+`entorno` es `produccion` (TestFlight y App Store) o `desarrollo` (compilado
+desde Xcode). Un token que ya tenía otra cuenta pasa a esta: es el mismo
+iPhone con otra sesión. `DELETE` al cerrar sesión, antes de
+`/auth/logout`, que ya no deja pedir nada. `plataforma` admitirá `android`.
+
+### Cuándo se avisa
+
+Tras un `POST /sincronizar` o un `POST /hogar/unirse`, el servidor avisa a
+las demás personas del hogar que lo tengan activado, nunca a quien hizo el
+cambio. Una notificación por tipo y por envío; los textos, en
+`docs/textos-interfaz.md`. Qué cuenta:
+
+- **Producto o categoría nuevos:** los que no existían y no llegan borrados.
+- **Entra o sale de la lista:** los que cambian de estar a no estar en la
+  lista, con la regla de `pruebas-compartidas/lista-compra.json`. Uno
+  borrado no «sale» de la lista: eso es eliminarlo, y no se avisa.
+- **Persona nueva:** quien se une con una invitación.
+
+Si Apple dice que un token ya no vale, se borra.
+
 ### `DELETE /cuenta`
 
 Borra la cuenta: correo, nombre, identificador del proveedor y sesiones.

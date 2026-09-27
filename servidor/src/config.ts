@@ -32,6 +32,13 @@ export const config = {
     privateKey: process.env.APPLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
   },
 
+  // Notificaciones de Apple. La clave actual es solo de producción y limitada a la app.
+  apns: {
+    keyId: process.env.APNS_KEY_ID,
+    privateKey: process.env.APNS_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    topic: process.env.APNS_TOPIC ?? 'com.jmortiz.inventario',
+  },
+
   // SOLO DESARROLLO: activa POST /auth/dev-login, que da sesión con solo un correo. Sin esta
   // variable a 'true' la ruta ni se registra.
   permitirLoginDev: process.env.PERMITIR_LOGIN_DEV === 'true',

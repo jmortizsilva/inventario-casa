@@ -119,4 +119,26 @@ CREATE TABLE IF NOT EXISTS movimientos (
 );
 
 CREATE INDEX IF NOT EXISTS idx_movimientos_producto ON movimientos (producto_id);
+
+-- Dónde mandar las notificaciones. Un token es un dispositivo: si inicia sesión otra cuenta,
+-- pasa a ser suyo. entorno: 'produccion' (TestFlight y App Store) o 'desarrollo' (Xcode).
+CREATE TABLE IF NOT EXISTS dispositivos (
+  token TEXT PRIMARY KEY,
+  usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+  plataforma TEXT NOT NULL,
+  entorno TEXT NOT NULL,
+  actualizado_en INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_dispositivos_usuario ON dispositivos (usuario_id);
+
+-- Qué notificaciones quiere cada persona. Sin fila, ninguna.
+CREATE TABLE IF NOT EXISTS avisos (
+  usuario_id INTEGER PRIMARY KEY REFERENCES usuarios(id),
+  productos_nuevos INTEGER NOT NULL DEFAULT 0,
+  categorias_nuevas INTEGER NOT NULL DEFAULT 0,
+  entra_en_lista INTEGER NOT NULL DEFAULT 0,
+  sale_de_lista INTEGER NOT NULL DEFAULT 0,
+  personas_nuevas INTEGER NOT NULL DEFAULT 0
+);
 `;

@@ -2,6 +2,8 @@ import { config } from './config';
 import { inicializarBd } from './db';
 import { purgarHogaresVacios } from './hogares/almacen';
 import { crearServidor } from './servidor';
+import { usarEnviador } from './avisos/avisar';
+import { EnviadorApns } from './avisos/apns';
 
 const UN_DIA_MS = 24 * 60 * 60 * 1000;
 
@@ -19,11 +21,15 @@ function comprobarConfiguracionMinima(): void {
   if (!config.apple.clientId || !config.apple.teamId || !config.apple.keyId || !config.apple.privateKey) {
     console.warn('Aviso: faltan variables de Apple; el inicio de sesión con Apple no funcionará.');
   }
+  if (!EnviadorApns.configurado()) {
+    console.warn('Aviso: faltan APNS_KEY_ID o APNS_PRIVATE_KEY; no se mandarán notificaciones.');
+  }
 }
 
 async function main(): Promise<void> {
   comprobarConfiguracionMinima();
   inicializarBd();
+  if (EnviadorApns.configurado()) usarEnviador(new EnviadorApns());
   purgarHogaresVacios();
   setInterval(() => purgarHogaresVacios(), UN_DIA_MS).unref();
   const app = await crearServidor();

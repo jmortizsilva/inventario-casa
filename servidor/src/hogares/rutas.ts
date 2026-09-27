@@ -1,6 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { config } from '../config';
 import { crearExigirSesion } from '../auth/middleware';
+import { avisarSinEsperar, nombreDe } from '../avisos/avisar';
+import { personaNueva } from '../avisos/textos';
 import { crearHogar, crearInvitacion, hogarDeUsuario, limpiarNombre, salir, unirse } from './almacen';
 
 // Rutas de /hogar (ver CONTRATO-API.md). El hogar de cada persona sale siempre de la tabla de
@@ -37,7 +39,16 @@ export async function registrarRutasHogar(app: FastifyInstance): Promise<void> {
     { preHandler: exigirSesion },
     async (request, reply) => {
       const resultado = unirse(request.usuarioId!, request.body?.codigo);
-      if ('hogar' in resultado) return resultado;
+      if ('hogar' in resultado) {
+        const quien = request.usuarioId!;
+        avisarSinEsperar(
+          resultado.hogar.id,
+          quien,
+          [{ tipo: 'personasNuevas', cuerpo: personaNueva(nombreDe(quien)) }],
+          request.log,
+        );
+        return resultado;
+      }
       switch (resultado.error) {
         case 'demasiados_intentos':
           return reply.code(429).send({ error: 'demasiados intentos, prueba dentro de una hora' });

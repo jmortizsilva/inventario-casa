@@ -22,6 +22,8 @@ export function borrarCuenta(usuarioId: number): boolean {
     bd.prepare('UPDATE invitaciones SET usada_por = NULL WHERE usada_por = ?').run(usuarioId);
 
     bd.prepare('DELETE FROM intentos_unirse WHERE usuario_id = ?').run(usuarioId);
+    bd.prepare('DELETE FROM dispositivos WHERE usuario_id = ?').run(usuarioId);
+    bd.prepare('DELETE FROM avisos WHERE usuario_id = ?').run(usuarioId);
     bd.prepare('DELETE FROM login_pendientes WHERE usuario_id = ?').run(usuarioId);
     bd.prepare('DELETE FROM sesiones WHERE usuario_id = ?').run(usuarioId);
     bd.prepare('DELETE FROM usuarios WHERE id = ?').run(usuarioId);

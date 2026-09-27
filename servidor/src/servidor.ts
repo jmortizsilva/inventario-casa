@@ -2,6 +2,7 @@ import formbody from '@fastify/formbody';
 import rateLimit from '@fastify/rate-limit';
 import Fastify, { FastifyInstance } from 'fastify';
 import { registrarRutasAuth } from './auth/rutas';
+import { registrarRutasAvisos } from './avisos/rutas';
 import { registrarRutasCuenta } from './cuenta/rutas';
 import { registrarRutasEnlaces } from './enlaces/rutas';
 import { registrarRutasHogar } from './hogares/rutas';
@@ -20,6 +21,7 @@ export async function crearServidor(): Promise<FastifyInstance> {
 
   await app.register(registrarRutasAuth);
   await app.register(registrarRutasCuenta);
+  await app.register(registrarRutasAvisos);
   await app.register(registrarRutasEnlaces);
   await app.register(registrarRutasHogar);
   await app.register(registrarRutasSincronizacion);

@@ -25,6 +25,23 @@ export function calcularCantidad(fijada: number, fijadaEn: number, movimientos: 
   return Math.min(Math.max(suma, CANTIDAD_MINIMA), CANTIDAD_MAXIMA);
 }
 
+/**
+ * Si un producto está en la lista de la compra: añadido a mano, o con la lista automática y
+ * tantas unidades como su umbral o menos. Lo borrado nunca. La misma regla que la app
+ * (casos en pruebas-compartidas/lista-compra.json).
+ */
+export function estaEnLista(p: {
+  cantidad: number;
+  umbralCompra: number;
+  autoListaCompra: boolean;
+  enListaCompraManual: boolean;
+  borrado: boolean;
+}): boolean {
+  if (p.borrado) return false;
+  if (p.enListaCompraManual) return true;
+  return p.autoListaCompra && p.cantidad <= p.umbralCompra;
+}
+
 /** Gana la versión modificada más tarde; si empatan, se queda la que ya había. */
 export function ganaLaNueva(modificadoExistente: number | undefined, modificadoNuevo: number): boolean {
   return modificadoExistente === undefined || modificadoNuevo > modificadoExistente;

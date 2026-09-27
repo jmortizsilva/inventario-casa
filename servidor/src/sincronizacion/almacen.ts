@@ -5,6 +5,7 @@ import {
   MovimientoEntrante,
   ProductoEntrante,
   calcularCantidad,
+  estaEnLista,
   ganaLaNueva,
   validarCategoria,
   validarMovimiento,
@@ -109,9 +110,38 @@ export interface Lote {
   movimientos?: unknown;
 }
 
+/**
+ * Lo que ha pasado con un envío, para las notificaciones. No va en la respuesta: son los
+ * nombres de lo que les interesa a las demás personas del hogar.
+ */
+export interface Sucesos {
+  productosNuevos: string[];
+  categoriasNuevas: string[];
+  entranEnLista: string[];
+  salenDeLista: string[];
+}
+
 export type ResultadoLote =
-  | { categorias: Categoria[]; productos: Producto[]; rechazados: Rechazado[]; revision: number }
+  | { categorias: Categoria[]; productos: Producto[]; rechazados: Rechazado[]; revision: number; sucesos: Sucesos }
   | { error: 'demasiados' };
+
+// Cómo estaba cada producto antes de tocarlo en este lote (null si no existía). Se guarda la
+// primera vez que se toca: después ya estaría cambiado.
+type Antes = Map<string, FilaProducto | null>;
+
+function recordarAntes(antes: Antes, id: string): void {
+  if (antes.has(id)) return;
+  antes.set(id, (obtenerBd().prepare('SELECT * FROM productos WHERE id = ?').get(id) as FilaProducto) ?? null);
+}
+
+const enLista = (f: FilaProducto) =>
+  estaEnLista({
+    cantidad: f.cantidad,
+    umbralCompra: f.umbral_compra,
+    autoListaCompra: f.auto_lista_compra === 1,
+    enListaCompraManual: f.en_lista_compra_manual === 1,
+    borrado: f.borrado === 1,
+  });
 
 export function aplicarLote(hogarId: string, lote: Lote): ResultadoLote {
   const lista = (valor: unknown): unknown[] => (Array.isArray(valor) ? valor : []);
@@ -127,6 +157,8 @@ export function aplicarLote(hogarId: string, lote: Lote): ResultadoLote {
     const rechazados: Rechazado[] = [];
     const categoriasTocadas = new Set<string>();
     const productosTocados = new Set<string>();
+    const antes: Antes = new Map();
+    const categoriasNuevas: string[] = [];
 
     for (const dato of categorias) {
       const categoria = validarCategoria(comoObjeto(dato));
@@ -134,7 +166,7 @@ export function aplicarLote(hogarId: string, lote: Lote): ResultadoLote {
         rechazados.push({ tipo: 'categoria', id: idDe(dato), motivo: 'no_valido' });
         continue;
       }
-      const motivo = aplicarCategoria(hogarId, categoria, productosTocados);
+      const motivo = aplicarCategoria(hogarId, categoria, productosTocados, antes, categoriasNuevas);
       if (motivo) rechazados.push({ tipo: 'categoria', id: categoria.id, motivo });
       else categoriasTocadas.add(categoria.id);
     }
@@ -145,6 +177,7 @@ export function aplicarLote(hogarId: string, lote: Lote): ResultadoLote {
         rechazados.push({ tipo: 'producto', id: idDe(dato), motivo: 'no_valido' });
         continue;
       }
+      recordarAntes(antes, producto.id);
       const motivo = aplicarProducto(hogarId, producto);
       if (motivo) rechazados.push({ tipo: 'producto', id: producto.id, motivo });
       else productosTocados.add(producto.id);
@@ -156,6 +189,7 @@ export function aplicarLote(hogarId: string, lote: Lote): ResultadoLote {
         rechazados.push({ tipo: 'movimiento', id: idDe(dato), motivo: 'no_valido' });
         continue;
       }
+      recordarAntes(antes, movimiento.productoId);
       if (!aplicarMovimiento(hogarId, movimiento)) {
         rechazados.push({ tipo: 'movimiento', id: movimiento.id, motivo: 'no_aplicable' });
       } else {
@@ -168,17 +202,37 @@ export function aplicarLote(hogarId: string, lote: Lote): ResultadoLote {
 
     const buscarCategoria = bd.prepare('SELECT * FROM categorias WHERE id = ?');
     const buscarProducto = bd.prepare('SELECT * FROM productos WHERE id = ?');
+    const despues = [...productosTocados].map((id) => buscarProducto.get(id) as FilaProducto);
+
+    const sucesos: Sucesos = { productosNuevos: [], categoriasNuevas, entranEnLista: [], salenDeLista: [] };
+    for (const fila of despues) {
+      const previa = antes.get(fila.id) ?? null;
+      if (!previa && fila.borrado === 0) sucesos.productosNuevos.push(fila.nombre);
+      const estaba = previa ? enLista(previa) : false;
+      const esta = enLista(fila);
+      if (!estaba && esta) sucesos.entranEnLista.push(fila.nombre);
+      // Borrarlo no es sacarlo de la lista: eso es eliminarlo, y no se avisa.
+      if (estaba && !esta && fila.borrado === 0) sucesos.salenDeLista.push(fila.nombre);
+    }
+
     return {
       categorias: [...categoriasTocadas].map((id) => aCategoria(buscarCategoria.get(id) as FilaCategoria)),
-      productos: [...productosTocados].map((id) => aProducto(buscarProducto.get(id) as FilaProducto)),
+      productos: despues.map(aProducto),
       rechazados,
+      sucesos,
       revision: (bd.prepare('SELECT revision FROM hogares WHERE id = ?').get(hogarId) as { revision: number })
         .revision,
     };
   })();
 }
 
-function aplicarCategoria(hogarId: string, nueva: CategoriaEntrante, productosTocados: Set<string>): Motivo | undefined {
+function aplicarCategoria(
+  hogarId: string,
+  nueva: CategoriaEntrante,
+  productosTocados: Set<string>,
+  antes: Antes,
+  categoriasNuevas: string[],
+): Motivo | undefined {
   const bd = obtenerBd();
   const existente = bd.prepare('SELECT * FROM categorias WHERE id = ?').get(nueva.id) as FilaCategoria | undefined;
   if (existente && existente.hogar_id !== hogarId) return 'no_aplicable';
@@ -187,6 +241,7 @@ function aplicarCategoria(hogarId: string, nueva: CategoriaEntrante, productosTo
   if (existente?.borrado === 1) return undefined;
   if (!ganaLaNueva(existente?.modificado, nueva.modificado)) return undefined;
 
+  if (!existente && !nueva.borrado) categoriasNuevas.push(nueva.nombre);
   const revision = siguienteRevision(hogarId);
   bd.prepare(
     `INSERT INTO categorias (id, hogar_id, nombre, creado, modificado, borrado, revision)
@@ -201,6 +256,7 @@ function aplicarCategoria(hogarId: string, nueva: CategoriaEntrante, productosTo
       .prepare('SELECT id FROM productos WHERE categoria_id = ? AND borrado = 0')
       .all(nueva.id) as { id: string }[];
     for (const { id } of vivos) {
+      recordarAntes(antes, id);
       bd.prepare('UPDATE productos SET borrado = 1, revision = ? WHERE id = ?').run(siguienteRevision(hogarId), id);
       productosTocados.add(id);
     }

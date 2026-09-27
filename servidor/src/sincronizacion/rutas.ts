@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { config } from '../config';
 import { crearExigirSesion } from '../auth/middleware';
 import { hogarDeUsuario } from '../hogares/almacen';
+import { avisarSinEsperar, avisosDeSucesos, nombreDe } from '../avisos/avisar';
 import { Lote, aplicarLote, novedadesDesde } from './almacen';
 
 const LIMITE_POR_DEFECTO = 500;
@@ -33,6 +34,9 @@ export async function registrarRutasSincronizacion(app: FastifyInstance): Promis
     if ('error' in resultado) {
       return reply.code(413).send({ error: `como mucho ${LIMITE_MAXIMO} cambios por lote` });
     }
-    return resultado;
+    const { sucesos, ...respuesta } = resultado;
+    const quien = request.usuarioId!;
+    avisarSinEsperar(hogar.id, quien, avisosDeSucesos(nombreDe(quien), sucesos), request.log);
+    return respuesta;
   });
 }
