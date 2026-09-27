@@ -8,6 +8,20 @@ public enum ErrorInventario: Error, Equatable, Sendable {
     case guardado(String)
 }
 
+/// Lo último eliminado, mientras se puede deshacer.
+public enum Eliminacion: Equatable, Sendable {
+    case producto(Producto)
+    /// Con los productos que se fueron con ella, tal como estaban.
+    case categoria(Categoria, productos: [Producto])
+
+    public var nombre: String {
+        switch self {
+        case .producto(let p): p.nombre
+        case .categoria(let c, _): c.nombre
+        }
+    }
+}
+
 /// Estado del inventario y todas las operaciones que lo cambian. Primero guarda
 /// en el almacén y solo si sale bien actualiza lo que ve la interfaz, para que
 /// pantalla y datos guardados no difieran tras un error.
@@ -23,6 +37,10 @@ public final class Inventario {
     /// Lo que falta por enviar al servidor. Vacía mientras no haya hogar.
     public private(set) var pendientes = Pendientes()
     public private(set) var estado = EstadoSincronizacion.sinHogar
+
+    /// Lo que se puede deshacer. Se olvida con cualquier otro cambio hecho
+    /// aquí (no con lo que llega sincronizando) y al salir de la pantalla.
+    public private(set) var ultimaEliminacion: Eliminacion?
 
     /// Unido a un hogar: cada cambio se anota para enviarlo.
     public var conHogar: Bool { estado.hogarId != nil }
@@ -99,10 +117,12 @@ public final class Inventario {
             conProductos: Array(todosProductos.values),
             ahora: ahora()
         )
+        let antes = productos.compactMap { todosProductos[$0.id] }
         try guardar(categorias: [borrada], productos: productos) { cola in
             cola.anotar(categoria: id)
             for producto in productos { cola.anotar(producto: producto.id) }
         }
+        ultimaEliminacion = .categoria(categoria, productos: antes)
     }
 
     // MARK: Productos
@@ -198,9 +218,54 @@ public final class Inventario {
     public func borrarProducto(_ id: UUID) throws(ErrorInventario) {
         guard var producto = producto(id) else { throw .noEncontrado }
         let momento = ahora()
+        let antes = producto
         producto.borrado = momento
         producto.modificado = momento
         try guardar(productos: [producto]) { $0.anotar(producto: id) }
+        ultimaEliminacion = .producto(antes)
+    }
+
+    // MARK: Deshacer
+
+    public func olvidarEliminacion() {
+        ultimaEliminacion = nil
+    }
+
+    /// Recupera lo último eliminado, con hora de ahora para que gane en el
+    /// servidor, y marcado para restaurar: sin eso el servidor no deja volver
+    /// nada borrado. Devuelve lo recuperado, o nil si no había nada.
+    @discardableResult
+    public func deshacerEliminacion() throws(ErrorInventario) -> Eliminacion? {
+        guard let eliminacion = ultimaEliminacion else { return nil }
+        let momento = ahora()
+        func recuperado(_ p: Producto) -> Producto {
+            var copia = todosProductos[p.id] ?? p
+            copia.borrado = nil
+            copia.modificado = momento
+            return copia
+        }
+        switch eliminacion {
+        case .producto(let original):
+            let producto = recuperado(original)
+            try guardar(productos: [producto]) { cola in
+                cola.anotar(producto: producto.id)
+                cola.anotar(restaurar: producto.id)
+            }
+        case .categoria(let original, let originales):
+            var categoria = todasCategorias[original.id] ?? original
+            categoria.borrado = nil
+            categoria.modificado = momento
+            let productos = originales.map(recuperado)
+            try guardar(categorias: [categoria], productos: productos) { cola in
+                cola.anotar(categoria: categoria.id)
+                cola.anotar(restaurar: categoria.id)
+                for producto in productos {
+                    cola.anotar(producto: producto.id)
+                    cola.anotar(restaurar: producto.id)
+                }
+            }
+        }
+        return eliminacion
     }
 
     // MARK: Importación
@@ -373,6 +438,8 @@ public final class Inventario {
         anotar: (inout Pendientes) -> Void = { _ in }
     ) throws(ErrorInventario) {
         guard !categorias.isEmpty || !productos.isEmpty else { return }
+        // Cualquier otro cambio hecho aquí cierra la posibilidad de deshacer.
+        ultimaEliminacion = nil
         var cola: Pendientes?
         if conHogar {
             var nueva = pendientes

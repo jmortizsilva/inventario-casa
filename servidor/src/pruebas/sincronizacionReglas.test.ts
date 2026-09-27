@@ -61,6 +61,7 @@ describe('validación', () => {
       creado: 1,
       modificado: 2,
       borrado: false,
+      restaurar: false,
     });
     expect(validarCategoria({ id: 'c1', nombre: '', creado: 1, modificado: 2 })).toBeUndefined();
     expect(validarCategoria({ id: 'c1', nombre: 'X', creado: 1.5, modificado: 2 })).toBeUndefined();

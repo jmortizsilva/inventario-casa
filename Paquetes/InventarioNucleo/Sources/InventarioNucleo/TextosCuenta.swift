@@ -300,3 +300,23 @@ extension Textos {
         public static let abrirAjustes = "Abrir Ajustes"
     }
 }
+
+extension Textos {
+    /// Deshacer lo último eliminado, agitando o con el botón de la barra.
+    public enum Deshacer {
+        public static let agitar = "Agita para deshacer."
+        public static let boton = "Deshacer"
+
+        /// El nombre de la acción para iOS, que al agitar pregunta «Deshacer Eliminar Leche».
+        public static func accion(_ nombre: String) -> String { "Eliminar \(nombre)" }
+
+        /// Lo que lee VoiceOver en el botón: «Deshacer» solo no dice qué se deshace.
+        public static func etiqueta(_ nombre: String) -> String { "Deshacer, eliminar \(nombre)" }
+
+        public static func productoRecuperado(_ nombre: String) -> String { "Recuperado, \(nombre)" }
+
+        public static func categoriaRecuperada(_ nombre: String, productos n: Int) -> String {
+            n == 0 ? "Recuperada, \(nombre)" : "Recuperada, \(nombre), con \(Textos.productos(n))"
+        }
+    }
+}

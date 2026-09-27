@@ -134,8 +134,8 @@ Solo después de que el cambio se haya guardado.
 | Producto editado | Guardado, {producto} | Producto actualizado: {producto}, cantidad {n}… |
 | Categoría creada | Añadida, {categoria} | Categoría {categoria} creada correctamente |
 | Nombre cambiado | Guardado, {categoria} | Categoría actualizada a {categoria} |
-| Producto eliminado | Eliminado, {producto} | {producto} eliminado |
-| Categoría eliminada | Eliminada, {categoria}, con {n} productos | Categoría {categoria} eliminada |
+| Producto eliminado | Eliminado, {producto}. Agita para deshacer. | {producto} eliminado |
+| Categoría eliminada | Eliminada, {categoria}, con {n} productos. Agita para deshacer. | Categoría {categoria} eliminada |
 
 Se quitan "Categorías actualizadas. {n} categorías disponibles" y "Lista de
 compra actualizada…", que sonaban con cada cambio de datos.
@@ -223,8 +223,8 @@ Casos en los que el texto cambia además del número:
 | Sigue en la lista con 1 unidad | Sigue en la lista, queda 1 unidad |
 | Sigue en la lista con 0 unidades | Sigue en la lista, agotado |
 | Eliminar categoría con 1 producto | También se eliminará su producto. |
-| Categoría eliminada con 1 producto | Eliminada, {categoria}, con 1 producto |
-| Categoría eliminada sin productos | Eliminada, {categoria} |
+| Categoría eliminada con 1 producto | Eliminada, {categoria}, con 1 producto. Agita para deshacer. |
+| Categoría eliminada sin productos | Eliminada, {categoria}. Agita para deshacer. |
 
 ## Cuenta y hogar (fase 4)
 
@@ -489,3 +489,23 @@ unidades, y «Ana ha puesto Leche en la lista» sería falso.
 
 Concordancias: «y 1 producto más», «y 1 más»; con dos nombres y nada más,
 «A la lista: Leche y Pan».
+
+## Deshacer
+
+Revisados el 27 de septiembre de 2026. Se deshace lo último eliminado (un
+producto, o una categoría con sus productos), agitando el iPhone o con el
+botón de la barra. El botón sigue hasta el siguiente cambio o hasta salir de
+esa pantalla: con VoiceOver, llegar a la barra lleva su tiempo, y uno que
+desaparece a los diez segundos no se llega a usar.
+
+| Cuándo | Texto |
+|---|---|
+| Botón en la barra, a la izquierda | Deshacer |
+| Lo que lee VoiceOver en el botón | Deshacer, eliminar {nombre} |
+| Alerta de iOS al agitar | Deshacer Eliminar {nombre} (la pone iOS con el nombre de la acción) |
+| Anuncio, producto | Recuperado, {producto} |
+| Anuncio, categoría | Recuperada, {categoria}, con {n} productos · con 1: «con 1 producto» · sin productos: «Recuperada, {categoria}» |
+| Si no se puede guardar | La alerta de siempre: «No se ha guardado» |
+
+El anuncio al eliminar termina en «Agita para deshacer.»: sin decirlo, nadie
+sabe que se puede.

@@ -230,3 +230,23 @@ private func hogarDeAnaYLuis() async throws
         #expect(ana.inventario.pendientes.productos.isEmpty)
     }
 }
+
+@MainActor
+@Suite struct DeshacerEnDosIphonePruebas {
+    @Test func loRecuperadoVuelveEnElOtroIphone() async throws {
+        let (ana, luis, _, _) = try await hogarDeAnaYLuis()
+        let arroz = try #require(luis.producto("Arroz"))
+
+        try luis.inventario.borrarProducto(arroz.id)
+        try await luis.sincronizar()
+        try await ana.sincronizar()
+        #expect(ana.producto("Arroz") == nil)
+
+        try luis.inventario.deshacerEliminacion()
+        try await luis.sincronizar()
+        try await ana.sincronizar()
+
+        #expect(luis.producto("Arroz") != nil)
+        #expect(ana.cantidad("Arroz") == 3)
+    }
+}

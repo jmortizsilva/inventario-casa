@@ -95,10 +95,10 @@ import Testing
         #expect(Textos.Anuncios.productoCreado("Arroz") == "Añadido, Arroz")
         #expect(Textos.Anuncios.categoriaCreada("Despensa") == "Añadida, Despensa")
         #expect(Textos.Anuncios.guardado("Arroz") == "Guardado, Arroz")
-        #expect(Textos.Anuncios.productoEliminado("Arroz") == "Eliminado, Arroz")
-        #expect(Textos.Anuncios.categoriaEliminada("Despensa", productos: 0) == "Eliminada, Despensa")
-        #expect(Textos.Anuncios.categoriaEliminada("Despensa", productos: 1) == "Eliminada, Despensa, con 1 producto")
-        #expect(Textos.Anuncios.categoriaEliminada("Despensa", productos: 12) == "Eliminada, Despensa, con 12 productos")
+        #expect(Textos.Anuncios.productoEliminado("Arroz") == "Eliminado, Arroz. Agita para deshacer.")
+        #expect(Textos.Anuncios.categoriaEliminada("Despensa", productos: 0) == "Eliminada, Despensa. Agita para deshacer.")
+        #expect(Textos.Anuncios.categoriaEliminada("Despensa", productos: 1) == "Eliminada, Despensa, con 1 producto. Agita para deshacer.")
+        #expect(Textos.Anuncios.categoriaEliminada("Despensa", productos: 12) == "Eliminada, Despensa, con 12 productos. Agita para deshacer.")
     }
 
     @Test func confirmaciones() {

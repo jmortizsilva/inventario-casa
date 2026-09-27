@@ -9,13 +9,17 @@ public enum Api {
         public let creado: Int64
         public let modificado: Int64
         public let borrado: Bool
+        /// Solo al subir, y solo con «Deshacer»: lo único que deja al servidor
+        /// devolver algo borrado. Nil se omite en el JSON.
+        public let restaurar: Bool?
 
-        public init(id: String, nombre: String, creado: Int64, modificado: Int64, borrado: Bool) {
+        public init(id: String, nombre: String, creado: Int64, modificado: Int64, borrado: Bool, restaurar: Bool? = nil) {
             self.id = id
             self.nombre = nombre
             self.creado = creado
             self.modificado = modificado
             self.borrado = borrado
+            self.restaurar = restaurar
         }
     }
 
@@ -34,12 +38,15 @@ public enum Api {
         public let creado: Int64
         public let modificado: Int64
         public let borrado: Bool
+        /// Como en `Categoria`.
+        public let restaurar: Bool?
 
         public init(
             id: String, categoriaId: String, nombre: String, cantidad: Int?, cantidadFijadaEn: Int64?,
             umbralCompra: Int, autoListaCompra: Bool, enListaCompraManual: Bool,
-            creado: Int64, modificado: Int64, borrado: Bool
+            creado: Int64, modificado: Int64, borrado: Bool, restaurar: Bool? = nil
         ) {
+            self.restaurar = restaurar
             self.id = id
             self.categoriaId = categoriaId
             self.nombre = nombre
@@ -147,19 +154,20 @@ extension UUID {
 }
 
 extension Api.Categoria {
-    init(_ categoria: InventarioNucleo.Categoria) {
+    init(_ categoria: InventarioNucleo.Categoria, restaurar: Bool = false) {
         self.init(
             id: categoria.id.enTexto,
             nombre: categoria.nombre,
             creado: categoria.creado.milisegundos,
             modificado: categoria.modificado.milisegundos,
-            borrado: categoria.estaBorrada
+            borrado: categoria.estaBorrada,
+            restaurar: restaurar ? true : nil
         )
     }
 }
 
 extension Api.Producto {
-    init(_ producto: InventarioNucleo.Producto, fijada: CantidadFijada?) {
+    init(_ producto: InventarioNucleo.Producto, fijada: CantidadFijada?, restaurar: Bool = false) {
         self.init(
             id: producto.id.enTexto,
             categoriaId: producto.categoriaId.enTexto,
@@ -171,7 +179,8 @@ extension Api.Producto {
             enListaCompraManual: producto.enListaCompraManual,
             creado: producto.creado.milisegundos,
             modificado: producto.modificado.milisegundos,
-            borrado: producto.estaBorrado
+            borrado: producto.estaBorrado,
+            restaurar: restaurar ? true : nil
         )
     }
 }

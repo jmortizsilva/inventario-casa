@@ -167,10 +167,13 @@ public enum Textos {
         public static func productoCreado(_ nombre: String) -> String { "Añadido, \(nombre)" }
         public static func categoriaCreada(_ nombre: String) -> String { "Añadida, \(nombre)" }
         public static func guardado(_ nombre: String) -> String { "Guardado, \(nombre)" }
-        public static func productoEliminado(_ nombre: String) -> String { "Eliminado, \(nombre)" }
+        /// Con «Agita para deshacer»: sin decirlo, nadie sabe que se puede.
+        public static func productoEliminado(_ nombre: String) -> String {
+            "Eliminado, \(nombre). \(Deshacer.agitar)"
+        }
 
         public static func categoriaEliminada(_ nombre: String, productos n: Int) -> String {
-            n == 0 ? "Eliminada, \(nombre)" : "Eliminada, \(nombre), con \(productos(n))"
+            (n == 0 ? "Eliminada, \(nombre)" : "Eliminada, \(nombre), con \(productos(n))") + ". \(Deshacer.agitar)"
         }
     }
 

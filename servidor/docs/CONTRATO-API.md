@@ -335,6 +335,12 @@ sin rechazarlo y se devuelve la versión borrada. Los movimientos sobre un
 producto borrado tampoco cuentan. (Decidido el 27 de septiembre de 2026, tras
 volver un producto borrado desde otro iPhone.)
 
+La única excepción es **`"restaurar": true`** en una categoría o un producto:
+lo manda «Deshacer» en la app, justo después de eliminar, y es lo único que
+devuelve algo borrado. Para devolver una categoría con sus productos, van en
+el mismo envío (las categorías se aplican antes). Un iPhone que no se había
+enterado del borrado nunca lo manda.
+
 Nombres repetidos: el servidor no fusiona nada. Si dos personas crean
 «Leche» en la misma categoría sin conexión, quedan las dos.
 

@@ -38,8 +38,24 @@ public struct Pendientes: Codable, Equatable, Sendable {
     public private(set) var productos: Set<UUID> = []
     public private(set) var fijadas: [UUID: CantidadFijada] = [:]
     public private(set) var movimientos: [UUID: Movimiento] = [:]
+    /// Categorías y productos recuperados con «Deshacer»: los únicos que el
+    /// servidor deja volver después de borrados.
+    public private(set) var restaurar: Set<UUID> = []
 
     public init() {}
+
+    enum CodingKeys: String, CodingKey { case categorias, productos, fijadas, movimientos, restaurar }
+
+    /// A mano para que una cola guardada antes de existir `restaurar` se siga
+    /// leyendo: si no, quien actualiza la app con cambios sin enviar los perdería.
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        categorias = try c.decode(Set<UUID>.self, forKey: .categorias)
+        productos = try c.decode(Set<UUID>.self, forKey: .productos)
+        fijadas = try c.decode([UUID: CantidadFijada].self, forKey: .fijadas)
+        movimientos = try c.decode([UUID: Movimiento].self, forKey: .movimientos)
+        restaurar = try c.decodeIfPresent(Set<UUID>.self, forKey: .restaurar) ?? []
+    }
 
     public var estaVacia: Bool { cuantos == 0 }
 
@@ -64,6 +80,10 @@ public struct Pendientes: Codable, Equatable, Sendable {
         movimientos[movimiento.id] = movimiento
     }
 
+    public mutating func anotar(restaurar id: UUID) {
+        restaurar.insert(id)
+    }
+
     public func movimientos(de productoId: UUID) -> [Movimiento] {
         movimientos.values.filter { $0.productoId == productoId }
     }
@@ -72,4 +92,5 @@ public struct Pendientes: Codable, Equatable, Sendable {
     mutating func quitar(producto id: UUID) { productos.remove(id) }
     mutating func quitar(fijada id: UUID) { fijadas[id] = nil }
     mutating func quitar(movimiento id: UUID) { movimientos[id] = nil }
+    mutating func quitar(restaurar id: UUID) { restaurar.remove(id) }
 }

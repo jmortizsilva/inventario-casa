@@ -54,13 +54,15 @@ public enum Sincronizacion {
         let categoriasPendientes = pendientes.categorias.compactMap { categorias[$0] }
         for categoria in categoriasPendientes.sorted(by: { $0.id.enTexto < $1.id.enTexto }) {
             guard lote.cuantos < maximo else { return lote }
-            lote.categorias.append(Api.Categoria(categoria))
+            lote.categorias.append(Api.Categoria(categoria, restaurar: pendientes.restaurar.contains(categoria.id)))
         }
 
         let productosPendientes = pendientes.productos.compactMap { productos[$0] }
         for producto in productosPendientes.sorted(by: { $0.id.enTexto < $1.id.enTexto }) {
             guard lote.cuantos < maximo else { return lote }
-            lote.productos.append(Api.Producto(producto, fijada: pendientes.fijadas[producto.id]))
+            lote.productos.append(Api.Producto(
+                producto, fijada: pendientes.fijadas[producto.id], restaurar: pendientes.restaurar.contains(producto.id)
+            ))
         }
 
         let movimientos = pendientes.movimientos.values.sorted {
@@ -91,8 +93,9 @@ public enum Sincronizacion {
         var cola = pendientes
         for enviada in enviado.categorias {
             guard let id = UUID(uuidString: enviada.id) else { continue }
-            if categorias[id].map({ Api.Categoria($0) == enviada }) ?? true {
+            if categorias[id].map({ Api.Categoria($0, restaurar: cola.restaurar.contains(id)) == enviada }) ?? true {
                 cola.quitar(categoria: id)
+                cola.quitar(restaurar: id)
             }
         }
         // El producto y sus unidades fijadas salen juntos, y solo si lo que se
@@ -101,10 +104,13 @@ public enum Sincronizacion {
         // que solo acepta una más reciente que la que tiene.
         for enviado in enviado.productos {
             guard let id = UUID(uuidString: enviado.id) else { continue }
-            let actual = productos[id].map { Api.Producto($0, fijada: cola.fijadas[id]) }
+            let actual = productos[id].map {
+                Api.Producto($0, fijada: cola.fijadas[id], restaurar: cola.restaurar.contains(id))
+            }
             if actual.map({ $0 == enviado }) ?? true {
                 cola.quitar(producto: id)
                 cola.quitar(fijada: id)
+                cola.quitar(restaurar: id)
             }
         }
         for movimiento in enviado.movimientos {
@@ -135,8 +141,10 @@ public enum Sincronizacion {
         var categorias: [Categoria] = []
         for recibida in recibidas {
             // Un borrado entra aunque haya cambios en la cola: eliminar es
-            // definitivo y el servidor no va a aceptar esos cambios.
+            // definitivo y el servidor no va a aceptar esos cambios. Salvo lo
+            // recuperado con «Deshacer», que va a volver en cuanto se envíe.
             guard let id = UUID(uuidString: recibida.id),
+                  !pendientes.restaurar.contains(id),
                   recibida.borrado || !pendientes.categorias.contains(id)
             else { continue }
             let local = locales.categorias[id]
@@ -163,6 +171,7 @@ public enum Sincronizacion {
             )
 
             let nuevo: Producto
+            if pendientes.restaurar.contains(id) { continue }
             if pendientes.productos.contains(id), !recibido.borrado, let local {
                 nuevo = local.fijandoCantidad(cantidad)
             } else {

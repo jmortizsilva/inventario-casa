@@ -57,6 +57,8 @@ export interface CategoriaEntrante {
   creado: number;
   modificado: number;
   borrado: boolean;
+  // Solo con «Deshacer» en la app: lo único que deja volver algo borrado.
+  restaurar: boolean;
 }
 
 export interface ProductoEntrante {
@@ -69,6 +71,7 @@ export interface ProductoEntrante {
   creado: number;
   modificado: number;
   borrado: boolean;
+  restaurar: boolean;
   // Solo si se fijó desde la ficha (o al crear): valor final y cuándo.
   fijada?: { cantidad: number; en: number };
 }
@@ -84,7 +87,14 @@ export interface MovimientoEntrante extends Movimiento {
 export function validarCategoria(dato: Record<string, unknown>): CategoriaEntrante | undefined {
   const nombre = limpiarNombre(dato.nombre);
   if (!esId(dato.id) || !nombre || !esEntero(dato.creado) || !esEntero(dato.modificado)) return undefined;
-  return { id: dato.id, nombre, creado: dato.creado, modificado: dato.modificado, borrado: dato.borrado === true };
+  return {
+    id: dato.id,
+    nombre,
+    creado: dato.creado,
+    modificado: dato.modificado,
+    borrado: dato.borrado === true,
+    restaurar: dato.restaurar === true,
+  };
 }
 
 export function validarProducto(dato: Record<string, unknown>): ProductoEntrante | undefined {
@@ -123,6 +133,7 @@ export function validarProducto(dato: Record<string, unknown>): ProductoEntrante
     creado: dato.creado,
     modificado: dato.modificado,
     borrado: dato.borrado === true,
+    restaurar: dato.restaurar === true,
     fijada,
   };
 }

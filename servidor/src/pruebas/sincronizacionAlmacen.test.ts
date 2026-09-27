@@ -170,6 +170,24 @@ describe('eliminar es definitivo', () => {
     expect(novedadesDesde(hogar, 0, 10).productos[0]).toMatchObject({ borrado: true, cantidad: 2 });
   });
 
+  it('«Deshacer» (restaurar) sí devuelve un producto borrado', () => {
+    aplicar({ categorias: [cat('c1', 10)], productos: [prod('p1', 10, { cantidad: 2, cantidadFijadaEn: 10 })] });
+    aplicar({ productos: [prod('p1', 20, { borrado: true })] });
+    const r = aplicar({ productos: [prod('p1', 30, { restaurar: true })] });
+    expect(r.productos[0]).toMatchObject({ id: 'p1', borrado: false, cantidad: 2 });
+  });
+
+  it('«Deshacer» devuelve una categoría con sus productos, en el mismo envío', () => {
+    aplicar({ categorias: [cat('c1', 10)], productos: [prod('p1', 10)] });
+    aplicar({ categorias: [cat('c1', 20, { borrado: true })] });
+    const r = aplicar({
+      categorias: [cat('c1', 30, { restaurar: true })],
+      productos: [prod('p1', 30, { restaurar: true })],
+    });
+    expect(r.categorias[0]).toMatchObject({ borrado: false });
+    expect(r.productos[0]).toMatchObject({ borrado: false });
+  });
+
   it('una categoría borrada no vuelve', () => {
     aplicar({ categorias: [cat('c1', 10)] });
     aplicar({ categorias: [cat('c1', 20, { borrado: true })] });
