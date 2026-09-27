@@ -8,6 +8,7 @@ struct Bienvenida: View {
     @Environment(Cuenta.self) private var cuenta
     var alTerminar: () -> Void
     @State private var tuHogar = false
+    @State private var unirse = false
 
     var body: some View {
         NavigationStack {
@@ -20,7 +21,9 @@ struct Bienvenida: View {
                 }
                 Section {
                     BotonesInicioSesion {
-                        if cuenta.pedirHogar {
+                        if cuenta.invitacion != nil, cuenta.hogar == nil {
+                            unirse = true
+                        } else if cuenta.pedirHogar {
                             tuHogar = true
                         } else if cuenta.decidirInventario == nil {
                             alTerminar()
@@ -33,6 +36,18 @@ struct Bienvenida: View {
                 }
             }
             .navigationTitle(Textos.Bienvenida.titulo)
+            .navigationDestination(isPresented: $unirse) {
+                FormularioUnirse(codigoInicial: cuenta.invitacion, alTerminar: alTerminar)
+                    .navigationBarBackButtonHidden()
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button(Textos.Botones.cancelar) {
+                                cuenta.invitacion = nil
+                                alTerminar()
+                            }
+                        }
+                    }
+            }
             .navigationDestination(isPresented: $tuHogar) {
                 VistaTuHogar(alTerminar: alTerminar)
                     .navigationBarBackButtonHidden()

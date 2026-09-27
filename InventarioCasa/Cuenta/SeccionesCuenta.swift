@@ -143,7 +143,7 @@ struct PresentacionesCuenta: ViewModifier {
                 }
             }
             .sheet(isPresented: Binding(
-                get: { cuenta.pedirHogar && !cuenta.enBienvenida },
+                get: { cuenta.pedirHogar && !cuenta.enBienvenida && cuenta.invitacion == nil },
                 set: { cuenta.pedirHogar = $0 }
             )) {
                 NavigationStack {

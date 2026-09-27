@@ -169,6 +169,43 @@ final class CuentaPruebasUI: XCTestCase {
         )
     }
 
+    // MARK: Enlace de invitación
+
+    private let enlaceDeLuis = "https://inventario.jmortiz.es/unirse/luiscasa"
+
+    func testEnlaceSinSesion() {
+        abrir(["-abrirEnlace", enlaceDeLuis])
+        XCTAssertTrue(app.staticTexts["Para unirte a un hogar, inicia sesión."].waitForExistence(timeout: 5))
+        pulsar("Iniciar sesión con Google")
+        // Sigue con el código ya escrito, sin pasar por «Tu hogar».
+        let codigo = app.textFields["Código"]
+        XCTAssertTrue(codigo.waitForExistence(timeout: 5))
+        XCTAssertEqual(codigo.value as? String, "LUISCASA")
+        XCTAssertFalse(app.navigationBars["Tu hogar"].exists)
+        app.navigationBars["Unirme a un hogar"].buttons["Unirme"].tap()
+        XCTAssertTrue(app.navigationBars["Unirme a un hogar"].waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.navigationBars["Inventario - Casa de Luis"].waitForExistence(timeout: 5))
+    }
+
+    func testEnlaceConLaBienvenidaDelante() {
+        abrir(["-conBienvenida", "-abrirEnlace", enlaceDeLuis])
+        XCTAssertTrue(app.navigationBars["Inventario Casa"].waitForExistence(timeout: 5))
+        pulsar("Iniciar sesión con Google")
+        let codigo = app.textFields["Código"]
+        XCTAssertTrue(codigo.waitForExistence(timeout: 5))
+        XCTAssertEqual(codigo.value as? String, "LUISCASA")
+        app.navigationBars["Unirme a un hogar"].buttons["Unirme"].tap()
+        XCTAssertTrue(app.buttons["Nevera, 1 producto"].waitForExistence(timeout: 5))
+    }
+
+    func testEnlaceCancelado() {
+        abrir(["-abrirEnlace", enlaceDeLuis])
+        XCTAssertTrue(app.staticTexts["Para unirte a un hogar, inicia sesión."].waitForExistence(timeout: 5))
+        app.navigationBars.buttons["Cancelar"].tap()
+        XCTAssertTrue(app.staticTexts["Para unirte a un hogar, inicia sesión."].waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.tabBars.buttons["Inventario"].exists)
+    }
+
     // MARK: Cuenta
 
     func testEliminarCuenta() {

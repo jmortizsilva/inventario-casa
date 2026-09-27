@@ -33,12 +33,36 @@ struct VistaRaiz: View {
                     ) { hogar, conservando in
                         Task { await cuenta.resolverInventario(hogar, conservando: conservando) }
                     }
+                    // El enlace de invitación. Con la bienvenida delante, espera:
+                    // la bienvenida lo recoge al iniciar sesión.
+                    .sheet(isPresented: Binding(
+                        get: { !bienvenida && cuenta.invitacion != nil && !cuenta.invitacionConHogar },
+                        set: { if !$0 { cuenta.invitacion = nil } }
+                    )) {
+                        if let codigo = cuenta.invitacion {
+                            HojaInvitacion(codigo: codigo)
+                                .environment(inventario)
+                                .environment(cuenta)
+                        }
+                    }
+                    .alertaYaEnHogar(dentroDeLaHoja: false)
+                    .onOpenURL { cuenta.abrirEnlace($0) }
                     .environment(cuenta)
                     .task {
                         // Aquí y no al crear la vista: presentar antes de que
                         // esté en la ventana a veces no llega a mostrar nada.
                         bienvenida = debeVerBienvenida
                         await cuenta.arrancar()
+                        #if DEBUG
+                        // El simulador no verifica enlaces universales: las
+                        // pruebas abren la invitación así.
+                        let argumentos = ProcessInfo.processInfo.arguments
+                        if let posicion = argumentos.firstIndex(of: "-abrirEnlace"),
+                           argumentos.indices.contains(posicion + 1),
+                           let url = URL(string: argumentos[posicion + 1]) {
+                            cuenta.abrirEnlace(url)
+                        }
+                        #endif
                     }
                     .onChange(of: fase) { _, nueva in
                         if nueva == .active { Task { await cuenta.alVolver() } }

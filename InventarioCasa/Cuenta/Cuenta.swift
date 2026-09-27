@@ -19,6 +19,13 @@ final class Cuenta {
     var pedirHogar = false
     /// Recién unido a este hogar con cosas en el iPhone: hay que preguntar qué hacer con ellas.
     var decidirInventario: Hogar?
+    /// El código de un enlace de invitación que se acaba de abrir, mientras se
+    /// atiende. Mientras lo hay, «Tu hogar» no sale al iniciar sesión: sigue la invitación.
+    var invitacion: String?
+    /// Si al abrir el enlace ya había hogar: entonces solo sale «Ya estás en…»,
+    /// sin hoja. Se decide al abrirlo y no después, para que la hoja no se
+    /// cierre sola si el hogar aparece al iniciar sesión desde ella.
+    private(set) var invitacionConHogar = false
     /// Con la bienvenida delante, Ajustes no presenta nada: la bienvenida se
     /// ocupa de «Tu hogar» y de la alerta del inventario.
     var enBienvenida = false
@@ -102,6 +109,13 @@ final class Cuenta {
         await sincronizar()
     }
 
+    /// Un enlace que abre la app. Solo se hace caso a los de invitación.
+    func abrirEnlace(_ url: URL) {
+        guard let codigo = EnlaceInvitacion.codigo(de: url) else { return }
+        invitacionConHogar = hogar != nil
+        invitacion = codigo
+    }
+
     // MARK: Iniciar y cerrar sesión
 
     func iniciarConGoogle() async -> String? {
@@ -150,7 +164,8 @@ final class Cuenta {
         anunciar(Textos.AnunciosCuenta.sesionIniciada)
         await actualizarHogar()
         if hogar == nil {
-            pedirHogar = true
+            // Con una invitación abierta, lo siguiente es unirse a ese hogar.
+            pedirHogar = invitacion == nil
         } else {
             await sincronizar()
         }
@@ -242,6 +257,7 @@ final class Cuenta {
     /// La respuesta a «Inventario de este iPhone» al unirse.
     func resolverInventario(_ unido: Hogar, conservando: Bool) async {
         decidirInventario = nil
+        invitacion = nil
         do {
             try inventario.unirAHogar(unido.id, conservando: conservando)
         } catch {

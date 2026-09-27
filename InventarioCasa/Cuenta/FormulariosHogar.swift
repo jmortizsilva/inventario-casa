@@ -106,6 +106,8 @@ struct FormularioCrearHogar: View {
 
 struct FormularioUnirse: View {
     @Environment(Cuenta.self) private var cuenta
+    /// El de un enlace de invitación, ya escrito.
+    var codigoInicial: String?
     var alTerminar: () -> Void
     @State private var codigo = ""
     @State private var tuNombre = ""
@@ -147,6 +149,9 @@ struct FormularioUnirse: View {
             }
         }
         .disabled(uniendo)
+        .onAppear {
+            if let codigoInicial, codigo.isEmpty { codigo = codigoInicial }
+        }
         .alertaInventarioDelIphone(hogar: $preguntar) { hogar, conservando in
             Task {
                 await cuenta.resolverInventario(hogar, conservando: conservando)

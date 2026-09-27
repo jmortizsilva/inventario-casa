@@ -13,7 +13,8 @@
 #     certificado 2GNUJ59SCD) y caduca con el certificado, el 20 de febrero
 #     de 2027. Si se activa una capacidad nueva en el App ID, el perfil deja de
 #     valer y hay que crear otro: a los de Expo les pasó al activar Sign in
-#     with Apple.
+#     with Apple, y a este al activar Associated Domains (se rehízo el 27 de
+#     septiembre de 2026, borrando el viejo y creando otro con el mismo nombre).
 #
 # El número de compilación se pregunta a Apple y no se commitea: lo único que
 # exige es que no se repita. La versión visible (MARKETING_VERSION) se cambia a
