@@ -206,6 +206,23 @@ final class CuentaPruebasUI: XCTestCase {
         XCTAssertTrue(app.tabBars.buttons["Inventario"].exists)
     }
 
+    // MARK: Sondeo
+
+    /// Lo que añade otra persona llega con la app abierta, sin cerrarla:
+    /// antes solo llegaba al volver a abrirla.
+    func testLoDeOtraPersonaLlegaSinCerrarLaApp() {
+        abrir(["-cambioAjeno"])
+        irAAjustes()
+        pulsar("Iniciar sesión con Google")
+        pulsar("Unirme con un código")
+        escribir("LUISCASA", en: "Código")
+        app.navigationBars["Unirme a un hogar"].buttons["Unirme"].tap()
+        app.tabBars.buttons["Inventario"].tap()
+        XCTAssertTrue(app.buttons["Nevera, 1 producto"].waitForExistence(timeout: 5))
+        // Luis añade Yogures a los 20 segundos de arrancar; el sondeo es cada 15.
+        XCTAssertTrue(app.buttons["Nevera, 2 productos"].waitForExistence(timeout: 45))
+    }
+
     // MARK: Cuenta
 
     func testEliminarCuenta() {

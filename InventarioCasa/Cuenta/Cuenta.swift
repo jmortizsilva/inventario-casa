@@ -41,10 +41,14 @@ final class Cuenta {
     private let ahora: () -> Date
     private var ultimaSincronizacion = Date.distantPast
     private var programada: Task<Void, Never>?
+    private var sondeo: Task<Void, Never>?
+    private var sincronizando = false
+    private var repetirSincronizacion = false
 
     /// Al volver a la app no se sincroniza si se hizo hace menos de esto:
     /// alternar entre dos apps sería una petición por cada vuelta.
     static let intervaloAlVolver: TimeInterval = 30
+    static let intervaloSondeo: Duration = .seconds(15)
     /// Tras un cambio se espera un poco: tocar «+» cinco veces seguidas va en un envío.
     static let esperaTrasCambio: Duration = .seconds(2)
 
@@ -347,17 +351,49 @@ final class Cuenta {
     }
 
     /// No dice nada: el estado se ve en Ajustes. Lo que no se envía sigue en la cola.
+    ///
+    /// Se piden desde tres sitios (el sondeo, un cambio propio y volver a la
+    /// app), y dos a la vez mandarían la misma cola dos veces. Si llega una
+    /// con otra en curso, se apunta y se hace al terminar la primera.
     func sincronizar() async {
         guard conSesion, inventario.conHogar else { return }
-        do {
-            try await sincronizador.sincronizar()
-            sinConexion = false
-            ultimaSincronizacion = ahora()
-        } catch let error as ErrorConexion {
-            fallo(error)
-        } catch {
-            // Fallo al guardar en el iPhone: se reintentará en la siguiente.
+        guard !sincronizando else {
+            repetirSincronizacion = true
+            return
         }
+        sincronizando = true
+        defer { sincronizando = false }
+        repeat {
+            repetirSincronizacion = false
+            do {
+                try await sincronizador.sincronizar()
+                sinConexion = false
+                ultimaSincronizacion = ahora()
+            } catch let error as ErrorConexion {
+                fallo(error)
+            } catch {
+                // Fallo al guardar en el iPhone: se reintentará en la siguiente.
+            }
+        } while repetirSincronizacion && conSesion && inventario.conHogar
+    }
+
+    /// Mientras la app está abierta y delante, se pregunta cada 15 segundos:
+    /// lo que haga otra persona no llegaba hasta cerrar y volver a abrir la
+    /// app. En segundo plano no se pregunta nada.
+    func empezarASondear() {
+        sondeo?.cancel()
+        sondeo = Task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: Self.intervaloSondeo)
+                guard !Task.isCancelled else { return }
+                await sincronizar()
+            }
+        }
+    }
+
+    func dejarDeSondear() {
+        sondeo?.cancel()
+        sondeo = nil
     }
 
     private func fallo(_ error: ErrorConexion) {

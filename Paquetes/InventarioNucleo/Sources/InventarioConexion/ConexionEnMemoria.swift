@@ -59,6 +59,22 @@ public final class ServidorEnMemoria {
         _ = try? enviar(lote, usuario: dueno.id)
     }
 
+    /// Otra persona añade un producto a una categoría que ya existe en su
+    /// hogar. Para comprobar que llega sin cerrar la app (`-cambioAjeno`).
+    public func anadirProducto(de persona: String, en nombreCategoria: String, nombre: String) {
+        guard let dueno = usuarios.values.first(where: { $0.nombre == persona }),
+              let hogar = miembros[dueno.id],
+              let categoria = categorias.values.first(where: { $0.hogar == hogar && $0.api.nombre == nombreCategoria })
+        else { return }
+        let ahora = Date().milisegundos
+        let lote = Api.Lote(productos: [Api.Producto(
+            id: UUID().uuidString.lowercased(), categoriaId: categoria.api.id, nombre: nombre, cantidad: 1,
+            cantidadFijadaEn: ahora, umbralCompra: 1, autoListaCompra: true, enListaCompraManual: false,
+            creado: ahora, modificado: ahora, borrado: false
+        )])
+        _ = try? enviar(lote, usuario: dueno.id)
+    }
+
     // MARK: Hogar
 
     func hogar(de usuario: Int) -> Hogar? {

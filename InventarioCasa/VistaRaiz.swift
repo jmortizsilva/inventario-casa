@@ -53,6 +53,8 @@ struct VistaRaiz: View {
                         // esté en la ventana a veces no llega a mostrar nada.
                         bienvenida = debeVerBienvenida
                         await cuenta.arrancar()
+                        // Al abrir, `fase` ya es .active y onChange no salta.
+                        if fase == .active { cuenta.empezarASondear() }
                         #if DEBUG
                         // El simulador no verifica enlaces universales: las
                         // pruebas abren la invitación así.
@@ -65,7 +67,12 @@ struct VistaRaiz: View {
                         #endif
                     }
                     .onChange(of: fase) { _, nueva in
-                        if nueva == .active { Task { await cuenta.alVolver() } }
+                        if nueva == .active {
+                            cuenta.empezarASondear()
+                            Task { await cuenta.alVolver() }
+                        } else {
+                            cuenta.dejarDeSondear()
+                        }
                     }
                     // Solo cuando la cola crece: al confirmarse un envío se
                     // vacía, y eso no tiene que lanzar otro.
@@ -138,6 +145,13 @@ struct VistaRaiz: View {
         if argumentos.contains("-servidorFalso") {
             let servidor = ServidorEnMemoria()
             servidor.sembrarHogar(nombre: "Casa de Luis", de: "Luis", codigo: "LUISCASA", categoria: "Nevera", producto: "Leche")
+            // Luis añade algo con la app ya abierta: tiene que llegar sin cerrarla.
+            if argumentos.contains("-cambioAjeno") {
+                Task {
+                    try? await Task.sleep(for: .seconds(20))
+                    servidor.anadirProducto(de: "Luis", en: "Nevera", nombre: "Yogures")
+                }
+            }
             return Cuenta(
                 inventario: inventario,
                 conexion: ConexionEnMemoria(servidor: servidor),
