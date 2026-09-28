@@ -107,6 +107,21 @@ final class CategoriasPruebasUI: XCTestCase {
         XCTAssertTrue(app.staticTexts["No hay categorías"].waitForExistence(timeout: 3))
     }
 
+    func testDeshacerEliminarCategoriaDevuelveSusProductos() {
+        abrir("-datosDeEjemplo")
+        menu(de: "Despensa, 2 productos", "Eliminar")
+        let alerta = app.alerts["¿Eliminar Despensa?"]
+        XCTAssertTrue(alerta.waitForExistence(timeout: 3))
+        alerta.buttons["Eliminar"].tap()
+        XCTAssertTrue(app.buttons["Despensa, 2 productos"].waitForNonExistence(timeout: 3))
+
+        let deshacer = app.navigationBars.buttons["Deshacer, eliminar Despensa"]
+        XCTAssertTrue(deshacer.waitForExistence(timeout: 3))
+        deshacer.tap()
+        XCTAssertTrue(app.buttons["Despensa, 2 productos"].waitForExistence(timeout: 3))
+        XCTAssertTrue(deshacer.waitForNonExistence(timeout: 3))
+    }
+
     func testEliminarCategoriaConProductosAvisaYSePuedeCancelar() {
         abrir("-datosDeEjemplo")
         XCTAssertTrue(app.buttons["Despensa, 2 productos"].waitForExistence(timeout: 5))

@@ -34,6 +34,10 @@ struct VistaProductos: View {
                 Button(Textos.Botones.cancelar, role: .cancel) {}
             }
             .alertaNoGuardado(isPresented: $errorAlGuardar)
+            .deshacerEliminacion { eliminacion in
+                if case .producto(let producto) = eliminacion { return producto.categoriaId == categoriaId }
+                return false
+            }
     }
 
     @ViewBuilder

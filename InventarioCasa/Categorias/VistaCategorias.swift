@@ -18,6 +18,10 @@ struct VistaCategorias: View {
                 .navigationDestination(for: UUID.self) { id in
                     VistaProductos(categoriaId: id)
                 }
+                .deshacerEliminacion { eliminacion in
+                    if case .categoria = eliminacion { return true }
+                    return false
+                }
                 .toolbar {
                     Menu {
                         Button(Textos.Botones.categoria) { formulario = .nueva }

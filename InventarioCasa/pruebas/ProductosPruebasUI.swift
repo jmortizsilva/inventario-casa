@@ -154,6 +154,41 @@ final class ProductosPruebasUI: XCTestCase {
         XCTAssertTrue(app.buttons["Aceite, 1 unidad, en la lista"].exists)
     }
 
+    private func eliminarArroz() {
+        entrarEnDespensa()
+        menu(de: "Arroz, 3 unidades", "Eliminar")
+        let alerta = app.alerts["¿Eliminar Arroz?"]
+        XCTAssertTrue(alerta.waitForExistence(timeout: 3))
+        alerta.buttons["Eliminar"].tap()
+        XCTAssertTrue(app.buttons["Arroz, 3 unidades"].waitForNonExistence(timeout: 3))
+    }
+
+    func testDeshacerEliminarProducto() {
+        eliminarArroz()
+        // VoiceOver lo lee con lo que deshace; a la vista pone «Deshacer».
+        let deshacer = app.navigationBars["Despensa"].buttons["Deshacer, eliminar Arroz"]
+        XCTAssertTrue(deshacer.waitForExistence(timeout: 3))
+        deshacer.tap()
+        XCTAssertTrue(app.buttons["Arroz, 3 unidades"].waitForExistence(timeout: 3))
+        XCTAssertTrue(deshacer.waitForNonExistence(timeout: 3))
+    }
+
+    func testOtroCambioQuitaElDeshacer() {
+        eliminarArroz()
+        let deshacer = app.navigationBars["Despensa"].buttons["Deshacer, eliminar Arroz"]
+        XCTAssertTrue(deshacer.waitForExistence(timeout: 3))
+        app.buttons["Aceite, 1 unidad, en la lista"].buttons["Aumentar cantidad"].tap()
+        XCTAssertTrue(deshacer.waitForNonExistence(timeout: 3))
+    }
+
+    func testSalirDeLaPantallaQuitaElDeshacer() {
+        eliminarArroz()
+        XCTAssertTrue(app.navigationBars["Despensa"].buttons["Deshacer, eliminar Arroz"].waitForExistence(timeout: 3))
+        app.navigationBars["Despensa"].buttons.element(boundBy: 0).tap()
+        entrar(en: "Despensa, 1 producto", titulo: "Despensa")
+        XCTAssertFalse(app.navigationBars["Despensa"].buttons["Deshacer, eliminar Arroz"].exists)
+    }
+
     func testAnadirProductoDesdeElMenuEligiendoCategoria() {
         XCTAssertTrue(app.buttons["Nevera, 1 producto"].waitForExistence(timeout: 5))
         app.navigationBars.buttons["Añadir"].tap()
