@@ -7,13 +7,24 @@ public final class AlmacenSwiftData: Almacen {
     private let contenedor: ModelContainer
     private let contexto: ModelContext
 
-    /// El almacén de la app, en el disco del móvil.
-    public static func enDisco() throws -> AlmacenSwiftData {
-        try AlmacenSwiftData(configuracion: ModelConfiguration("Inventario"))
+    /// Un almacén de la app, en el disco del móvil. Cada hogar tiene el suyo
+    /// (ver `RegistroHogares`); sin nombre, el de siempre.
+    public static func enDisco(nombre: String = RegistroHogares.ficheroOriginal) throws -> AlmacenSwiftData {
+        try AlmacenSwiftData(configuracion: ModelConfiguration(nombre))
+    }
+
+    /// Borra del disco el almacén de ese nombre. Con sus ficheros -wal y -shm:
+    /// SQLite guarda ahí lo reciente, y borrando solo el principal quedarían
+    /// restos. Hay que haber soltado antes el almacén abierto.
+    public static func borrarDelDisco(nombre: String) {
+        let url = ModelConfiguration(nombre).url
+        for sufijo in ["", "-wal", "-shm"] {
+            try? FileManager.default.removeItem(at: URL(fileURLWithPath: url.path + sufijo))
+        }
     }
 
     /// Para probar la migración sobre un fichero de verdad.
-    static func enFichero(_ url: URL) throws -> AlmacenSwiftData {
+    public static func enFichero(_ url: URL) throws -> AlmacenSwiftData {
         try AlmacenSwiftData(configuracion: ModelConfiguration(url: url))
     }
 

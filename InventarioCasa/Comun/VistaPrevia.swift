@@ -1,5 +1,6 @@
 import SwiftUI
 import InventarioNucleo
+import InventarioAlmacen
 import InventarioConexion
 
 /// Inventario de ejemplo en memoria para las vistas previas de Xcode.
@@ -21,7 +22,7 @@ enum VistaPrevia {
     /// Sin sesión, contra un servidor en memoria.
     static func cuenta(_ inventario: Inventario) -> Cuenta {
         Cuenta(
-            inventario: inventario,
+            inventarios: try! Inventarios(almacenamiento: .enMemoria(original: inventario)),
             conexion: ConexionEnMemoria(),
             pedirCodigoGoogle: { _ in .cancelado },
             pedirIdentidadApple: { _ in .cancelado },

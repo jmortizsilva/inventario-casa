@@ -6,7 +6,6 @@ import InventarioConexion
 /// Abre el almacén y, si no se puede leer, lo dice y deja reintentar. Con el
 /// inventario abierto, monta la cuenta y decide si sale la bienvenida.
 struct VistaRaiz: View {
-    @State private var inventario: Inventario?
     @State private var cuenta: Cuenta?
     @State private var falloAlAbrir = false
     @State private var bienvenida = false
@@ -17,7 +16,9 @@ struct VistaRaiz: View {
 
     var body: some View {
         Group {
-            if let inventario, let cuenta {
+            if let cuenta {
+                // El del hogar abierto: al cambiar de hogar, cambia y las pantallas con él.
+                let inventario = cuenta.inventario
                 VistaPrincipal()
                     .environment(inventario)
                     .fullScreenCover(isPresented: $bienvenida) {
@@ -91,7 +92,7 @@ struct VistaRaiz: View {
     }
 
     private func abrir() {
-        guard inventario == nil else { return }
+        guard cuenta == nil else { return }
         let argumentos = ProcessInfo.processInfo.arguments
         #if DEBUG
         // Para capturas y pruebas a mano: datos de ejemplo en memoria, sin tocar los guardados.
@@ -103,17 +104,13 @@ struct VistaRaiz: View {
         let enMemoria = false
         #endif
         do {
-            let nuevo: Inventario
-            if deEjemplo {
-                nuevo = VistaPrevia.inventario()
-            } else {
-                let almacen = enMemoria ? try AlmacenSwiftData.enMemoria() : try AlmacenSwiftData.enDisco()
-                nuevo = Inventario(almacen: almacen)
-                try nuevo.cargar()
-            }
-            cuenta = crearCuenta(nuevo, argumentos: argumentos)
-            if let cuenta { DelegadoApp.actual?.conectar(cuenta) }
-            inventario = nuevo
+            let almacenamiento: Inventarios.Almacenamiento =
+                deEjemplo ? .enMemoria(original: VistaPrevia.inventario())
+                : enMemoria ? .enMemoria()
+                : .enDisco
+            let nueva = crearCuenta(try Inventarios(almacenamiento: almacenamiento), argumentos: argumentos)
+            DelegadoApp.actual?.conectar(nueva)
+            cuenta = nueva
             falloAlAbrir = false
         } catch {
             falloAlAbrir = true
@@ -154,7 +151,7 @@ struct VistaRaiz: View {
     }
     #endif
 
-    private func crearCuenta(_ inventario: Inventario, argumentos: [String]) -> Cuenta {
+    private func crearCuenta(_ inventarios: Inventarios, argumentos: [String]) -> Cuenta {
         #if DEBUG
         // Para las pruebas de interfaz: un servidor en memoria, con el hogar
         // de Luis para probar a unirse (código LUISCASA). Google entra como
@@ -170,7 +167,7 @@ struct VistaRaiz: View {
                 }
             }
             return Cuenta(
-                inventario: inventario,
+                inventarios: inventarios,
                 conexion: ConexionEnMemoria(servidor: servidor),
                 pedirCodigoGoogle: { _ in .exito(codigoDeCanje: "ana@ejemplo.com") },
                 pedirIdentidadApple: { _ in .exito(identityToken: "x7k2mq@privaterelay.appleid.com", codigo: "codigo") },
@@ -182,7 +179,7 @@ struct VistaRaiz: View {
         let google = IniciadorGoogle()
         let apple = IniciadorApple()
         return Cuenta(
-            inventario: inventario,
+            inventarios: inventarios,
             conexion: ConexionServidor(),
             pedirCodigoGoogle: { await google.pedirCodigo($0) },
             pedirIdentidadApple: { await apple.pedirIdentidad(resumenDelNonce: $0) }

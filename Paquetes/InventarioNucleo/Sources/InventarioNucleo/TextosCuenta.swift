@@ -236,6 +236,8 @@ extension Textos {
     public enum ErroresCuenta {
         public static let codigoNoSirve = "Ese código no sirve. Puede que haya caducado o que ya se haya usado."
         public static let demasiadosIntentos = "Demasiados intentos. Prueba dentro de una hora."
+        public static let yaEnEseHogar = "Ya estás en ese hogar."
+        public static let limiteHogares = "Ya estás en 10 hogares, que es el máximo."
 
         public static func noIniciada(_ causa: Causa) -> String { "No se ha iniciado sesión. \(causa.texto)" }
         public static func noCreado(_ causa: Causa) -> String { "No se ha creado el hogar. \(causa.texto)" }
