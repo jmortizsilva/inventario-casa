@@ -340,20 +340,39 @@ hay categorías, todo va en femenino: «¿Las añades…?», «Añadirlas»,
 
 ### Ajustes, con sesión
 
+Desde el 28 de septiembre de 2026, con varios hogares:
+
 | Elemento | Texto |
 |---|---|
-| Encabezado de sección | Hogar (el nombre ya está en el título) |
-| Fila | En el hogar: Ana y Luis |
-| Botón | Cambiar tu nombre |
-| Botón | Invitar a alguien |
-| Botón | Salir del hogar |
+| Encabezado de sección | Hogares |
+| Fila del hogar actual | {hogar} y, debajo, «Hogar actual». VoiceOver: «{hogar}, hogar actual» |
+| Fila de otro hogar | {hogar} |
+| Acción del rotor en las filas que no son el actual | Abrir |
+| Botones, debajo de la lista | Crear hogar · Unirme con un código |
+| Anuncio al cambiar de hogar | Hogar actual, {hogar} |
 | Encabezado de sección | Cuenta |
 | Texto | Sesión iniciada como {correo} |
 | … con el correo oculto de Apple | Sesión iniciada con Apple |
 | Estado | Todo enviado · {n} cambios sin enviar · Sin conexión · Sin conexión, {n} cambios sin enviar |
+| Botón | Cambiar tu nombre (es de la cuenta, no de un hogar) |
 | Botón | Cerrar sesión |
 | Botón | Eliminar cuenta |
 | Sesión caducada | La sesión ha caducado. Vuelve a iniciarla. |
+
+Pulsar un hogar abre su pantalla, con su nombre como título. Se configura
+aunque no sea el actual:
+
+| Elemento | Texto |
+|---|---|
+| Botón, si no es el actual | Abrir este hogar |
+| Fila | En el hogar: Ana y Luis |
+| Botón | Invitar a alguien |
+| Sección | Notificaciones (de ese hogar; ver «Notificaciones») |
+| Botón | Salir del hogar |
+
+Cerrar sesión envía antes lo pendiente de todos los hogares, porque los que
+no son el actual se quitan del iPhone. Si algo no se pudo enviar, pregunta
+como siempre, contando los cambios de todos.
 
 Sin hogar, en lugar de la primera sección: encabezado «Hogar», texto «No estás
 en ningún hogar.» y los botones «Crear hogar» y «Unirme con un código».
@@ -399,13 +418,18 @@ también para Android.
 | Cuándo | Título | Mensaje | Botones |
 |---|---|---|---|
 | Salir del hogar | ¿Salir de {hogar}? | El inventario se queda en este iPhone, pero deja de compartirse. Para volver hará falta otro código. | Salir · Cancelar |
+| … teniendo otros hogares | ¿Salir de {hogar}? | Su inventario se quita de este iPhone. Para volver hará falta otro código. | Salir · Cancelar |
+| … teniendo otros, y siendo la última persona | ¿Salir de {hogar}? | Eres la única persona del hogar: se eliminará del servidor dentro de 30 días. Su inventario se quita de este iPhone. | Salir · Cancelar |
 | … si es la última persona | ¿Salir de {hogar}? | Eres la única persona del hogar: se eliminará del servidor dentro de 30 días. El inventario se queda en este iPhone. | Salir · Cancelar |
 | Cerrar sesión con cambios sin enviar | ¿Cerrar sesión? | Hay {n} cambios sin enviar. Si cierras sesión, se quedan solo en este iPhone. | Cerrar sesión · Cancelar |
 | Eliminar cuenta | ¿Eliminar tu cuenta? | Se eliminan tu cuenta y tus datos del servidor. {hogar sigue o no}. El inventario se queda en este iPhone. | Eliminar cuenta · Cancelar |
 
-Cerrar sesión sin cambios pendientes no pregunta. En «Eliminar cuenta», la
-frase del hogar es «El hogar sigue para las demás personas.» o, si es la
-última, «El hogar {hogar} y su inventario también se eliminan.». Con cuenta de
+Cerrar sesión sin cambios pendientes no pregunta. En «Eliminar cuenta», con
+un hogar: «El hogar sigue para las demás personas.» o, si es la última, «El
+hogar {hogar} y su inventario también se eliminan.». Con varios: «Los hogares
+Casa y Playa, con su inventario, también se eliminan.» para los que son solo
+suyos, y «Piso sigue para las demás personas.» / «Piso y Casa siguen para las
+demás personas.» para los compartidos. Con cuenta de
 Apple se añade «Para confirmarlo, Apple te pedirá que inicies sesión otra vez.
 No se abre ninguna sesión nueva: es solo para poder eliminarla.», porque
 después sale su hoja, que dice «iniciar sesión» y no se puede cambiar.
@@ -422,6 +446,8 @@ después sale su hoja, que dice «iniciar sesión» y no se puede cambiar.
 | Error al salir | No has salido del hogar. {causa} |
 | Error al invitar | No se ha creado el código. {causa} |
 | Error al cambiar tu nombre | No se ha guardado el nombre. {causa} |
+| Unirse a un hogar en el que ya está | Ya estás en ese hogar. |
+| Crear o unirse con 10 hogares | Ya estás en 10 hogares, que es el máximo. |
 | Error al eliminar la cuenta | No se ha eliminado la cuenta. {causa} |
 
 Cerrar sesión no tiene error: si el servidor no contesta, la sesión se

@@ -48,9 +48,16 @@ y su correo puede ser una dirección oculta que no dice quién es.
 
 ### 4. Hogares, miembros e invitaciones
 
-- **Un hogar por persona** en esta primera versión. La app de Expo permitía
-  varios, pero complica la app (qué se ve, dónde se guarda lo nuevo) sin que
-  haga falta todavía.
+- **Hasta 10 hogares por persona**, desde el 28 de septiembre de 2026 (antes,
+  uno). En el iPhone cada hogar tiene su propio fichero de inventario y se
+  cambia de uno a otro sin cerrar sesión; el que ya había se quedó en su
+  fichero y pasó a ser el de su hogar, sin copiar nada. Las notificaciones son
+  de cada hogar, y se eligen para cada uno aunque no sea el abierto. Sin
+  cuenta, todo sigue igual: un inventario solo en el dispositivo. Salir para
+  siempre de un hogar teniendo otros quita su inventario del iPhone; cambiar
+  de hogar no quita nada. Descartado un solo fichero con el hogar en cada fila:
+  habría que filtrar en todas partes, y un filtro olvidado mezclaría
+  inventarios.
 - **La pertenencia la decide el servidor** en cada petición, mirando su propia
   tabla de miembros. Nunca se fía de lo que diga el móvil: ese era el agujero
   de las reglas de Firestore.

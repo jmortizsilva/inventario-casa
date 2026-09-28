@@ -35,7 +35,9 @@ final class Cuenta {
     var enBienvenida = false
 
     /// Lo que quiere recibir esta cuenta. Nil hasta que se pregunta al servidor.
-    private(set) var avisos: Avisos?
+    /// Lo que quiere recibir de cada hogar, según se va preguntando al
+    /// servidor. Se configura cada uno aunque no sea el actual.
+    private(set) var avisosPorHogar: [String: Avisos] = [:]
     /// iOS tiene denegadas las notificaciones de la app: se dice en Ajustes.
     private(set) var permisoDenegado = false
     private let permiso: PermisoNotificaciones
@@ -325,7 +327,7 @@ final class Cuenta {
         return nil
     }
 
-    /// Cambiar el inventario abierto a otro hogar de la cuenta. No borra nada:
+    /// Cambiar el inventario abierto a otro hogar de la cuenta, y decirlo. No borra nada:
     /// lo pendiente del que se deja se envía antes, y si no hay conexión se
     /// queda guardado en su inventario hasta la próxima.
     func cambiar(a destino: Hogar) async -> String? {
@@ -336,7 +338,7 @@ final class Cuenta {
         } catch {
             return Textos.Errores.noGuardadoMensaje
         }
-        avisos = nil
+        anunciar(Textos.Hogares.cambiado(destino.nombre))
         await sincronizar()
         await cargarAvisos()
         return nil
@@ -347,7 +349,16 @@ final class Cuenta {
         let siguiente = hogares.first { $0.id != id }?.id
         try? inventarios.salir(de: id, siguiente: siguiente)
         hogares.removeAll { $0.id == id }
-        avisos = nil
+        avisosPorHogar = [:]
+    }
+
+    /// Antes de cerrar sesión: lo pendiente de todos los hogares, porque al
+    /// cerrar se quitan del iPhone los que no son el actual. Devuelve cuántos
+    /// cambios han quedado sin enviar.
+    func enviarTodo() async -> Int {
+        await sincronizar()
+        await enviarPendientesDeOtros()
+        return pendientes + inventarios.otrosConPendientes().reduce(0) { $0 + $1.pendientes.cuantos }
     }
 
     /// Los cambios sin enviar de los hogares que no están abiertos.
@@ -394,7 +405,7 @@ final class Cuenta {
         programada?.cancel()
         // El servidor ya ha borrado los dispositivos de la cuenta.
         tokenDispositivo = nil
-        avisos = nil
+        avisosPorHogar = [:]
         try? inventarios.cerrarSesion()
         usuario = nil
         hogares = []
@@ -412,10 +423,11 @@ final class Cuenta {
 
     /// Al abrir Ajustes. Si hay alguna activada, se vuelve a pedir el token:
     /// iOS puede cambiarlo, y así el servidor tiene siempre el último.
-    func cargarAvisos() async {
-        guard conSesion, let id = hogar?.id else { return }
+    /// Las de un hogar; sin decir cuál, las del actual.
+    func cargarAvisos(de cual: String? = nil) async {
+        guard conSesion, let id = cual ?? hogar?.id else { return }
         guard let cargados = try? await conexion.avisos(hogar: id) else { return }
-        avisos = cargados
+        avisosPorHogar[id] = cargados
         guard cargados.algunoActivo else { return }
         switch await permiso.estado() {
         case .concedido:
@@ -430,8 +442,8 @@ final class Cuenta {
 
     /// Activar pide permiso a iOS si aún no se ha pedido. Si se deniega, el
     /// interruptor se queda como estaba y se dice por qué.
-    func cambiarAviso(_ cual: WritableKeyPath<Avisos, Bool>, a valor: Bool) async {
-        guard var nuevos = avisos else { return }
+    func cambiarAviso(_ cual: WritableKeyPath<Avisos, Bool>, a valor: Bool, en hogar: String) async {
+        guard var nuevos = avisosPorHogar[hogar] else { return }
         if valor {
             switch await permiso.estado() {
             case .denegado:
@@ -450,8 +462,7 @@ final class Cuenta {
         }
         nuevos[keyPath: cual] = valor
         do {
-            guard let id = hogar?.id else { return }
-            avisos = try await conexion.cambiarAvisos(nuevos, hogar: id)
+            avisosPorHogar[hogar] = try await conexion.cambiarAvisos(nuevos, hogar: hogar)
         } catch {
             anunciar(Textos.ErroresCuenta.avisoNoGuardado(error.causa))
         }
@@ -471,7 +482,7 @@ final class Cuenta {
             try? await conexion.quitarDispositivo(token)
         }
         tokenDispositivo = nil
-        avisos = nil
+        avisosPorHogar = [:]
     }
 
     // MARK: Sincronizar

@@ -16,21 +16,16 @@ final class EstadoAjustesCuenta {
     }
 
     enum Confirmacion: Identifiable {
-        case salir, cerrarSesion, eliminarCuenta
+        case cerrarSesion, eliminarCuenta
         var id: Self { self }
-    }
-
-    struct TextoParaCompartir: Identifiable {
-        let id = UUID()
-        let texto: String
     }
 
     var hoja: Hoja?
     var confirmar: Confirmacion?
-    var invitacion: Invitacion?
-    var compartir: TextoParaCompartir?
     var error: String?
     var ocupado = false
+    /// Los cambios que no se pudieron enviar antes de cerrar sesión, de todos los hogares.
+    var pendientesAlCerrar = 0
 
     func ejecutar(_ accion: @escaping () async -> String?) {
         ocupado = true
@@ -46,30 +41,23 @@ final class EstadoAjustesCuenta {
     }
 }
 
-/// Hogar y cuenta, al principio de Ajustes.
+/// Hogares y cuenta, al principio de Ajustes.
 struct SeccionesCuenta: View {
     @Environment(Cuenta.self) private var cuenta
     let estado: EstadoAjustesCuenta
 
     var body: some View {
         if let usuario = cuenta.usuario {
-            seccionHogar
-            if cuenta.hogar != nil {
-                SeccionNotificaciones()
-            }
+            seccionHogares
             Section(Textos.Sesion.encabezado) {
                 Text(Textos.Sesion.iniciadaComo(usuario.email))
                 if cuenta.inventario.conHogar {
                     Text(Textos.estadoSincronizacion(pendientes: cuenta.pendientes, sinConexion: cuenta.sinConexion))
                 }
-                Button(Textos.Sesion.cerrarSesion) {
-                    if cuenta.pendientes > 0 {
-                        estado.confirmar = .cerrarSesion
-                    } else {
-                        Task { await cuenta.cerrarSesion() }
-                    }
-                }
-                .disabled(estado.ocupado)
+                // El nombre es de la cuenta, no de un hogar.
+                Button(Textos.Hogar.cambiarTuNombre) { estado.hoja = .tuNombre }
+                Button(Textos.Sesion.cerrarSesion, action: cerrarSesion)
+                    .disabled(estado.ocupado)
                 Button(Textos.Sesion.eliminarCuenta, role: .destructive) { estado.confirmar = .eliminarCuenta }
                     .disabled(estado.ocupado)
                 if let error = estado.error {
@@ -88,45 +76,73 @@ struct SeccionesCuenta: View {
     }
 
     @ViewBuilder
-    private var seccionHogar: some View {
-        if let hogar = cuenta.hogar {
-            Section(Textos.Hogar.encabezado) {
-                Text(Textos.Hogar.personas(hogar.miembros.map { $0.nombre ?? $0.email }))
-                Button(Textos.Hogar.invitar, action: invitar)
-                    .disabled(estado.ocupado)
-                Button(Textos.Hogar.cambiarTuNombre) { estado.hoja = .tuNombre }
-                Button(Textos.Hogar.salir, role: .destructive) { estado.confirmar = .salir }
-                    .disabled(estado.ocupado)
-            }
-        } else {
+    private var seccionHogares: some View {
+        if cuenta.hogares.isEmpty {
             Section(Textos.Hogar.encabezado) {
                 Text(Textos.Hogar.sinHogar)
+                Button(Textos.Hogar.crear) { estado.hoja = .crear }
+                Button(Textos.Hogar.unirmeConCodigo) { estado.hoja = .unirse }
+            }
+        } else {
+            Section(Textos.Hogares.encabezado) {
+                ForEach(cuenta.hogares, id: \.id) { hogar in
+                    fila(hogar)
+                }
                 Button(Textos.Hogar.crear) { estado.hoja = .crear }
                 Button(Textos.Hogar.unirmeConCodigo) { estado.hoja = .unirse }
             }
         }
     }
 
-    private func invitar() {
-        estado.ocupado = true
-        estado.error = nil
-        Task {
-            switch await cuenta.invitar() {
-            case .success(let nueva): estado.invitacion = nueva
-            case .failure(let fallo):
-                estado.error = fallo.texto
-                anunciar(fallo.texto)
+    /// Pulsar abre su pantalla; «Abrir», en el rotor, cambia a él sin entrar.
+    private func fila(_ hogar: Hogar) -> some View {
+        let actual = hogar.id == cuenta.hogar?.id
+        return NavigationLink {
+            PantallaHogar(hogarId: hogar.id)
+        } label: {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(hogar.nombre)
+                if actual {
+                    Text(Textos.Hogares.actual)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(actual ? Textos.Hogares.filaActual(hogar.nombre) : hogar.nombre)
+        }
+        .accessibilityActions {
+            if !actual {
+                Button(Textos.Hogares.abrir) {
+                    estado.ejecutar { await cuenta.cambiar(a: hogar) }
+                }
+            }
+        }
+    }
+
+    /// Antes de cerrar se envía lo de todos los hogares: al cerrar se quitan
+    /// del iPhone los que no son el actual. Si algo no se pudo enviar, se pregunta.
+    private func cerrarSesion() {
+        estado.ocupado = true
+        Task {
+            let quedan = await cuenta.enviarTodo()
             estado.ocupado = false
+            if quedan > 0 {
+                estado.pendientesAlCerrar = quedan
+                estado.confirmar = .cerrarSesion
+            } else {
+                await cuenta.cerrarSesion()
+            }
         }
     }
 }
 
 /// Qué notificaciones recibir. Cada interruptor se guarda en el servidor al
 /// tocarlo: es él quien decide a quién avisar.
-private struct SeccionNotificaciones: View {
+struct SeccionNotificaciones: View {
     @Environment(Cuenta.self) private var cuenta
     @Environment(\.openURL) private var abrir
+    let hogarId: String
 
     var body: some View {
         Section {
@@ -146,16 +162,16 @@ private struct SeccionNotificaciones: View {
         } footer: {
             Text(Textos.Notificaciones.pie)
         }
-        .task { await cuenta.cargarAvisos() }
+        .task { await cuenta.cargarAvisos(de: hogarId) }
     }
 
     private func interruptor(_ texto: String, _ cual: WritableKeyPath<Avisos, Bool>) -> some View {
         Toggle(texto, isOn: Binding(
-            get: { cuenta.avisos?[keyPath: cual] ?? false },
-            set: { valor in Task { await cuenta.cambiarAviso(cual, a: valor) } }
+            get: { cuenta.avisosPorHogar[hogarId]?[keyPath: cual] ?? false },
+            set: { valor in Task { await cuenta.cambiarAviso(cual, a: valor, en: hogarId) } }
         ))
         // Hasta saber qué hay en el servidor, no se puede cambiar.
-        .disabled(cuenta.avisos == nil)
+        .disabled(cuenta.avisosPorHogar[hogarId] == nil)
     }
 }
 
@@ -200,23 +216,6 @@ struct PresentacionesCuenta: ViewModifier {
             } message: { cual in
                 Text(mensaje(cual))
             }
-            .alert(
-                Textos.Invitacion.titulo,
-                isPresented: Binding(get: { estado.invitacion != nil }, set: { if !$0 { estado.invitacion = nil } }),
-                presenting: estado.invitacion
-            ) { invitacion in
-                Button(Textos.Invitacion.compartir) {
-                    estado.compartir = .init(texto: Textos.Invitacion.textoCompartido(
-                        codigo: invitacion.codigo, caduca: Date(milisegundos: invitacion.caducaEn)
-                    ))
-                }
-                Button(Textos.Botones.aceptar, role: .cancel) {}
-            } message: { invitacion in
-                Text(Textos.Invitacion.mensaje(codigo: invitacion.codigo, caduca: Date(milisegundos: invitacion.caducaEn)))
-            }
-            .sheet(item: $estado.compartir) { texto in
-                HojaCompartir(texto: texto.texto)
-            }
     }
 
     private var botonCancelar: some ToolbarContent {
@@ -225,11 +224,8 @@ struct PresentacionesCuenta: ViewModifier {
         }
     }
 
-    private var esLaUltima: Bool { (cuenta.hogar?.miembros.count ?? 0) <= 1 }
-
     private func titulo(_ cual: EstadoAjustesCuenta.Confirmacion?) -> String {
         switch cual {
-        case .salir: Textos.ConfirmacionCuenta.salirTitulo(cuenta.hogar?.nombre ?? "")
         case .cerrarSesion: Textos.ConfirmacionCuenta.cerrarSesionTitulo
         case .eliminarCuenta: Textos.ConfirmacionCuenta.eliminarCuentaTitulo
         case nil: ""
@@ -238,20 +234,19 @@ struct PresentacionesCuenta: ViewModifier {
 
     private func mensaje(_ cual: EstadoAjustesCuenta.Confirmacion) -> String {
         switch cual {
-        case .salir:
-            Textos.ConfirmacionCuenta.salirMensaje(ultimaPersona: esLaUltima)
         case .cerrarSesion:
-            Textos.ConfirmacionCuenta.cerrarSesionMensaje(pendientes: cuenta.pendientes)
+            Textos.ConfirmacionCuenta.cerrarSesionMensaje(pendientes: estado.pendientesAlCerrar)
         case .eliminarCuenta:
             Textos.ConfirmacionCuenta.eliminarCuentaMensaje(
-                hogar: cuenta.hogar?.nombre, ultimaPersona: esLaUltima, conApple: cuenta.usuario?.esDeApple == true
+                soloTuyos: cuenta.hogares.filter { $0.miembros.count <= 1 }.map(\.nombre),
+                compartidos: cuenta.hogares.filter { $0.miembros.count > 1 }.map(\.nombre),
+                conApple: cuenta.usuario?.esDeApple == true
             )
         }
     }
 
     private func boton(_ cual: EstadoAjustesCuenta.Confirmacion) -> String {
         switch cual {
-        case .salir: Textos.ConfirmacionCuenta.salirBoton
         case .cerrarSesion: Textos.Sesion.cerrarSesion
         case .eliminarCuenta: Textos.Sesion.eliminarCuenta
         }
@@ -260,7 +255,6 @@ struct PresentacionesCuenta: ViewModifier {
     private func ejecutar(_ cual: EstadoAjustesCuenta.Confirmacion) {
         let cuenta = self.cuenta
         switch cual {
-        case .salir: estado.ejecutar { await cuenta.salir() }
         case .cerrarSesion: estado.ejecutar { await cuenta.cerrarSesion(); return nil }
         case .eliminarCuenta: estado.ejecutar { await cuenta.eliminarCuenta() }
         }

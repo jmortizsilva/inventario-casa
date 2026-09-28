@@ -85,20 +85,45 @@ import Testing
                 == "Hay 1 cambio sin enviar. Si cierras sesión, se quedan solo en este iPhone."
         )
         #expect(
-            Textos.ConfirmacionCuenta.eliminarCuentaMensaje(hogar: "Casa", ultimaPersona: true, conApple: true)
+            Textos.ConfirmacionCuenta.eliminarCuentaMensaje(soloTuyos: ["Casa"], compartidos: [], conApple: true)
                 == "Se eliminan tu cuenta y tus datos del servidor. El hogar Casa y su inventario también se eliminan. "
                 + "El inventario se queda en este iPhone. Para confirmarlo, Apple te pedirá que inicies sesión otra vez. "
                 + "No se abre ninguna sesión nueva: es solo para poder eliminarla."
         )
         #expect(
-            Textos.ConfirmacionCuenta.eliminarCuentaMensaje(hogar: "Casa", ultimaPersona: false, conApple: false)
+            Textos.ConfirmacionCuenta.eliminarCuentaMensaje(soloTuyos: [], compartidos: ["Casa"], conApple: false)
                 == "Se eliminan tu cuenta y tus datos del servidor. El hogar sigue para las demás personas. "
                 + "El inventario se queda en este iPhone."
         )
         #expect(
-            Textos.ConfirmacionCuenta.eliminarCuentaMensaje(hogar: nil, ultimaPersona: false, conApple: false)
+            Textos.ConfirmacionCuenta.eliminarCuentaMensaje(soloTuyos: ["Casa", "Playa"], compartidos: ["Piso"], conApple: false)
+                == "Se eliminan tu cuenta y tus datos del servidor. Los hogares Casa y Playa, con su inventario, "
+                + "también se eliminan. Piso sigue para las demás personas. El inventario se queda en este iPhone."
+        )
+        #expect(
+            Textos.ConfirmacionCuenta.eliminarCuentaMensaje(soloTuyos: [], compartidos: [], conApple: false)
                 == "Se eliminan tu cuenta y tus datos del servidor. El inventario se queda en este iPhone."
         )
+        #expect(
+            Textos.ConfirmacionCuenta.salirMensaje(ultimaPersona: false, conOtros: true)
+                == "Su inventario se quita de este iPhone. Para volver hará falta otro código."
+        )
+        #expect(
+            Textos.ConfirmacionCuenta.salirMensaje(ultimaPersona: true, conOtros: true)
+                == "Eres la única persona del hogar: se eliminará del servidor dentro de 30 días. "
+                + "Su inventario se quita de este iPhone."
+        )
+    }
+
+    @Test func variosHogares() {
+        #expect(Textos.Hogares.encabezado == "Hogares")
+        #expect(Textos.Hogares.actual == "Hogar actual")
+        #expect(Textos.Hogares.filaActual("Casa") == "Casa, hogar actual")
+        #expect(Textos.Hogares.abrir == "Abrir")
+        #expect(Textos.Hogares.abrirEste == "Abrir este hogar")
+        #expect(Textos.Hogares.cambiado("Playa") == "Hogar actual, Playa")
+        #expect(Textos.ErroresCuenta.yaEnEseHogar == "Ya estás en ese hogar.")
+        #expect(Textos.ErroresCuenta.limiteHogares == "Ya estás en 10 hogares, que es el máximo.")
     }
 
     @Test func anunciosYErrores() {

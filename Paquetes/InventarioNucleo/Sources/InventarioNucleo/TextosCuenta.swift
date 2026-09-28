@@ -127,6 +127,21 @@ extension Textos {
         }
     }
 
+    // MARK: Varios hogares
+
+    public enum Hogares {
+        public static let encabezado = "Hogares"
+        /// Debajo del nombre del hogar abierto.
+        public static let actual = "Hogar actual"
+        /// Lo que lee VoiceOver en la fila del hogar actual.
+        public static func filaActual(_ hogar: String) -> String { "\(hogar), hogar actual" }
+        /// Acción del rotor en los demás: cambiar sin entrar en su pantalla.
+        public static let abrir = "Abrir"
+        public static let abrirEste = "Abrir este hogar"
+        /// Al cambiar: el resultado, con la misma palabra que la lista.
+        public static func cambiado(_ hogar: String) -> String { "Hogar actual, \(hogar)" }
+    }
+
     // MARK: Invitar
 
     public enum Invitacion {
@@ -158,8 +173,16 @@ extension Textos {
         public static func salirTitulo(_ hogar: String) -> String { "¿Salir de \(hogar)?" }
         public static let salirBoton = "Salir"
 
-        public static func salirMensaje(ultimaPersona: Bool) -> String {
-            ultimaPersona
+        /// `conOtros`: le quedan otros hogares, así que el inventario de este se
+        /// quita del iPhone en lugar de quedarse sin hogar.
+        public static func salirMensaje(ultimaPersona: Bool, conOtros: Bool = false) -> String {
+            if conOtros {
+                let quitar = "Su inventario se quita de este iPhone."
+                return ultimaPersona
+                    ? "Eres la única persona del hogar: se eliminará del servidor dentro de 30 días. \(quitar)"
+                    : "\(quitar) Para volver hará falta otro código."
+            }
+            return ultimaPersona
                 ? "Eres la única persona del hogar: se eliminará del servidor dentro de 30 días. "
                     + "El inventario se queda en este iPhone."
                 : "El inventario se queda en este iPhone, pero deja de compartirse. "
@@ -175,15 +198,20 @@ extension Textos {
 
         public static let eliminarCuentaTitulo = "¿Eliminar tu cuenta?"
 
-        /// `hogar` es nil si no está en ninguno.
-        public static func eliminarCuentaMensaje(hogar: String?, ultimaPersona: Bool, conApple: Bool) -> String {
+        /// `soloTuyos`: los hogares en los que es la única persona, que se
+        /// eliminan con la cuenta. `compartidos`: los que siguen para los demás.
+        public static func eliminarCuentaMensaje(soloTuyos: [String], compartidos: [String], conApple: Bool) -> String {
             var partes = ["Se eliminan tu cuenta y tus datos del servidor."]
-            if let hogar {
-                partes.append(
-                    ultimaPersona
-                        ? "El hogar \(hogar) y su inventario también se eliminan."
-                        : "El hogar sigue para las demás personas."
-                )
+            switch soloTuyos.count {
+            case 0: break
+            case 1: partes.append("El hogar \(soloTuyos[0]) y su inventario también se eliminan.")
+            default: partes.append("Los hogares \(enumerar(soloTuyos)), con su inventario, también se eliminan.")
+            }
+            switch (compartidos.count, soloTuyos.isEmpty) {
+            case (0, _): break
+            case (1, true): partes.append("El hogar sigue para las demás personas.")
+            case (1, false): partes.append("\(compartidos[0]) sigue para las demás personas.")
+            default: partes.append("\(enumerar(compartidos)) siguen para las demás personas.")
             }
             partes.append("El inventario se queda en este iPhone.")
             if conApple {

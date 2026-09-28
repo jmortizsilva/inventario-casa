@@ -44,6 +44,12 @@ final class CuentaPruebasUI: XCTestCase {
         XCTAssertTrue(alerta.waitForNonExistence(timeout: 5))
     }
 
+    /// La fila de un hogar en Ajustes lleva a su pantalla.
+    private func entrarEnHogar(_ fila: String, titulo: String) {
+        pulsar(fila)
+        XCTAssertTrue(app.navigationBars[titulo].waitForExistence(timeout: 5), "No se abre \(titulo)")
+    }
+
     private func crearCategoria(_ nombre: String) {
         app.navigationBars.buttons["Añadir"].tap()
         pulsar("Categoría")
@@ -95,7 +101,7 @@ final class CuentaPruebasUI: XCTestCase {
         app.navigationBars["Nuevo hogar"].buttons["Crear"].tap()
 
         XCTAssertTrue(app.navigationBars["Nuevo hogar"].waitForNonExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["En el hogar: Ana"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Casa, hogar actual"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Todo enviado"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.navigationBars["Ajustes - Casa"].exists)
         app.tabBars.buttons["Inventario"].tap()
@@ -108,6 +114,10 @@ final class CuentaPruebasUI: XCTestCase {
         XCTAssertLessThan(titulo, anadir)
         app.tabBars.buttons["Ajustes"].tap()
 
+        entrarEnHogar("Casa, hogar actual", titulo: "Casa")
+        XCTAssertTrue(app.staticTexts["En el hogar: Ana"].exists)
+        // Es el actual: no se ofrece abrirlo.
+        XCTAssertFalse(app.buttons["Abrir este hogar"].exists)
         pulsar("Invitar a alguien")
         responderAlerta("Código de invitación", "Aceptar")
 
@@ -133,8 +143,9 @@ final class CuentaPruebasUI: XCTestCase {
         unirme.tap()
 
         XCTAssertTrue(app.navigationBars["Unirme a un hogar"].waitForNonExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["En el hogar: Luis y Eva"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Sesión iniciada con Apple"].exists)
+        XCTAssertTrue(app.staticTexts["Sesión iniciada con Apple"].waitForExistence(timeout: 5))
+        entrarEnHogar("Casa de Luis, hogar actual", titulo: "Casa de Luis")
+        XCTAssertTrue(app.staticTexts["En el hogar: Luis y Eva"].exists)
         app.tabBars.buttons["Inventario"].tap()
         XCTAssertTrue(app.buttons["Nevera, 1 producto"].waitForExistence(timeout: 5))
         app.tabBars.buttons["Compra"].tap()
@@ -167,6 +178,75 @@ final class CuentaPruebasUI: XCTestCase {
             app.staticTexts["Ese código no sirve. Puede que haya caducado o que ya se haya usado."]
                 .waitForExistence(timeout: 5)
         )
+    }
+
+    // MARK: Varios hogares
+
+    func testVariosHogaresConSuInventarioCadaUno() {
+        abrir()
+        irAAjustes()
+        pulsar("Iniciar sesión con Google")
+        pulsar("Crear hogar")
+        escribir("Casa", en: "Nombre del hogar")
+        app.navigationBars["Nuevo hogar"].buttons["Crear"].tap()
+        XCTAssertTrue(app.buttons["Casa, hogar actual"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["Inventario"].tap()
+        crearCategoria("Despensa")
+
+        // Otro hogar desde la lista: pasa a ser el actual y empieza vacío.
+        app.tabBars.buttons["Ajustes"].tap()
+        pulsar("Crear hogar")
+        escribir("Playa", en: "Nombre del hogar")
+        app.navigationBars["Nuevo hogar"].buttons["Crear"].tap()
+        XCTAssertTrue(app.buttons["Playa, hogar actual"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Casa"].exists)
+        app.tabBars.buttons["Inventario"].tap()
+        XCTAssertTrue(app.navigationBars["Inventario - Playa"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["No hay categorías"].exists)
+
+        // Volver a Casa desde su pantalla: sigue con lo suyo.
+        app.tabBars.buttons["Ajustes"].tap()
+        entrarEnHogar("Casa", titulo: "Casa")
+        pulsar("Abrir este hogar")
+        XCTAssertTrue(app.buttons["Abrir este hogar"].waitForNonExistence(timeout: 5))
+        // De vuelta a la lista: la pestaña conserva la pantalla en la que se quedó.
+        app.navigationBars["Casa"].buttons.element(boundBy: 0).tap()
+        app.tabBars.buttons["Inventario"].tap()
+        XCTAssertTrue(app.navigationBars["Inventario - Casa"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Despensa, 0 productos"].exists)
+
+        // Salir de Playa teniendo Casa: su inventario se quita del iPhone.
+        app.tabBars.buttons["Ajustes"].tap()
+        entrarEnHogar("Playa", titulo: "Playa")
+        pulsar("Salir del hogar")
+        let alerta = app.alerts["¿Salir de Playa?"]
+        XCTAssertTrue(alerta.waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            alerta.staticTexts["Eres la única persona del hogar: se eliminará del servidor dentro de 30 días. "
+                + "Su inventario se quita de este iPhone."].exists
+        )
+        alerta.buttons["Salir"].tap()
+        XCTAssertTrue(app.buttons["Playa"].waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Casa, hogar actual"].exists)
+    }
+
+    func testUnirseTeniendoYaUnHogar() {
+        abrir()
+        irAAjustes()
+        pulsar("Iniciar sesión con Google")
+        pulsar("Crear hogar")
+        escribir("Casa", en: "Nombre del hogar")
+        app.navigationBars["Nuevo hogar"].buttons["Crear"].tap()
+        XCTAssertTrue(app.buttons["Casa, hogar actual"].waitForExistence(timeout: 5))
+
+        pulsar("Unirme con un código")
+        escribir("LUISCASA", en: "Código")
+        app.navigationBars["Unirme a un hogar"].buttons["Unirme"].tap()
+        // Sin preguntar por lo del iPhone: el hogar nuevo trae lo suyo.
+        XCTAssertTrue(app.buttons["Casa de Luis, hogar actual"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.alerts.firstMatch.exists)
+        app.tabBars.buttons["Inventario"].tap()
+        XCTAssertTrue(app.buttons["Nevera, 1 producto"].waitForExistence(timeout: 5))
     }
 
     // MARK: Enlace de invitación
@@ -225,6 +305,7 @@ final class CuentaPruebasUI: XCTestCase {
 
     // MARK: Notificaciones
 
+    /// Crea «Casa» y entra en su pantalla, que es donde están sus notificaciones.
     private func crearHogarConGoogle(_ extra: [String] = []) {
         abrir(extra)
         irAAjustes()
@@ -233,6 +314,7 @@ final class CuentaPruebasUI: XCTestCase {
         escribir("Casa", en: "Nombre del hogar")
         app.navigationBars["Nuevo hogar"].buttons["Crear"].tap()
         XCTAssertTrue(app.navigationBars["Nuevo hogar"].waitForNonExistence(timeout: 5))
+        entrarEnHogar("Casa, hogar actual", titulo: "Casa")
     }
 
     /// El interruptor de verdad está dentro de la fila: tocar la fila no lo cambia.
