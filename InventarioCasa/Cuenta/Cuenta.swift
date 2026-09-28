@@ -205,7 +205,9 @@ final class Cuenta {
     /// es una instalación nueva de una cuenta que ya tenía hogar.
     func actualizarHogar() async {
         do {
-            hogar = try await conexion.hogar()
+            // Mientras la app lleve un solo hogar: el que ya tenía el iPhone, o el primero.
+            let lista = try await conexion.hogares()
+            hogar = lista.first { $0.id == inventario.estado.hogarId } ?? lista.first
             sinConexion = false
         } catch {
             fallo(error)
@@ -285,8 +287,9 @@ final class Cuenta {
     }
 
     func invitar() async -> Result<Invitacion, MensajeError> {
-        do {
-            return .success(try await conexion.invitar())
+        do throws(ErrorConexion) {
+            guard let id = hogar?.id else { throw ErrorConexion.servidor(codigo: 404, error: nil) }
+            return .success(try await conexion.invitar(hogar: id))
         } catch {
             return .failure(MensajeError(texto: Textos.ErroresCuenta.noInvitado(error.causa)))
         }
@@ -295,7 +298,7 @@ final class Cuenta {
     func salir() async -> String? {
         let nombre = hogar?.nombre ?? ""
         do {
-            try await conexion.salir()
+            if let id = hogar?.id { try await conexion.salir(hogar: id) }
         } catch {
             // Si el servidor dice que ya no estaba, el resultado es el que se quería.
             guard error.codigo == 409 else { return Textos.ErroresCuenta.noSalido(error.causa) }
@@ -362,8 +365,8 @@ final class Cuenta {
     /// Al abrir Ajustes. Si hay alguna activada, se vuelve a pedir el token:
     /// iOS puede cambiarlo, y así el servidor tiene siempre el último.
     func cargarAvisos() async {
-        guard conSesion else { return }
-        guard let cargados = try? await conexion.avisos() else { return }
+        guard conSesion, let id = hogar?.id else { return }
+        guard let cargados = try? await conexion.avisos(hogar: id) else { return }
         avisos = cargados
         guard cargados.algunoActivo else { return }
         switch await permiso.estado() {
@@ -399,7 +402,8 @@ final class Cuenta {
         }
         nuevos[keyPath: cual] = valor
         do {
-            avisos = try await conexion.cambiarAvisos(nuevos)
+            guard let id = hogar?.id else { return }
+            avisos = try await conexion.cambiarAvisos(nuevos, hogar: id)
         } catch {
             anunciar(Textos.ErroresCuenta.avisoNoGuardado(error.causa))
         }
@@ -490,8 +494,8 @@ final class Cuenta {
             // El hogar y la cola se conservan: al volver a iniciar sesión se envía lo pendiente.
             usuario = nil
             sesionCaducada = true
-        case .servidor(409, _):
-            // El servidor ya no lo tiene en ningún hogar.
+        case .servidor(404, _), .servidor(409, _):
+            // Ya no está en ese hogar: lo sacaron, o salió desde otro dispositivo.
             try? inventario.separarDelHogar()
             hogar = nil
         default:

@@ -20,7 +20,8 @@ public final class ServidorEnMemoria {
     private var usuarios: [Int: Usuario] = [:]
     private var siguienteUsuario = 1
     private var hogares: [String: (nombre: String, revision: Int)] = [:]
-    private var miembros: [Int: String] = [:]
+    /// Los hogares de cada persona, en el orden en que se unió.
+    private var miembros: [Int: [String]] = [:]
     private var invitaciones: [String: String] = [:]
     private var categorias: [String: (api: Api.Categoria, hogar: String, revision: Int)] = [:]
     private var productos: [String: (guardado: ProductoGuardado, hogar: String)] = [:]
@@ -28,8 +29,8 @@ public final class ServidorEnMemoria {
 
     /// Para simular que no hay red.
     public var sinConexion = false
-    /// Preferencias de notificaciones por usuario, y dispositivos registrados (token → usuario).
-    public internal(set) var avisos: [Int: Avisos] = [:]
+    /// Preferencias de notificaciones por usuario y hogar, y dispositivos registrados (token → usuario).
+    public internal(set) var avisos: [Int: [String: Avisos]] = [:]
     public internal(set) var dispositivos: [String: Int] = [:]
 
     public init() {}
@@ -59,14 +60,14 @@ public final class ServidorEnMemoria {
             cantidadFijadaEn: ahora, umbralCompra: 1, autoListaCompra: true, enListaCompraManual: false,
             creado: ahora, modificado: ahora, borrado: false
         )]
-        _ = try? enviar(lote, usuario: dueno.id)
+        _ = try? enviar(lote, usuario: dueno.id, hogar: hogar.id)
     }
 
     /// Otra persona añade un producto a una categoría que ya existe en su
     /// hogar. Para comprobar que llega sin cerrar la app (`-cambioAjeno`).
     public func anadirProducto(de persona: String, en nombreCategoria: String, nombre: String) {
         guard let dueno = usuarios.values.first(where: { $0.nombre == persona }),
-              let hogar = miembros[dueno.id],
+              let hogar = miembros[dueno.id]?.first,
               let categoria = categorias.values.first(where: { $0.hogar == hogar && $0.api.nombre == nombreCategoria })
         else { return }
         let ahora = Date().milisegundos
@@ -75,14 +76,16 @@ public final class ServidorEnMemoria {
             cantidadFijadaEn: ahora, umbralCompra: 1, autoListaCompra: true, enListaCompraManual: false,
             creado: ahora, modificado: ahora, borrado: false
         )])
-        _ = try? enviar(lote, usuario: dueno.id)
+        _ = try? enviar(lote, usuario: dueno.id, hogar: hogar)
     }
 
     // MARK: Hogar
 
-    func hogar(de usuario: Int) -> Hogar? {
-        guard let id = miembros[usuario], let hogar = hogares[id] else { return nil }
-        let gente = miembros.filter { $0.value == id }.keys.sorted().compactMap { usuarios[$0] }
+    static let maximoHogares = 10
+
+    private func hogar(_ id: String) -> Hogar? {
+        guard let hogar = hogares[id] else { return nil }
+        let gente = miembros.filter { $0.value.contains(id) }.keys.sorted().compactMap { usuarios[$0] }
         return Hogar(
             id: id, nombre: hogar.nombre,
             miembros: gente.map { Miembro(id: $0.id, nombre: $0.nombre, email: $0.email) },
@@ -90,34 +93,51 @@ public final class ServidorEnMemoria {
         )
     }
 
-    func crearHogar(nombre: String, usuario: Int) throws(ErrorConexion) -> Hogar {
-        guard miembros[usuario] == nil else { throw .servidor(codigo: 409, error: "ya estás en un hogar") }
-        let id = UUID().uuidString.lowercased()
-        hogares[id] = (nombre, 0)
-        miembros[usuario] = id
-        return hogar(de: usuario)!
+    func hogares(de usuario: Int) -> [Hogar] {
+        (miembros[usuario] ?? []).compactMap(hogar)
     }
 
-    func invitar(usuario: Int) throws(ErrorConexion) -> Invitacion {
-        guard let id = miembros[usuario] else { throw .servidor(codigo: 409, error: "no estás en ningún hogar") }
+    /// Como el servidor: si no está en ese hogar, 404, igual que si no existiera.
+    private func deMiembro(_ usuario: Int, _ id: String) throws(ErrorConexion) -> String {
+        guard miembros[usuario]?.contains(id) == true else { throw .servidor(codigo: 404, error: "hogar no encontrado") }
+        return id
+    }
+
+    func crearHogar(nombre: String, usuario: Int) throws(ErrorConexion) -> Hogar {
+        guard (miembros[usuario]?.count ?? 0) < Self.maximoHogares else {
+            throw .servidor(codigo: 409, error: "limite_hogares")
+        }
+        let id = UUID().uuidString.lowercased()
+        hogares[id] = (nombre, 0)
+        miembros[usuario, default: []].append(id)
+        return hogar(id)!
+    }
+
+    func invitar(usuario: Int, hogar id: String) throws(ErrorConexion) -> Invitacion {
+        let id = try deMiembro(usuario, id)
         let codigo = String(UUID().uuidString.replacingOccurrences(of: "-", with: "").prefix(8)).uppercased()
         invitaciones[codigo] = id
         return Invitacion(codigo: codigo, caducaEn: Date().addingTimeInterval(7 * 86_400).milisegundos)
     }
 
     func unirse(codigo: String, usuario: Int) throws(ErrorConexion) -> Hogar {
-        guard miembros[usuario] == nil else { throw .servidor(codigo: 409, error: "ya estás en un hogar") }
-        guard let id = invitaciones.removeValue(forKey: codigo.uppercased()) else {
+        guard let id = invitaciones[codigo.uppercased()] else {
             throw .servidor(codigo: 404, error: "código no válido")
         }
-        miembros[usuario] = id
-        return hogar(de: usuario)!
+        // Sin gastar la invitación, como el servidor.
+        if miembros[usuario]?.contains(id) == true { throw .servidor(codigo: 409, error: "ya_en_este_hogar") }
+        guard (miembros[usuario]?.count ?? 0) < Self.maximoHogares else {
+            throw .servidor(codigo: 409, error: "limite_hogares")
+        }
+        invitaciones[codigo.uppercased()] = nil
+        miembros[usuario, default: []].append(id)
+        return hogar(id)!
     }
 
-    func salir(usuario: Int) throws(ErrorConexion) {
-        guard miembros.removeValue(forKey: usuario) != nil else {
-            throw .servidor(codigo: 409, error: "no estás en ningún hogar")
-        }
+    func salir(usuario: Int, hogar id: String) throws(ErrorConexion) {
+        let id = try deMiembro(usuario, id)
+        miembros[usuario]?.removeAll { $0 == id }
+        avisos[usuario]?[id] = nil
     }
 
     func cambiarNombre(_ nombre: String, usuario: Int) -> Usuario {
@@ -139,8 +159,8 @@ public final class ServidorEnMemoria {
         return hogares[hogar]!.revision
     }
 
-    func enviar(_ lote: Api.Lote, usuario: Int) throws(ErrorConexion) -> Api.RespuestaEnvio {
-        guard let hogar = miembros[usuario] else { throw .servidor(codigo: 409, error: "no estás en ningún hogar") }
+    func enviar(_ lote: Api.Lote, usuario: Int, hogar id: String) throws(ErrorConexion) -> Api.RespuestaEnvio {
+        let hogar = try deMiembro(usuario, id)
         var rechazados: [Api.Rechazado] = []
         var categoriasTocadas: [String] = []
         var productosTocados = Set<String>()
@@ -230,8 +250,8 @@ public final class ServidorEnMemoria {
         }
     }
 
-    func novedades(desde: Int, usuario: Int) throws(ErrorConexion) -> Api.Novedades {
-        guard let hogar = miembros[usuario] else { throw .servidor(codigo: 409, error: "no estás en ningún hogar") }
+    func novedades(desde: Int, usuario: Int, hogar id: String) throws(ErrorConexion) -> Api.Novedades {
+        let hogar = try deMiembro(usuario, id)
         return Api.Novedades(
             categorias: categorias.values.filter { $0.hogar == hogar && $0.revision > desde }.map(\.api),
             productos: productos.values.filter { $0.hogar == hogar && $0.guardado.revision > desde }.map(\.guardado.api),
@@ -285,7 +305,7 @@ public final class ConexionEnMemoria: Conexion {
 
     public func cerrarSesion() async { usuario = nil }
 
-    public func hogar() async throws(ErrorConexion) -> Hogar? { servidor.hogar(de: try conSesion()) }
+    public func hogares() async throws(ErrorConexion) -> [Hogar] { servidor.hogares(de: try conSesion()) }
 
     public func crearHogar(nombre: String) async throws(ErrorConexion) -> Hogar {
         try servidor.crearHogar(nombre: nombre, usuario: try conSesion())
@@ -295,11 +315,13 @@ public final class ConexionEnMemoria: Conexion {
         try servidor.unirse(codigo: codigo, usuario: try conSesion())
     }
 
-    public func invitar() async throws(ErrorConexion) -> Invitacion {
-        try servidor.invitar(usuario: try conSesion())
+    public func invitar(hogar: String) async throws(ErrorConexion) -> Invitacion {
+        try servidor.invitar(usuario: try conSesion(), hogar: hogar)
     }
 
-    public func salir() async throws(ErrorConexion) { try servidor.salir(usuario: try conSesion()) }
+    public func salir(hogar: String) async throws(ErrorConexion) {
+        try servidor.salir(usuario: try conSesion(), hogar: hogar)
+    }
 
     public func cambiarNombre(_ nombre: String) async throws(ErrorConexion) -> Usuario {
         let nuevo = servidor.cambiarNombre(nombre, usuario: try conSesion())
@@ -316,12 +338,12 @@ public final class ConexionEnMemoria: Conexion {
         usuario = nil
     }
 
-    public func avisos() async throws(ErrorConexion) -> Avisos {
-        servidor.avisos[try conSesion()] ?? Avisos()
+    public func avisos(hogar: String) async throws(ErrorConexion) -> Avisos {
+        servidor.avisos[try conSesion()]?[hogar] ?? Avisos()
     }
 
-    public func cambiarAvisos(_ avisos: Avisos) async throws(ErrorConexion) -> Avisos {
-        servidor.avisos[try conSesion()] = avisos
+    public func cambiarAvisos(_ avisos: Avisos, hogar: String) async throws(ErrorConexion) -> Avisos {
+        servidor.avisos[try conSesion(), default: [:]][hogar] = avisos
         return avisos
     }
 
@@ -333,12 +355,12 @@ public final class ConexionEnMemoria: Conexion {
         if servidor.dispositivos[token] == (try conSesion()) { servidor.dispositivos[token] = nil }
     }
 
-    public func enviar(_ lote: Api.Lote) async throws(ErrorConexion) -> Api.RespuestaEnvio {
-        try servidor.enviar(lote, usuario: try conSesion())
+    public func enviar(_ lote: Api.Lote, hogar: String) async throws(ErrorConexion) -> Api.RespuestaEnvio {
+        try servidor.enviar(lote, usuario: try conSesion(), hogar: hogar)
     }
 
-    public func novedades(desde revision: Int) async throws(ErrorConexion) -> Api.Novedades {
-        try servidor.novedades(desde: revision, usuario: try conSesion())
+    public func novedades(desde revision: Int, hogar: String) async throws(ErrorConexion) -> Api.Novedades {
+        try servidor.novedades(desde: revision, usuario: try conSesion(), hogar: hogar)
     }
 }
 

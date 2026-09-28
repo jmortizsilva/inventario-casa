@@ -60,7 +60,7 @@ private func hogarDeAnaYLuis() async throws
     try await ana.sincronizar()
 
     _ = try await luis.conexion.entrar(conCodigoDeCanje: "luis@ejemplo.com")
-    let invitacion = try await ana.conexion.invitar()
+    let invitacion = try await ana.conexion.invitar(hogar: hogar.id)
     let mismo = try await luis.conexion.unirse(codigo: invitacion.codigo)
     try luis.inventario.unirAHogar(mismo.id, conservando: false)
     try await luis.sincronizar()
@@ -157,7 +157,8 @@ private func hogarDeAnaYLuis() async throws
         try eva.inventario.crearProducto(nombre: "Lejía", en: limpieza.id, cantidad: 1)
 
         _ = try await eva.conexion.entrar(conCodigoDeCanje: "eva@ejemplo.com")
-        let hogar = try await eva.conexion.unirse(codigo: try await ana.conexion.invitar().codigo)
+        let deAna = try #require(ana.inventario.estado.hogarId)
+        let hogar = try await eva.conexion.unirse(codigo: try await ana.conexion.invitar(hogar: deAna).codigo)
         try eva.inventario.unirAHogar(hogar.id, conservando: true)
         try await eva.sincronizar()
         try await ana.sincronizar()
@@ -183,7 +184,7 @@ private func hogarDeAnaYLuis() async throws
         var vueltas = 0
         while !ana.inventario.loteParaEnviar(maximo: 2).estaVacio {
             let lote = ana.inventario.loteParaEnviar(maximo: 2)
-            let respuesta = try await ana.conexion.enviar(lote)
+            let respuesta = try await ana.conexion.enviar(lote, hogar: try #require(ana.inventario.estado.hogarId))
             try ana.inventario.confirmarEnvio(lote, respuesta: respuesta)
             vueltas += 1
         }
@@ -248,5 +249,58 @@ private func hogarDeAnaYLuis() async throws
 
         #expect(luis.producto("Arroz") != nil)
         #expect(ana.cantidad("Arroz") == 3)
+    }
+}
+
+/// Una misma persona en dos hogares: cada inventario va por separado.
+@MainActor
+@Suite struct VariosHogaresPruebas {
+    @Test func loDeUnHogarNoLlegaAlOtro() async throws {
+        let servidor = ServidorEnMemoria()
+        let reloj = RelojCompartido()
+        let enCasa = Iphone(servidor: servidor, reloj: reloj)
+        _ = try await enCasa.conexion.entrar(conCodigoDeCanje: "ana@ejemplo.com")
+        let casa = try await enCasa.conexion.crearHogar(nombre: "Casa")
+        let playa = try await enCasa.conexion.crearHogar(nombre: "Playa")
+        try enCasa.inventario.unirAHogar(casa.id, conservando: false)
+        try enCasa.inventario.crearCategoria(nombre: "Despensa")
+        try await enCasa.sincronizar()
+
+        // La misma cuenta, con el inventario de la playa.
+        let enPlaya = Iphone(servidor: servidor, reloj: reloj)
+        _ = try await enPlaya.conexion.entrar(conCodigoDeCanje: "ana@ejemplo.com")
+        try enPlaya.inventario.unirAHogar(playa.id, conservando: false)
+        try await enPlaya.sincronizar()
+
+        #expect(enPlaya.inventario.categorias.isEmpty)
+        #expect(try await enCasa.conexion.hogares().map(\.nombre) == ["Casa", "Playa"])
+    }
+
+    @Test func unirseAlQueYaEsTuyoNoGastaLaInvitacion() async throws {
+        let servidor = ServidorEnMemoria()
+        let ana = ConexionEnMemoria(servidor: servidor)
+        _ = try await ana.entrar(conCodigoDeCanje: "ana@ejemplo.com")
+        let casa = try await ana.crearHogar(nombre: "Casa")
+        let invitacion = try await ana.invitar(hogar: casa.id)
+
+        await #expect(throws: ErrorConexion.servidor(codigo: 409, error: "ya_en_este_hogar")) {
+            _ = try await ana.unirse(codigo: invitacion.codigo)
+        }
+        let luis = ConexionEnMemoria(servidor: servidor)
+        _ = try await luis.entrar(conCodigoDeCanje: "luis@ejemplo.com")
+        #expect(try await luis.unirse(codigo: invitacion.codigo).id == casa.id)
+    }
+
+    @Test func enUnHogarAjenoNoEntra() async throws {
+        let servidor = ServidorEnMemoria()
+        let ana = ConexionEnMemoria(servidor: servidor)
+        _ = try await ana.entrar(conCodigoDeCanje: "ana@ejemplo.com")
+        let casa = try await ana.crearHogar(nombre: "Casa")
+        let luis = ConexionEnMemoria(servidor: servidor)
+        _ = try await luis.entrar(conCodigoDeCanje: "luis@ejemplo.com")
+
+        await #expect(throws: ErrorConexion.servidor(codigo: 404, error: "hogar no encontrado")) {
+            _ = try await luis.novedades(desde: 0, hogar: casa.id)
+        }
     }
 }

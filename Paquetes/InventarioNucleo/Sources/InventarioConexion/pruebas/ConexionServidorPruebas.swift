@@ -114,14 +114,14 @@ private let ana = Usuario(id: 1, email: "ana@ejemplo.com", nombre: "Ana", provee
         ProtocoloFalso.responder = { peticion in
             switch peticion.url?.path {
             case "/auth/renovar": (200, sesionJson("acceso", "refresco-2"))
-            case "/hogar": (200, Data(#"{"hogar":null}"#.utf8))
+            case "/hogares": (200, Data(#"{"hogares":[]}"#.utf8))
             default: nil
             }
         }
         let credenciales = CredencialesEnMemoria(SesionGuardada(tokenRefresco: "refresco-1", usuario: ana))
         let conexion = conexion(credenciales)
-        async let uno = conexion.hogar()
-        async let dos = conexion.hogar()
+        async let uno = conexion.hogares()
+        async let dos = conexion.hogares()
         _ = try await (uno, dos)
 
         let renovaciones = ProtocoloFalso.peticiones.filter { $0.url?.path == "/auth/renovar" }
@@ -132,7 +132,7 @@ private let ana = Usuario(id: 1, email: "ana@ejemplo.com", nombre: "Ana", provee
         ProtocoloFalso.responder = { peticion in
             switch peticion.url?.path {
             case "/auth/renovar": (200, sesionJson("acceso", "refresco-2"))
-            case "/hogar/unirse": (404, Data(#"{"error":"código no válido"}"#.utf8))
+            case "/hogares/unirse": (404, Data(#"{"error":"código no válido"}"#.utf8))
             default: nil
             }
         }
@@ -146,13 +146,13 @@ private let ana = Usuario(id: 1, email: "ana@ejemplo.com", nombre: "Ana", provee
         ProtocoloFalso.responder = { peticion in
             switch peticion.url?.path {
             case "/auth/renovar": (200, sesionJson("acceso", "refresco-2"))
-            case "/sincronizar":
+            case "/hogares/h1/sincronizar":
                 (200, Data(#"{"categorias":[],"productos":[],"revision":9,"masDisponible":false}"#.utf8))
             default: nil
             }
         }
         let credenciales = CredencialesEnMemoria(SesionGuardada(tokenRefresco: "refresco-1", usuario: ana))
-        let novedades = try await conexion(credenciales).novedades(desde: 7)
+        let novedades = try await conexion(credenciales).novedades(desde: 7, hogar: "h1")
 
         #expect(novedades.revision == 9)
         let peticion = try #require(ProtocoloFalso.peticiones.last)

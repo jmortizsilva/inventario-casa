@@ -12,23 +12,25 @@ public protocol Conexion: AnyObject {
     func entrarConApple(identityToken: String, nonce: String) async throws(ErrorConexion) -> Usuario
     func cerrarSesion() async
 
-    func hogar() async throws(ErrorConexion) -> Hogar?
+    /// Los hogares de la cuenta, en el orden en que se unió a cada uno. Un
+    /// hogar en el que ya no está da 404 en las demás: el servidor no dice si existe.
+    func hogares() async throws(ErrorConexion) -> [Hogar]
     func crearHogar(nombre: String) async throws(ErrorConexion) -> Hogar
     func unirse(codigo: String) async throws(ErrorConexion) -> Hogar
-    func invitar() async throws(ErrorConexion) -> Invitacion
-    func salir() async throws(ErrorConexion)
+    func invitar(hogar: String) async throws(ErrorConexion) -> Invitacion
+    func salir(hogar: String) async throws(ErrorConexion)
 
     func cambiarNombre(_ nombre: String) async throws(ErrorConexion) -> Usuario
     func eliminarCuenta(codigoApple: String?) async throws(ErrorConexion)
 
-    func avisos() async throws(ErrorConexion) -> Avisos
-    func cambiarAvisos(_ avisos: Avisos) async throws(ErrorConexion) -> Avisos
+    func avisos(hogar: String) async throws(ErrorConexion) -> Avisos
+    func cambiarAvisos(_ avisos: Avisos, hogar: String) async throws(ErrorConexion) -> Avisos
     /// El token de APNs de este iPhone. Hay que quitarlo antes de cerrar sesión: después ya no hay con qué pedirlo.
     func registrarDispositivo(_ token: String, entorno: EntornoAvisos) async throws(ErrorConexion)
     func quitarDispositivo(_ token: String) async throws(ErrorConexion)
 
-    func enviar(_ lote: Api.Lote) async throws(ErrorConexion) -> Api.RespuestaEnvio
-    func novedades(desde revision: Int) async throws(ErrorConexion) -> Api.Novedades
+    func enviar(_ lote: Api.Lote, hogar: String) async throws(ErrorConexion) -> Api.RespuestaEnvio
+    func novedades(desde revision: Int, hogar: String) async throws(ErrorConexion) -> Api.Novedades
 }
 
 @MainActor
@@ -57,9 +59,9 @@ public final class ConexionServidor: Conexion {
 
     public func cerrarSesion() async { await sesion.cerrar() }
 
-    public func hogar() async throws(ErrorConexion) -> Hogar? {
+    public func hogares() async throws(ErrorConexion) -> [Hogar] {
         let cliente = self.cliente
-        return try await sesion.conToken { token throws(ErrorConexion) in try await cliente.hogar(token: token) }
+        return try await sesion.conToken { token throws(ErrorConexion) in try await cliente.hogares(token: token) }
     }
 
     public func crearHogar(nombre: String) async throws(ErrorConexion) -> Hogar {
@@ -76,14 +78,16 @@ public final class ConexionServidor: Conexion {
         }
     }
 
-    public func invitar() async throws(ErrorConexion) -> Invitacion {
+    public func invitar(hogar: String) async throws(ErrorConexion) -> Invitacion {
         let cliente = self.cliente
-        return try await sesion.conToken { token throws(ErrorConexion) in try await cliente.invitar(token: token) }
+        return try await sesion.conToken { token throws(ErrorConexion) in
+            try await cliente.invitar(hogar: hogar, token: token)
+        }
     }
 
-    public func salir() async throws(ErrorConexion) {
+    public func salir(hogar: String) async throws(ErrorConexion) {
         let cliente = self.cliente
-        try await sesion.conToken { token throws(ErrorConexion) in try await cliente.salir(token: token) }
+        try await sesion.conToken { token throws(ErrorConexion) in try await cliente.salir(hogar: hogar, token: token) }
     }
 
     public func cambiarNombre(_ nombre: String) async throws(ErrorConexion) -> Usuario {
@@ -104,15 +108,17 @@ public final class ConexionServidor: Conexion {
         await sesion.olvidar()
     }
 
-    public func avisos() async throws(ErrorConexion) -> Avisos {
-        let cliente = self.cliente
-        return try await sesion.conToken { token throws(ErrorConexion) in try await cliente.avisos(token: token) }
-    }
-
-    public func cambiarAvisos(_ avisos: Avisos) async throws(ErrorConexion) -> Avisos {
+    public func avisos(hogar: String) async throws(ErrorConexion) -> Avisos {
         let cliente = self.cliente
         return try await sesion.conToken { token throws(ErrorConexion) in
-            try await cliente.cambiarAvisos(avisos, token: token)
+            try await cliente.avisos(hogar: hogar, token: token)
+        }
+    }
+
+    public func cambiarAvisos(_ avisos: Avisos, hogar: String) async throws(ErrorConexion) -> Avisos {
+        let cliente = self.cliente
+        return try await sesion.conToken { token throws(ErrorConexion) in
+            try await cliente.cambiarAvisos(avisos, hogar: hogar, token: token)
         }
     }
 
@@ -130,15 +136,17 @@ public final class ConexionServidor: Conexion {
         }
     }
 
-    public func enviar(_ lote: Api.Lote) async throws(ErrorConexion) -> Api.RespuestaEnvio {
-        let cliente = self.cliente
-        return try await sesion.conToken { token throws(ErrorConexion) in try await cliente.enviar(lote, token: token) }
-    }
-
-    public func novedades(desde revision: Int) async throws(ErrorConexion) -> Api.Novedades {
+    public func enviar(_ lote: Api.Lote, hogar: String) async throws(ErrorConexion) -> Api.RespuestaEnvio {
         let cliente = self.cliente
         return try await sesion.conToken { token throws(ErrorConexion) in
-            try await cliente.novedades(desde: revision, token: token)
+            try await cliente.enviar(lote, hogar: hogar, token: token)
+        }
+    }
+
+    public func novedades(desde revision: Int, hogar: String) async throws(ErrorConexion) -> Api.Novedades {
+        let cliente = self.cliente
+        return try await sesion.conToken { token throws(ErrorConexion) in
+            try await cliente.novedades(desde: revision, hogar: hogar, token: token)
         }
     }
 }

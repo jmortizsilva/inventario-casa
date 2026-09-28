@@ -44,31 +44,34 @@ public struct ClienteApi: Sendable {
         let _: Vacia = try await pedir("POST", "auth/logout", cuerpo: ["tokenRefresco": tokenRefresco])
     }
 
-    // MARK: Hogar
+    // MARK: Hogares
+    //
+    // Las rutas de varios hogares (/hogares…). Las de uno solo (/hogar…) son de las
+    // compilaciones anteriores y esta ya no las usa.
 
-    public func hogar(token: String) async throws(ErrorConexion) -> Hogar? {
-        let respuesta: ConHogar = try await pedir("GET", "hogar", token: token)
-        return respuesta.hogar
+    public func hogares(token: String) async throws(ErrorConexion) -> [Hogar] {
+        let respuesta: ConHogares = try await pedir("GET", "hogares", token: token)
+        return respuesta.hogares
     }
 
     public func crearHogar(nombre: String, token: String) async throws(ErrorConexion) -> Hogar {
-        let respuesta: ConHogar = try await pedir("POST", "hogar", cuerpo: ["nombre": nombre], token: token)
+        let respuesta: ConHogar = try await pedir("POST", "hogares", cuerpo: ["nombre": nombre], token: token)
         guard let hogar = respuesta.hogar else { throw .respuestaIlegible }
         return hogar
     }
 
     public func unirse(codigo: String, token: String) async throws(ErrorConexion) -> Hogar {
-        let respuesta: ConHogar = try await pedir("POST", "hogar/unirse", cuerpo: ["codigo": codigo], token: token)
+        let respuesta: ConHogar = try await pedir("POST", "hogares/unirse", cuerpo: ["codigo": codigo], token: token)
         guard let hogar = respuesta.hogar else { throw .respuestaIlegible }
         return hogar
     }
 
-    public func invitar(token: String) async throws(ErrorConexion) -> Invitacion {
-        try await pedir("POST", "hogar/invitaciones", cuerpo: [String: String](), token: token)
+    public func invitar(hogar: String, token: String) async throws(ErrorConexion) -> Invitacion {
+        try await pedir("POST", "hogares/\(hogar)/invitaciones", cuerpo: [String: String](), token: token)
     }
 
-    public func salir(token: String) async throws(ErrorConexion) {
-        let _: Vacia = try await pedir("POST", "hogar/salir", cuerpo: [String: String](), token: token)
+    public func salir(hogar: String, token: String) async throws(ErrorConexion) {
+        let _: Vacia = try await pedir("POST", "hogares/\(hogar)/salir", cuerpo: [String: String](), token: token)
     }
 
     // MARK: Cuenta
@@ -88,12 +91,12 @@ public struct ClienteApi: Sendable {
 
     // MARK: Notificaciones
 
-    public func avisos(token: String) async throws(ErrorConexion) -> Avisos {
-        try await pedir("GET", "cuenta/avisos", token: token)
+    public func avisos(hogar: String, token: String) async throws(ErrorConexion) -> Avisos {
+        try await pedir("GET", "hogares/\(hogar)/avisos", token: token)
     }
 
-    public func cambiarAvisos(_ avisos: Avisos, token: String) async throws(ErrorConexion) -> Avisos {
-        try await pedir("PUT", "cuenta/avisos", cuerpo: avisos, token: token)
+    public func cambiarAvisos(_ avisos: Avisos, hogar: String, token: String) async throws(ErrorConexion) -> Avisos {
+        try await pedir("PUT", "hogares/\(hogar)/avisos", cuerpo: avisos, token: token)
     }
 
     public func registrarDispositivo(_ dispositivo: String, entorno: EntornoAvisos, token: String) async throws(ErrorConexion) {
@@ -110,18 +113,23 @@ public struct ClienteApi: Sendable {
 
     // MARK: Sincronización
 
-    public func enviar(_ lote: Api.Lote, token: String) async throws(ErrorConexion) -> Api.RespuestaEnvio {
-        try await pedir("POST", "sincronizar", cuerpo: lote, token: token)
+    public func enviar(_ lote: Api.Lote, hogar: String, token: String) async throws(ErrorConexion) -> Api.RespuestaEnvio {
+        try await pedir("POST", "hogares/\(hogar)/sincronizar", cuerpo: lote, token: token)
     }
 
-    public func novedades(desde: Int, limite: Int = 500, token: String) async throws(ErrorConexion) -> Api.Novedades {
-        try await pedir("GET", "sincronizar", consulta: ["desde": "\(desde)", "limite": "\(limite)"], token: token)
+    public func novedades(
+        desde: Int, limite: Int = 500, hogar: String, token: String
+    ) async throws(ErrorConexion) -> Api.Novedades {
+        try await pedir(
+            "GET", "hogares/\(hogar)/sincronizar", consulta: ["desde": "\(desde)", "limite": "\(limite)"], token: token
+        )
     }
 
     // MARK: Fontanería
 
     private struct Vacia: Decodable {}
     private struct ConHogar: Decodable { let hogar: Hogar? }
+    private struct ConHogares: Decodable { let hogares: [Hogar] }
     private struct ConUsuario: Decodable { let usuario: Usuario }
     private struct SinCuerpo: Encodable {}
     private struct CuerpoError: Decodable { let error: String? }
