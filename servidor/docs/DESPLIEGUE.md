@@ -127,11 +127,26 @@ de 2026.
 
 ## Consultar la base de datos
 
-Copia antes de cualquier cosa que la cambie:
+Copia antes de cualquier cosa que la cambie. **Con `cp` no vale**: la base
+va en modo WAL, y lo reciente vive en `inventario.sqlite-wal` hasta que
+SQLite lo vuelca, al pasar de unos 4 MB. El 28 de septiembre de 2026 un `cp`
+del `.sqlite` dio una copia de 4 KB sin ninguna tabla, con todo en el WAL.
+Se copia con la función de copia de SQLite, que lo incluye, y se comprueba:
 
 ```bash
-cp ~/podman-volumes/inventario-casa/datos/inventario.sqlite ~/copia-inventario.sqlite
+cat > /tmp/copiar.js <<'FIN'
+const Database = require('better-sqlite3');
+const destino = '/app/datos/copia.sqlite';
+new Database('/app/datos/inventario.sqlite', { readonly: true }).backup(destino).then(() => {
+  const n = new Database(destino, { readonly: true }).prepare('SELECT COUNT(*) AS n FROM productos').get().n;
+  console.log(`copia con ${n} productos`);
+});
+FIN
+podman exec -i inventario-casa node < /tmp/copiar.js
+mv ~/podman-volumes/inventario-casa/datos/copia.sqlite ~/copia-inventario-$(date +%F).sqlite
 ```
+
+Si dice «copia con 0 productos» y no debería, la copia no sirve.
 
 No hace falta `sqlite3` en el sistema: el contenedor trae `better-sqlite3`. Se
 le pasa un script por la entrada estándar. Hay que poner `readonly` si solo se
