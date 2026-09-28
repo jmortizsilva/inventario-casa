@@ -49,8 +49,14 @@ struct FormularioCrearHogar: View {
     @State private var tuNombre = ""
     @State private var error: String?
     @State private var creando = false
+    @State private var copiar = QueCopiar.nada
 
     private var pideTuNombre: Bool { cuenta.usuario?.nombre == nil }
+
+    /// Del que se puede copiar: el abierto, si tiene algo.
+    private var hogarActual: Hogar? {
+        cuenta.inventario.categorias.isEmpty ? nil : cuenta.hogar
+    }
 
     private var listo: Bool {
         !Nombres.limpiar(nombre).isEmpty && (!pideTuNombre || !Nombres.limpiar(tuNombre).isEmpty)
@@ -65,7 +71,7 @@ struct FormularioCrearHogar: View {
                 }
             } footer: {
                 VStack(alignment: .leading, spacing: 8) {
-                    if let pasa = Textos.Hogar.pasaAlHogar(
+                    if cuenta.hogar == nil, let pasa = Textos.Hogar.pasaAlHogar(
                         categorias: cuenta.inventario.categorias.count,
                         productos: cuenta.inventario.cuantosProductos
                     ) {
@@ -74,6 +80,25 @@ struct FormularioCrearHogar: View {
                     if let error {
                         Text(error).foregroundStyle(.red)
                     }
+                }
+            }
+            if let hogarActual {
+                // En línea y no como menú: con el teclado abierto, VoiceOver
+                // pasaba del menú al teclado (ver CLAUDE.md).
+                Section {
+                    Picker(Textos.Hogar.copiarDe(hogarActual.nombre), selection: $copiar) {
+                        Text(Textos.Hogar.copiarNada).tag(QueCopiar.nada)
+                        Text(Textos.Hogar.copiarCategorias).tag(QueCopiar.categorias)
+                        if cuenta.inventario.cuantosProductos > 0 {
+                            Text(Textos.Hogar.copiarTodo).tag(QueCopiar.categoriasYProductos)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                } header: {
+                    Text(Textos.Hogar.copiarDe(hogarActual.nombre))
+                } footer: {
+                    Text(Textos.Hogar.seQuedaComoEsta(hogarActual.nombre))
                 }
             }
         }
@@ -92,7 +117,11 @@ struct FormularioCrearHogar: View {
         creando = true
         error = nil
         Task {
-            let fallo = await cuenta.crearHogar(nombre: Nombres.limpiar(nombre), tuNombre: pideTuNombre ? tuNombre : nil)
+            let fallo = await cuenta.crearHogar(
+                nombre: Nombres.limpiar(nombre),
+                tuNombre: pideTuNombre ? tuNombre : nil,
+                copiar: hogarActual == nil ? .nada : copiar
+            )
             creando = false
             if let fallo {
                 error = fallo

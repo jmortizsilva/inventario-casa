@@ -142,4 +142,48 @@ import Testing
         }
         #expect(inventario.categorias.isEmpty)
     }
+
+    // MARK: Copia a otro hogar
+
+    @Test func copiaAOtroHogarSinCantidadesNiListaManual() throws {
+        let despensa = try inventario.crearCategoria(nombre: "Despensa")
+        try inventario.crearCategoria(nombre: "Baño")
+        let arroz = try inventario.crearProducto(nombre: "Arroz", en: despensa.id, cantidad: 4, umbralCompra: 2)
+        try inventario.fijarListaManual(arroz.id, en: true)
+        try inventario.borrarProducto(inventario.crearProducto(nombre: "Sal", en: despensa.id).id)
+
+        let otro = Inventario(almacen: AlmacenEnMemoria(), ahora: { despues })
+        try otro.unirAHogar("playa", conservando: false)
+        try otro.importar(try #require(inventario.copia(.categoriasYProductos)))
+
+        #expect(otro.categorias.map(\.nombre) == ["Baño", "Despensa"])
+        let despensaCopiada = try #require(otro.categorias.last)
+        #expect(despensaCopiada.id != despensa.id)
+        let copiado = try #require(otro.productos(en: despensaCopiada.id).first)
+        #expect(otro.productos(en: despensaCopiada.id).count == 1, "Lo borrado no se copia")
+        #expect(copiado.id != arroz.id)
+        #expect(copiado.cantidad == 0)
+        #expect(copiado.umbralCompra == 2)
+        #expect(!copiado.enListaCompraManual)
+        #expect(otro.pendientes.categorias.count == 2)
+        #expect(otro.pendientes.productos == [copiado.id])
+        // El original no cambia.
+        #expect(inventario.producto(arroz.id)?.cantidad == 4)
+    }
+
+    @Test func copiaSoloLasCategorias() throws {
+        let despensa = try inventario.crearCategoria(nombre: "Despensa")
+        try inventario.crearProducto(nombre: "Arroz", en: despensa.id)
+
+        let copia = try #require(inventario.copia(.categorias))
+
+        #expect(copia.categorias.map(\.nombre) == ["Despensa"])
+        #expect(copia.productos.isEmpty)
+    }
+
+    @Test func sinNadaQueCopiarNoHayCopia() throws {
+        #expect(inventario.copia(.categoriasYProductos) == nil)
+        try inventario.crearCategoria(nombre: "Despensa")
+        #expect(inventario.copia(.nada) == nil)
+    }
 }

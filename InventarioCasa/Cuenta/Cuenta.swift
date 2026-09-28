@@ -228,17 +228,27 @@ final class Cuenta {
         }
     }
 
-    func crearHogar(nombre: String, tuNombre: String?) async -> String? {
+    /// `copiar` solo cuenta si ya hay otro hogar: el primero se queda con lo
+    /// que hubiera en el iPhone, entero.
+    func crearHogar(nombre: String, tuNombre: String?, copiar: QueCopiar = .nada) async -> String? {
         if let tuNombre, let error = await cambiarNombre(tuNombre, anunciando: false) { return error }
         do {
             let creado = try await conexion.crearHogar(nombre: nombre)
-            // Lo pendiente del que se deja, antes de dejarlo.
-            if inventarios.registro.conHogares { await sincronizar() }
-            // El primero se queda con lo que ya había en el iPhone; los demás empiezan vacíos.
+            var copia: Exportacion?
+            if inventarios.registro.conHogares {
+                // Lo pendiente del que se deja, antes de dejarlo.
+                await sincronizar()
+                copia = inventario.copia(copiar)
+            }
             try inventarios.entrar(en: creado.id, conservando: true)
             hogares.append(creado)
             pedirHogar = false
-            anunciar(Textos.AnunciosCuenta.hogarCreado(creado.nombre))
+            // El hogar ya existe: si la copia falla, se queda vacío y se dice.
+            if let copia, (try? inventario.importar(copia)) == nil {
+                anunciar(Textos.AnunciosCuenta.hogarCreadoSinCopia(creado.nombre))
+            } else {
+                anunciar(Textos.AnunciosCuenta.hogarCreado(creado.nombre))
+            }
             await sincronizar()
             return nil
         } catch let error as ErrorConexion {

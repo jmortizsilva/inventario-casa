@@ -42,6 +42,15 @@ import Testing
         #expect(Textos.Hogar.pasaAlHogar(categorias: 0, productos: 0) == nil)
     }
 
+    @Test func copiarDelHogarActual() {
+        #expect(Textos.Hogar.copiarDe("Casa") == "Copiar de Casa")
+        #expect(Textos.Hogar.copiarNada == "Nada")
+        #expect(Textos.Hogar.copiarCategorias == "Solo las categorías")
+        #expect(Textos.Hogar.copiarTodo == "Categorías y productos")
+        #expect(Textos.Hogar.seQuedaComoEsta("Casa") == "Casa se queda como está.")
+        #expect(Textos.AnunciosCuenta.hogarCreadoSinCopia("Playa") == "Hogar creado, Playa. No se ha podido copiar nada.")
+    }
+
     @Test func preguntaAlUnirseConCosasEnElIphone() {
         #expect(
             Textos.InventarioEnElIphone.pregunta(categorias: 2, productos: 5, hogar: "Casa")

@@ -197,6 +197,8 @@ final class CuentaPruebasUI: XCTestCase {
         app.tabBars.buttons["Ajustes"].tap()
         pulsar("Crear hogar")
         escribir("Playa", en: "Nombre del hogar")
+        // Sin elegir nada: de entrada no se copia.
+        XCTAssertTrue(app.buttons["Nada"].isSelected)
         app.navigationBars["Nuevo hogar"].buttons["Crear"].tap()
         XCTAssertTrue(app.buttons["Playa, hogar actual"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Casa"].exists)
@@ -228,6 +230,47 @@ final class CuentaPruebasUI: XCTestCase {
         alerta.buttons["Salir"].tap()
         XCTAssertTrue(app.buttons["Playa"].waitForNonExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Casa, hogar actual"].exists)
+    }
+
+    func testCrearOtroHogarCopiandoDelActual() {
+        abrir()
+        irAAjustes()
+        pulsar("Iniciar sesión con Google")
+        pulsar("Crear hogar")
+        escribir("Casa", en: "Nombre del hogar")
+        app.navigationBars["Nuevo hogar"].buttons["Crear"].tap()
+        XCTAssertTrue(app.buttons["Casa, hogar actual"].waitForExistence(timeout: 5))
+        app.tabBars.buttons["Inventario"].tap()
+        crearCategoria("Despensa")
+        entrarEnHogar("Despensa, 0 productos", titulo: "Despensa")
+        app.navigationBars.buttons["Añadir producto"].tap()
+        XCTAssertTrue(app.navigationBars["Nuevo producto"].waitForExistence(timeout: 3))
+        app.textFields.firstMatch.typeText("Arroz")
+        app.navigationBars.buttons["Guardar"].tap()
+        XCTAssertTrue(app.buttons["Arroz, 0 unidades, en la lista"].waitForExistence(timeout: 3))
+        app.navigationBars["Despensa"].buttons.element(boundBy: 0).tap()
+
+        app.tabBars.buttons["Ajustes"].tap()
+        pulsar("Crear hogar")
+        escribir("Playa", en: "Nombre del hogar")
+        XCTAssertTrue(app.staticTexts["Casa se queda como está."].exists)
+        pulsar("Categorías y productos")
+        app.navigationBars["Nuevo hogar"].buttons["Crear"].tap()
+        XCTAssertTrue(app.buttons["Playa, hogar actual"].waitForExistence(timeout: 5))
+
+        app.tabBars.buttons["Inventario"].tap()
+        XCTAssertTrue(app.navigationBars["Inventario - Playa"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Despensa, 1 producto"].waitForExistence(timeout: 3))
+
+        // Casa sigue con lo suyo.
+        app.tabBars.buttons["Ajustes"].tap()
+        entrarEnHogar("Casa", titulo: "Casa")
+        pulsar("Abrir este hogar")
+        XCTAssertTrue(app.buttons["Abrir este hogar"].waitForNonExistence(timeout: 5))
+        app.navigationBars["Casa"].buttons.element(boundBy: 0).tap()
+        app.tabBars.buttons["Inventario"].tap()
+        XCTAssertTrue(app.navigationBars["Inventario - Casa"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Despensa, 1 producto"].exists)
     }
 
     func testUnirseTeniendoYaUnHogar() {

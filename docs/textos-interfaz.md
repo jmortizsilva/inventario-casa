@@ -307,10 +307,18 @@ Ajustes. Crear y Unirme están desactivados mientras falte.
 | Campo | Nombre del hogar |
 | Campo | Tu nombre |
 | Pista de «Tu nombre» | Así te verán las demás personas del hogar |
-| Texto, si hay algo en el iPhone | Tu inventario de este iPhone pasa al hogar: {n} categorías y {n} productos. |
+| Texto, si es el primer hogar y hay algo en el iPhone | Tu inventario de este iPhone pasa al hogar: {n} categorías y {n} productos. |
+| Elección, si ya hay otro hogar con algo | Copiar de {hogar}: Nada · Solo las categorías · Categorías y productos |
+| Pie de la elección | {hogar} se queda como está. |
 | Botones | Cancelar · Crear |
 | Anuncio | Hogar creado, {hogar} |
+| Anuncio, si no se pudo copiar | Hogar creado, {hogar}. No se ha podido copiar nada. |
 | Error | No se ha creado el hogar. {causa} |
+
+La copia no quita nada del hogar actual. Los productos llegan con cantidad 0
+y fuera de la lista manual; conservan el mínimo y si entran solos en la lista.
+Con cantidad 0, los que tienen mínimo aparecen en la lista de la compra del
+hogar nuevo.
 
 ### Unirme con un código
 

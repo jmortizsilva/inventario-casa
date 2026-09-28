@@ -97,7 +97,14 @@ extension Textos {
             "En el hogar: " + enumerar(nombres)
         }
 
-        /// Al crear un hogar con cosas ya guardadas en el iPhone.
+        /// Al crear otro hogar: qué se copia del actual.
+        public static func copiarDe(_ hogar: String) -> String { "Copiar de \(hogar)" }
+        public static let copiarNada = "Nada"
+        public static let copiarCategorias = "Solo las categorías"
+        public static let copiarTodo = "Categorías y productos"
+        public static func seQuedaComoEsta(_ hogar: String) -> String { "\(hogar) se queda como está." }
+
+        /// Al crear el primer hogar con cosas ya guardadas en el iPhone.
         public static func pasaAlHogar(categorias: Int, productos: Int) -> String? {
             resumen(categorias: categorias, productos: productos).map {
                 "Tu inventario de este iPhone pasa al hogar: \($0)."
@@ -233,6 +240,9 @@ extension Textos {
         public static let sesionCerrada = "Sesión cerrada"
         public static let cuentaEliminada = "Cuenta eliminada"
         public static func hogarCreado(_ hogar: String) -> String { "Hogar creado, \(hogar)" }
+        public static func hogarCreadoSinCopia(_ hogar: String) -> String {
+            "Hogar creado, \(hogar). No se ha podido copiar nada."
+        }
         public static func unido(_ hogar: String) -> String { "Unido al hogar, \(hogar)" }
         public static func salido(_ hogar: String) -> String { "Has salido de \(hogar)" }
     }

@@ -270,6 +270,28 @@ public final class Inventario {
 
     // MARK: Importación
 
+    /// Lo que se lleva a un hogar nuevo, para `importar` en él. Nil si no hay
+    /// nada que copiar.
+    ///
+    /// Los productos llegan con cantidad 0 y fuera de la lista manual: lo que
+    /// hay en la despensa de otra casa no dice nada de esta.
+    public func copia(_ que: QueCopiar) -> Exportacion? {
+        let categorias = categorias
+        guard que != .nada, !categorias.isEmpty else { return nil }
+        let productos = que == .categoriasYProductos
+            ? categorias.flatMap { productos(en: $0.id) }.map {
+                Producto(
+                    categoriaId: $0.categoriaId,
+                    nombre: $0.nombre,
+                    umbralCompra: $0.umbralCompra,
+                    autoListaCompra: $0.autoListaCompra,
+                    creado: $0.creado
+                )
+            }
+            : []
+        return Exportacion(categorias: categorias, productos: productos)
+    }
+
     /// Añade lo que trae el archivo. Las categorías con el mismo nombre que una
     /// existente se juntan con ella; los productos que ya existen con el mismo
     /// nombre en su categoría se saltan. Todo se guarda de una vez.
@@ -467,4 +489,11 @@ public final class Inventario {
         if let pendientes { self.pendientes = pendientes }
         if let estado { self.estado = estado }
     }
+}
+
+/// Al crear un hogar teniendo ya otro: qué se copia del actual al nuevo.
+public enum QueCopiar: CaseIterable, Sendable {
+    case nada
+    case categorias
+    case categoriasYProductos
 }
