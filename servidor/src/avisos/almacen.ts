@@ -21,23 +21,26 @@ const COLUMNAS: Record<TipoAviso, string> = {
 };
 export const TIPOS = Object.keys(COLUMNAS) as TipoAviso[];
 
-export function preferencias(usuarioId: number): Preferencias {
-  const fila = obtenerBd().prepare('SELECT * FROM avisos WHERE usuario_id = ?').get(usuarioId) as
+/** Las de una persona en uno de sus hogares. */
+export function preferencias(usuarioId: number, hogarId: string): Preferencias {
+  const fila = obtenerBd()
+    .prepare('SELECT * FROM avisos WHERE usuario_id = ? AND hogar_id = ?')
+    .get(usuarioId, hogarId) as
     | Record<string, number>
     | undefined;
   return Object.fromEntries(TIPOS.map((tipo) => [tipo, fila?.[COLUMNAS[tipo]] === 1])) as unknown as Preferencias;
 }
 
-export function cambiarPreferencias(usuarioId: number, cambios: Partial<Preferencias>): Preferencias {
-  const nuevas = { ...preferencias(usuarioId), ...cambios };
+export function cambiarPreferencias(usuarioId: number, hogarId: string, cambios: Partial<Preferencias>): Preferencias {
+  const nuevas = { ...preferencias(usuarioId, hogarId), ...cambios };
   const valores = TIPOS.map((tipo) => (nuevas[tipo] ? 1 : 0));
   obtenerBd()
     .prepare(
-      `INSERT INTO avisos (usuario_id, ${TIPOS.map((t) => COLUMNAS[t]).join(', ')})
-       VALUES (?, ?, ?, ?, ?, ?)
-       ON CONFLICT(usuario_id) DO UPDATE SET ${TIPOS.map((t) => `${COLUMNAS[t]} = excluded.${COLUMNAS[t]}`).join(', ')}`,
+      `INSERT INTO avisos (usuario_id, hogar_id, ${TIPOS.map((t) => COLUMNAS[t]).join(', ')})
+       VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(usuario_id, hogar_id) DO UPDATE SET ${TIPOS.map((t) => `${COLUMNAS[t]} = excluded.${COLUMNAS[t]}`).join(', ')}`,
     )
-    .run(usuarioId, ...valores);
+    .run(usuarioId, hogarId, ...valores);
   return nuevas;
 }
 
@@ -69,13 +72,13 @@ export function olvidarToken(token: string): void {
   obtenerBd().prepare('DELETE FROM dispositivos WHERE token = ?').run(token);
 }
 
-/** Los dispositivos de las demás personas del hogar que quieren este aviso. */
+/** Los dispositivos de las demás personas del hogar que quieren este aviso de este hogar. */
 export function destinatarios(hogarId: string, quienHizo: number, tipo: TipoAviso): Dispositivo[] {
   return obtenerBd()
     .prepare(
       `SELECT d.token, d.plataforma, d.entorno FROM dispositivos d
        JOIN miembros m ON m.usuario_id = d.usuario_id
-       JOIN avisos a ON a.usuario_id = d.usuario_id
+       JOIN avisos a ON a.usuario_id = d.usuario_id AND a.hogar_id = m.hogar_id
        WHERE m.hogar_id = ? AND d.usuario_id != ? AND a.${COLUMNAS[tipo]} = 1`,
     )
     .all(hogarId, quienHizo) as Dispositivo[];

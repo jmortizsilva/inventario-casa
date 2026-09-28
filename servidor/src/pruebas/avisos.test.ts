@@ -120,6 +120,10 @@ describe('regla de la lista (casos compartidos)', () => {
 describe('preferencias', () => {
   it('empiezan desactivadas, se cambian por partes y se validan', async () => {
     const ana = persona('Ana', 'ana');
+    // Son de cada hogar: sin hogar no hay dónde guardarlas.
+    const sinHogar = await app.inject({ method: 'PUT', url: '/cuenta/avisos', headers: ana.headers, payload: { entraEnLista: true } });
+    expect(sinHogar.statusCode).toBe(409);
+    await app.inject({ method: 'POST', url: '/hogar', headers: ana.headers, payload: { nombre: 'Casa' } });
     expect((await app.inject({ method: 'GET', url: '/cuenta/avisos', headers: ana.headers })).json()).toEqual({
       productosNuevos: false, categoriasNuevas: false, entraEnLista: false, saleDeLista: false, personasNuevas: false,
     });

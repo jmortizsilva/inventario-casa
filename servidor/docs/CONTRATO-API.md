@@ -151,9 +151,35 @@ Ojo: con `Content-Type: application/json` y el cuerpo vacío, Fastify responde
 
 ## Hogar
 
-Una persona está como mucho en un hogar. **La pertenencia la decide el
-servidor** con su tabla de miembros en cada petición; el móvil nunca dice a
-qué hogar pertenece.
+Una persona puede estar en **hasta 10 hogares** (desde el 28 de septiembre de
+2026; antes, en uno). **La pertenencia la decide el servidor** con su tabla de
+miembros en cada petición: el móvil dice de qué hogar habla, y el servidor
+responde `404` si esa persona no está en él, igual que si no existiera.
+
+### Rutas por hogar
+
+| Ruta | Qué hace |
+|---|---|
+| `GET /hogares` | `{ "hogares": [ <hogar> ] }`, en el orden en que se unió a cada uno |
+| `POST /hogares` | Crear uno más, `{ "nombre": "Casa" }` → `201 { "hogar" }`. `409 {"error": "limite_hogares"}` con 10 |
+| `POST /hogares/unirse` | Unirse con un código, esté o no en otros hogares. `409 {"error": "ya_en_este_hogar"}` si el código es de uno en el que ya está; `409 {"error": "limite_hogares"}` con 10. El resto, como `POST /hogar/unirse` |
+| `POST /hogares/:id/invitaciones` | Como `POST /hogar/invitaciones`, para ese hogar |
+| `POST /hogares/:id/salir` | Como `POST /hogar/salir`, para ese hogar |
+| `GET /hogares/:id/sincronizar` y `POST /hogares/:id/sincronizar` | Como `/sincronizar`, para ese hogar |
+| `GET /hogares/:id/avisos` y `PUT /hogares/:id/avisos` | Las notificaciones de ese hogar, como `/cuenta/avisos` |
+
+Las notificaciones son por hogar: cada persona elige, en cada uno de sus
+hogares, qué quiere recibir, lo tenga abierto en el iPhone o no. El servidor
+no sabe cuál tiene abierto.
+
+### Las rutas de un solo hogar
+
+`/hogar`, `/hogar/invitaciones`, `/hogar/salir`, `/sincronizar` y
+`/cuenta/avisos` siguen funcionando para las compilaciones que no conocen los
+varios hogares. Trabajan sobre el **primer hogar** al que se unió la persona
+(el más antiguo de los suyos). `POST /hogar` y `POST /hogar/unirse` mantienen
+su `409` si ya está en algún hogar: una app que solo sabe llevar uno no puede
+acabar en dos.
 
 Modelo:
 

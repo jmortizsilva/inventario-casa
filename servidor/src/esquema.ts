@@ -49,11 +49,13 @@ CREATE TABLE IF NOT EXISTS hogares (
   vacio_desde INTEGER
 );
 
--- La clave primaria es usuario_id: así la base de datos misma impide estar en dos hogares.
+-- Una fila por persona y hogar: desde el 28 de septiembre de 2026 se puede estar en varios.
+-- Antes la clave era solo usuario_id (ver migrar() en db.ts).
 CREATE TABLE IF NOT EXISTS miembros (
-  usuario_id INTEGER PRIMARY KEY REFERENCES usuarios(id),
+  usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
   hogar_id TEXT NOT NULL REFERENCES hogares(id),
-  unido_en INTEGER NOT NULL
+  unido_en INTEGER NOT NULL,
+  PRIMARY KEY (usuario_id, hogar_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_miembros_hogar ON miembros (hogar_id);
@@ -132,13 +134,15 @@ CREATE TABLE IF NOT EXISTS dispositivos (
 
 CREATE INDEX IF NOT EXISTS idx_dispositivos_usuario ON dispositivos (usuario_id);
 
--- Qué notificaciones quiere cada persona. Sin fila, ninguna.
+-- Qué notificaciones quiere cada persona de cada uno de sus hogares. Sin fila, ninguna.
 CREATE TABLE IF NOT EXISTS avisos (
-  usuario_id INTEGER PRIMARY KEY REFERENCES usuarios(id),
+  usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+  hogar_id TEXT NOT NULL REFERENCES hogares(id),
   productos_nuevos INTEGER NOT NULL DEFAULT 0,
   categorias_nuevas INTEGER NOT NULL DEFAULT 0,
   entra_en_lista INTEGER NOT NULL DEFAULT 0,
   sale_de_lista INTEGER NOT NULL DEFAULT 0,
-  personas_nuevas INTEGER NOT NULL DEFAULT 0
+  personas_nuevas INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (usuario_id, hogar_id)
 );
 `;

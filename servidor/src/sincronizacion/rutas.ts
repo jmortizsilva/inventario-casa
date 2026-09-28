@@ -1,35 +1,63 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { config } from '../config';
 import { crearExigirSesion } from '../auth/middleware';
-import { hogarDeUsuario } from '../hogares/almacen';
+import { hogarDeMiembro, hogarDeUsuario, type Hogar } from '../hogares/almacen';
 import { avisarSinEsperar, avisosDeSucesos, nombreDe } from '../avisos/avisar';
 import { Lote, aplicarLote, novedadesDesde } from './almacen';
 
 const LIMITE_POR_DEFECTO = 500;
 const LIMITE_MAXIMO = 1000;
 
-// El hogar sale siempre de la tabla de miembros: el móvil nunca dice en qué hogar escribe.
+type ConsultaNovedades = { Querystring: { desde?: string; limite?: string } };
+
+// La pertenencia sale siempre de la tabla de miembros. /sincronizar es la de un solo hogar (el
+// primero de la persona, 409 si no tiene); /hogares/:id/sincronizar, la de varios (404 si no
+// está en ese hogar, igual que si no existiera).
 export async function registrarRutasSincronizacion(app: FastifyInstance): Promise<void> {
   const exigirSesion = crearExigirSesion(config.tokenSecreto ?? '');
 
-  app.get<{ Querystring: { desde?: string; limite?: string } }>(
-    '/sincronizar',
-    { preHandler: exigirSesion },
-    async (request, reply) => {
-      const hogar = hogarDeUsuario(request.usuarioId!);
-      if (!hogar) return reply.code(409).send({ error: 'no estás en ningún hogar' });
-      const desde = Number(request.query.desde ?? 0);
-      const limite = Number(request.query.limite ?? LIMITE_POR_DEFECTO);
-      if (!Number.isSafeInteger(desde) || desde < 0 || !Number.isSafeInteger(limite) || limite < 1) {
-        return reply.code(400).send({ error: '"desde" y "limite" tienen que ser enteros positivos' });
-      }
-      return novedadesDesde(hogar.id, desde, Math.min(limite, LIMITE_MAXIMO));
-    },
-  );
+  app.get<ConsultaNovedades>('/sincronizar', { preHandler: exigirSesion }, async (request, reply) => {
+    const hogar = hogarDeUsuario(request.usuarioId!);
+    if (!hogar) return reply.code(409).send({ error: 'no estás en ningún hogar' });
+    return novedades(hogar, request, reply);
+  });
 
   app.post<{ Body: Lote }>('/sincronizar', { preHandler: exigirSesion }, async (request, reply) => {
     const hogar = hogarDeUsuario(request.usuarioId!);
     if (!hogar) return reply.code(409).send({ error: 'no estás en ningún hogar' });
+    return aplicar(hogar, request, reply);
+  });
+
+  app.get<ConsultaNovedades & { Params: { id: string } }>(
+    '/hogares/:id/sincronizar',
+    { preHandler: exigirSesion },
+    async (request, reply) => {
+      const hogar = hogarDeMiembro(request.usuarioId!, request.params.id);
+      if (!hogar) return reply.code(404).send({ error: 'hogar no encontrado' });
+      return novedades(hogar, request, reply);
+    },
+  );
+
+  app.post<{ Body: Lote; Params: { id: string } }>(
+    '/hogares/:id/sincronizar',
+    { preHandler: exigirSesion },
+    async (request, reply) => {
+      const hogar = hogarDeMiembro(request.usuarioId!, request.params.id);
+      if (!hogar) return reply.code(404).send({ error: 'hogar no encontrado' });
+      return aplicar(hogar, request, reply);
+    },
+  );
+
+  function novedades(hogar: Hogar, request: FastifyRequest<ConsultaNovedades>, reply: FastifyReply) {
+    const desde = Number(request.query.desde ?? 0);
+    const limite = Number(request.query.limite ?? LIMITE_POR_DEFECTO);
+    if (!Number.isSafeInteger(desde) || desde < 0 || !Number.isSafeInteger(limite) || limite < 1) {
+      return reply.code(400).send({ error: '"desde" y "limite" tienen que ser enteros positivos' });
+    }
+    return novedadesDesde(hogar.id, desde, Math.min(limite, LIMITE_MAXIMO));
+  }
+
+  function aplicar(hogar: Hogar, request: FastifyRequest<{ Body: Lote }>, reply: FastifyReply) {
     const resultado = aplicarLote(hogar.id, request.body ?? {});
     if ('error' in resultado) {
       return reply.code(413).send({ error: `como mucho ${LIMITE_MAXIMO} cambios por lote` });
@@ -38,5 +66,5 @@ export async function registrarRutasSincronizacion(app: FastifyInstance): Promis
     const quien = request.usuarioId!;
     avisarSinEsperar(hogar.id, quien, avisosDeSucesos(nombreDe(quien), sucesos), request.log);
     return respuesta;
-  });
+  }
 }

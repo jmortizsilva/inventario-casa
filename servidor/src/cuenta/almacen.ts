@@ -1,5 +1,5 @@
 import { obtenerBd } from '../db';
-import { borrarHogar, hogarDeUsuario } from '../hogares/almacen';
+import { borrarHogar, hogaresDeUsuario } from '../hogares/almacen';
 
 // Borrado de la cuenta (ver CONTRATO-API.md, DELETE /cuenta, y docs/SERVIDOR.md, decisión 7).
 // Lo personal se borra de verdad; el inventario es del hogar y solo se va si no queda nadie.
@@ -11,10 +11,12 @@ export function borrarCuenta(usuarioId: number): boolean {
     const existe = bd.prepare('SELECT 1 FROM usuarios WHERE id = ?').get(usuarioId);
     if (!existe) return false;
 
-    const hogar = hogarDeUsuario(usuarioId);
+    const hogares = hogaresDeUsuario(usuarioId);
     bd.prepare('DELETE FROM miembros WHERE usuario_id = ?').run(usuarioId);
-    // Sin los 30 días de «salir»: ya no queda nadie que pueda volver a entrar en ese hogar.
-    if (hogar && hogar.miembros.length === 1) borrarHogar(hogar.id);
+    // Sin los 30 días de «salir»: ya no queda nadie que pueda volver a entrar en esos hogares.
+    for (const hogar of hogares) {
+      if (hogar.miembros.length === 1) borrarHogar(hogar.id);
+    }
 
     // Las que creó se van todas: las usadas solo eran historia. En las que usó para entrar se
     // quita quién fue, para no dejar su id colgando.

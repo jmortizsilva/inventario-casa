@@ -46,14 +46,18 @@ export function limpiarNombre(texto: unknown): string | undefined {
   return limpio;
 }
 
-export function hogarDeUsuario(usuarioId: number): Hogar | undefined {
+export const MAXIMO_HOGARES = 10;
+
+/**
+ * Cómo tratar a quien ya está en algún hogar. `unico` es lo de las rutas antiguas (`/hogar…`),
+ * que usan las compilaciones que solo saben llevar un hogar: no dejan crear ni unirse a otro.
+ * `varios` es lo de `/hogares…`, hasta MAXIMO_HOGARES.
+ */
+export type Modo = 'unico' | 'varios';
+
+export function hogarPorId(hogarId: string): Hogar | undefined {
   const bd = obtenerBd();
-  const fila = bd
-    .prepare(
-      `SELECT h.id, h.nombre, h.revision FROM hogares h
-       JOIN miembros m ON m.hogar_id = h.id WHERE m.usuario_id = ?`,
-    )
-    .get(usuarioId) as FilaHogar | undefined;
+  const fila = bd.prepare('SELECT id, nombre, revision FROM hogares WHERE id = ?').get(hogarId) as FilaHogar | undefined;
   if (!fila) return undefined;
   const miembros = bd
     .prepare(
@@ -64,12 +68,48 @@ export function hogarDeUsuario(usuarioId: number): Hogar | undefined {
   return { ...fila, miembros };
 }
 
-export type ResultadoCrear = { hogar: Hogar } | { error: 'ya_en_un_hogar' };
+/** Sus hogares, en el orden en que se unió a cada uno. */
+export function hogaresDeUsuario(usuarioId: number): Hogar[] {
+  const ids = obtenerBd()
+    .prepare('SELECT hogar_id FROM miembros WHERE usuario_id = ? ORDER BY unido_en, rowid')
+    .all(usuarioId) as { hogar_id: string }[];
+  return ids.map(({ hogar_id }) => hogarPorId(hogar_id)!);
+}
 
-export function crearHogar(usuarioId: number, nombre: string, ahora: Reloj = relojReal): ResultadoCrear {
+/**
+ * El primero al que se unió. Es el hogar de las rutas antiguas: una compilación que solo sabe
+ * llevar uno sigue viendo siempre el mismo, aunque la persona se una a más desde otro iPhone.
+ */
+export function hogarDeUsuario(usuarioId: number): Hogar | undefined {
+  return hogaresDeUsuario(usuarioId)[0];
+}
+
+/** El hogar si la persona está en él. Si no, nada: ni si existe se le dice. */
+export function hogarDeMiembro(usuarioId: number, hogarId: string): Hogar | undefined {
+  const esMiembro = obtenerBd()
+    .prepare('SELECT 1 FROM miembros WHERE usuario_id = ? AND hogar_id = ?')
+    .get(usuarioId, hogarId);
+  return esMiembro ? hogarPorId(hogarId) : undefined;
+}
+
+function cuantosHogares(usuarioId: number): number {
+  return (obtenerBd().prepare('SELECT COUNT(*) AS n FROM miembros WHERE usuario_id = ?').get(usuarioId) as { n: number })
+    .n;
+}
+
+export type ResultadoCrear = { hogar: Hogar } | { error: 'ya_en_un_hogar' | 'limite_hogares' };
+
+export function crearHogar(
+  usuarioId: number,
+  nombre: string,
+  ahora: Reloj = relojReal,
+  modo: Modo = 'unico',
+): ResultadoCrear {
   const bd = obtenerBd();
   return bd.transaction((): ResultadoCrear => {
-    if (hogarDeUsuario(usuarioId)) return { error: 'ya_en_un_hogar' };
+    const tiene = cuantosHogares(usuarioId);
+    if (modo === 'unico' && tiene > 0) return { error: 'ya_en_un_hogar' };
+    if (tiene >= MAXIMO_HOGARES) return { error: 'limite_hogares' };
     const id = randomUUID();
     const momento = ahora();
     bd.prepare('INSERT INTO hogares (id, nombre, creado_en) VALUES (?, ?, ?)').run(id, nombre, momento);
@@ -78,7 +118,7 @@ export function crearHogar(usuarioId: number, nombre: string, ahora: Reloj = rel
       id,
       momento,
     );
-    return { hogar: hogarDeUsuario(usuarioId)! };
+    return { hogar: hogarPorId(id)! };
   })();
 }
 
@@ -94,12 +134,14 @@ export type ResultadoInvitacion =
   | { codigo: string; caducaEn: number }
   | { error: 'sin_hogar' };
 
+/** Sin `hogarId`, el primero de la persona (rutas antiguas). */
 export function crearInvitacion(
   usuarioId: number,
   ahora: Reloj = relojReal,
   nuevoCodigo: () => string = () => generarCodigo(),
+  hogarId?: string,
 ): ResultadoInvitacion {
-  const hogar = hogarDeUsuario(usuarioId);
+  const hogar = hogarId ? hogarDeMiembro(usuarioId, hogarId) : hogarDeUsuario(usuarioId);
   if (!hogar) return { error: 'sin_hogar' };
   const bd = obtenerBd();
   const momento = ahora();
@@ -121,9 +163,16 @@ export function crearInvitacion(
 
 export type ResultadoUnirse =
   | { hogar: Hogar }
-  | { error: 'ya_en_un_hogar' | 'codigo_no_valido' | 'demasiados_intentos' };
+  | {
+      error: 'ya_en_un_hogar' | 'ya_en_este_hogar' | 'limite_hogares' | 'codigo_no_valido' | 'demasiados_intentos';
+    };
 
-export function unirse(usuarioId: number, codigoEscrito: unknown, ahora: Reloj = relojReal): ResultadoUnirse {
+export function unirse(
+  usuarioId: number,
+  codigoEscrito: unknown,
+  ahora: Reloj = relojReal,
+  modo: Modo = 'unico',
+): ResultadoUnirse {
   const bd = obtenerBd();
   return bd.transaction((): ResultadoUnirse => {
     const momento = ahora();
@@ -131,7 +180,8 @@ export function unirse(usuarioId: number, codigoEscrito: unknown, ahora: Reloj =
       .prepare('SELECT COUNT(*) AS n FROM intentos_unirse WHERE usuario_id = ? AND momento > ?')
       .get(usuarioId, momento - UNA_HORA_MS) as { n: number };
     if (fallidos.n >= INTENTOS_FALLIDOS_POR_HORA) return { error: 'demasiados_intentos' };
-    if (hogarDeUsuario(usuarioId)) return { error: 'ya_en_un_hogar' };
+    const tiene = cuantosHogares(usuarioId);
+    if (modo === 'unico' && tiene > 0) return { error: 'ya_en_un_hogar' };
 
     // Se admite escrito en minúsculas o con espacios, como se dicta.
     const codigo = typeof codigoEscrito === 'string' ? codigoEscrito.replace(/\s+/g, '').toUpperCase() : '';
@@ -147,6 +197,9 @@ export function unirse(usuarioId: number, codigoEscrito: unknown, ahora: Reloj =
       bd.prepare('INSERT INTO intentos_unirse (usuario_id, momento) VALUES (?, ?)').run(usuarioId, momento);
       return { error: 'codigo_no_valido' };
     }
+    // Sin gastar la invitación: sigue valiendo para quien iba de verdad.
+    if (hogarDeMiembro(usuarioId, invitacion.hogar_id)) return { error: 'ya_en_este_hogar' };
+    if (tiene >= MAXIMO_HOGARES) return { error: 'limite_hogares' };
 
     bd.prepare('UPDATE invitaciones SET usada_en = ?, usada_por = ? WHERE codigo = ?').run(
       momento,
@@ -158,16 +211,23 @@ export function unirse(usuarioId: number, codigoEscrito: unknown, ahora: Reloj =
       invitacion.hogar_id,
       momento,
     );
-    return { hogar: hogarDeUsuario(usuarioId)! };
+    return { hogar: hogarPorId(invitacion.hogar_id)! };
   })();
 }
 
-export function salir(usuarioId: number, ahora: Reloj = relojReal): { ok: true } | { error: 'sin_hogar' } {
+/** Sin `hogarId`, el primero de la persona (rutas antiguas). */
+export function salir(
+  usuarioId: number,
+  ahora: Reloj = relojReal,
+  hogarId?: string,
+): { ok: true } | { error: 'sin_hogar' } {
   const bd = obtenerBd();
   return bd.transaction((): { ok: true } | { error: 'sin_hogar' } => {
-    const hogar = hogarDeUsuario(usuarioId);
+    const hogar = hogarId ? hogarDeMiembro(usuarioId, hogarId) : hogarDeUsuario(usuarioId);
     if (!hogar) return { error: 'sin_hogar' };
-    bd.prepare('DELETE FROM miembros WHERE usuario_id = ?').run(usuarioId);
+    bd.prepare('DELETE FROM miembros WHERE usuario_id = ? AND hogar_id = ?').run(usuarioId, hogar.id);
+    // Sus notificaciones de ese hogar ya no tienen sentido.
+    bd.prepare('DELETE FROM avisos WHERE usuario_id = ? AND hogar_id = ?').run(usuarioId, hogar.id);
     if (hogar.miembros.length === 1) {
       bd.prepare('UPDATE hogares SET vacio_desde = ? WHERE id = ?').run(ahora(), hogar.id);
     }
@@ -204,5 +264,6 @@ export function borrarHogar(hogarId: string): void {
   bd.prepare('DELETE FROM productos WHERE hogar_id = ?').run(hogarId);
   bd.prepare('DELETE FROM categorias WHERE hogar_id = ?').run(hogarId);
   bd.prepare('DELETE FROM invitaciones WHERE hogar_id = ?').run(hogarId);
+  bd.prepare('DELETE FROM avisos WHERE hogar_id = ?').run(hogarId);
   bd.prepare('DELETE FROM hogares WHERE id = ?').run(hogarId);
 }
