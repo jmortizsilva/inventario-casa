@@ -5,7 +5,7 @@ import UserNotifications
 /// notificaciones y las que llegan con la app abierta.
 @MainActor
 final class DelegadoApp: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
-    /// El que está en marcha. Lo conecta `VistaRaiz` con la cuenta al crearla.
+    /// El que está en marcha. Lo conecta `Arranque` con la cuenta al crearla.
     static weak var actual: DelegadoApp?
 
     private weak var cuenta: Cuenta?

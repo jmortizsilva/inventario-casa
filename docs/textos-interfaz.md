@@ -543,3 +543,54 @@ desaparece a los diez segundos no se llega a usar.
 
 El anuncio al eliminar termina en «Agita para deshacer.»: sin decirlo, nadie
 sabe que se puede.
+
+## Siri
+
+Todas las acciones van al hogar abierto. Las frases, los títulos de las
+acciones y las preguntas son literales en `InventarioCasa/Siri` (Apple los
+lee al compilar); las respuestas están en `Textos.Siri`, con pruebas.
+
+### Frases
+
+«Inventario Casa» es el nombre de la app, que Siri exige en la frase.
+
+| Acción (título en Atajos) | Frases |
+|---|---|
+| Añadir unidades | Añade {producto} en Inventario Casa · He comprado {producto} en Inventario Casa |
+| Quitar unidades | Quita {producto} en Inventario Casa · He gastado {producto} en Inventario Casa |
+| Cambiar la cantidad | Cambia la cantidad de {producto} en Inventario Casa |
+| Crear producto | Crea un producto en Inventario Casa |
+| Eliminar producto | Elimina {producto} de Inventario Casa |
+| Consultar un producto | ¿Cuántas unidades de {producto} hay en Inventario Casa? · Consulta {producto} en Inventario Casa |
+
+Para consultar no se usa «¿cuánta leche queda?»: la frase tendría que
+concordar con cada producto y Siri no la adapta.
+
+### Preguntas
+
+| Cuándo | Texto |
+|---|---|
+| Falta el producto | ¿Qué producto? |
+| Añadir o quitar | ¿Cuántas unidades? |
+| Cambiar la cantidad | ¿Cuántas unidades hay? |
+| Crear: nombre | ¿Cómo se llama? |
+| Crear: categoría | ¿En qué categoría? |
+| Crear: unidades | ¿Cuántas unidades? |
+| Eliminar | ¿Elimino {producto} de {categoría}? |
+
+### Respuestas
+
+| Cuándo | Texto |
+|---|---|
+| Añadir, quitar, cambiar o consultar | {producto}, {n} unidades (y «, en la lista» si está en la lista) |
+| Crear | Creado, {producto} en {categoría} |
+| Eliminar | Eliminado, {producto} |
+| Eliminar, contestando que no | No se ha eliminado {producto} |
+| No encuentra el producto | No encuentro {lo dicho} en {hogar}. (sin hogar: No encuentro {lo dicho}.) |
+| Nombre repetido al crear | Ya hay un producto con ese nombre en {categoría} |
+
+El hogar no se nombra en las respuestas, salvo cuando no se encuentra el
+producto: así son cortas.
+
+Con el iPhone bloqueado, consultar, añadir y quitar funcionan; crear y
+eliminar piden desbloquearlo.

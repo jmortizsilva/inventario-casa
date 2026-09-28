@@ -81,6 +81,21 @@ public final class Inventario {
             .sorted { Nombres.vaAntes($0.nombre, $1.nombre) }
     }
 
+    /// Todos los productos sin borrar, de todas las categorías.
+    public var todosLosProductos: [Producto] {
+        todosProductos.values
+            .filter { !$0.estaBorrado }
+            .sorted { Nombres.vaAntes($0.nombre, $1.nombre) }
+    }
+
+    public func buscarProductos(_ texto: String) -> [Producto] {
+        Busqueda.productos(texto, en: Array(todosProductos.values))
+    }
+
+    public func buscarCategorias(_ texto: String) -> [Categoria] {
+        Busqueda.categorias(texto, en: categorias)
+    }
+
     public func producto(_ id: UUID) -> Producto? {
         todosProductos[id].flatMap { $0.estaBorrado ? nil : $0 }
     }
