@@ -154,8 +154,12 @@ import Testing
         )
     }
 
-    @Test func elManualExplicaCompartir() {
-        #expect(Textos.manual.last?.titulo == "Compartir con tu casa")
+    @Test func apartadosDelManual() {
+        #expect(Textos.manual.map(\.titulo) == [
+            "Categorías y productos", "Cambiar las unidades", "Lista de la compra", "Eliminar",
+            "Deshacer", "Importar datos", "Compartir con tu casa", "Varios hogares",
+            "Notificaciones", "Siri",
+        ])
     }
 }
 

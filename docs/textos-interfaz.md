@@ -212,6 +212,32 @@ lista cuando queden pocas" en su ficha.
 
 **Eliminar.** Eliminar una categoría elimina también sus productos.
 
+**Deshacer.** Si eliminas algo por error, agita el iPhone o usa Deshacer en la
+barra. Se recupera lo último eliminado; si era una categoría, con sus
+productos.
+
+**Importar datos.** En Ajustes, Importar datos añade lo que trae un archivo
+exportado del inventario. Las categorías con el mismo nombre se juntan, y los
+productos que ya estaban no se repiten.
+
+Después van «Compartir con tu casa» (apartado «Cuenta y hogar») y estos:
+
+**Varios hogares.** Puedes estar en hasta 10 hogares, cada uno con su
+inventario. En Ajustes, Hogares los muestra todos, y el que tienes abierto se
+marca como Hogar actual. Para cambiar, entra en otro y pulsa Abrir este hogar;
+con VoiceOver, también con la acción Abrir del rotor. Al crear otro hogar
+puedes copiar del actual las categorías, o las categorías y los productos.
+
+**Notificaciones.** En Ajustes, en la pantalla de cada hogar, eliges de qué te
+avisa: productos y categorías nuevos, lo que entra y sale de la lista, y las
+personas que se unen. Solo avisa de lo que hacen las demás personas.
+
+**Siri.** Di, por ejemplo, "Añade leche en Inventario Casa", "He gastado leche
+en Inventario Casa", "Consulta leche en Inventario Casa" o "Crea un producto en
+Inventario Casa". Siri pregunta lo que falte. Todo va al hogar abierto. Crear y
+eliminar piden desbloquear el iPhone. En la app Atajos puedes hacerte frases
+propias con estas acciones.
+
 ## Concordancias
 
 Casos en los que el texto cambia además del número:

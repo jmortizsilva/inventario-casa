@@ -280,6 +280,17 @@ public enum Textos {
             titulo: "Eliminar",
             texto: "Eliminar una categoría elimina también sus productos."
         ),
+        Apartado(
+            titulo: "Deshacer",
+            texto: "Si eliminas algo por error, agita el iPhone o usa Deshacer en la barra. Se recupera lo último eliminado; si era una categoría, con sus productos."
+        ),
+        Apartado(
+            titulo: "Importar datos",
+            texto: "En Ajustes, Importar datos añade lo que trae un archivo exportado del inventario. Las categorías con el mismo nombre se juntan, y los productos que ya estaban no se repiten."
+        ),
         apartadoCompartir,
+        apartadoVariosHogares,
+        apartadoNotificaciones,
+        Siri.apartado,
     ]
 }

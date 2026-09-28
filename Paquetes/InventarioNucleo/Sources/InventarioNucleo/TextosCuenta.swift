@@ -293,6 +293,16 @@ extension Textos {
         texto: "En Ajustes, inicia sesión y crea un hogar. Con Invitar a alguien sale un código: quien lo escriba en Unirme con un código comparte el inventario contigo. Los cambios llegan a todos cuando hay conexión; sin ella, la app funciona igual y los envía después."
     )
 
+    public static let apartadoVariosHogares = Apartado(
+        titulo: "Varios hogares",
+        texto: "Puedes estar en hasta 10 hogares, cada uno con su inventario. En Ajustes, Hogares los muestra todos, y el que tienes abierto se marca como Hogar actual. Para cambiar, entra en otro y pulsa Abrir este hogar; con VoiceOver, también con la acción Abrir del rotor. Al crear otro hogar puedes copiar del actual las categorías, o las categorías y los productos."
+    )
+
+    public static let apartadoNotificaciones = Apartado(
+        titulo: "Notificaciones",
+        texto: "En Ajustes, en la pantalla de cada hogar, eliges de qué te avisa: productos y categorías nuevos, lo que entra y sale de la lista, y las personas que se unen. Solo avisa de lo que hacen las demás personas."
+    )
+
     // MARK: Auxiliares
 
     /// «1 categoría y 3 productos», solo con lo que no sea cero. Nil si no hay nada.

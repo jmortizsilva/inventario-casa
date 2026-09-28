@@ -8,6 +8,10 @@ import Foundation
 /// literales en el código de la app (`InventarioCasa/Siri`).
 extension Textos {
     public enum Siri {
+        public static let apartado = Apartado(
+            titulo: "Siri",
+            texto: "Di, por ejemplo, \u{201C}Añade leche en Inventario Casa\u{201D}, \u{201C}He gastado leche en Inventario Casa\u{201D}, \u{201C}Consulta leche en Inventario Casa\u{201D} o \u{201C}Crea un producto en Inventario Casa\u{201D}. Siri pregunta lo que falte. Todo va al hogar abierto. Crear y eliminar piden desbloquear el iPhone. En la app Atajos puedes hacerte frases propias con estas acciones."
+        )
 
         /// Tras añadir, quitar, cambiar la cantidad o consultar: lo mismo que
         /// dice la fila del producto en la app.
