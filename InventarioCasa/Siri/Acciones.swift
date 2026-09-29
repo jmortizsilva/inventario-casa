@@ -1,5 +1,10 @@
 import AppIntents
 import InventarioNucleo
+import OSLog
+
+/// Para seguir en el registro del iPhone lo que recibe cada acción:
+/// `log show --predicate 'subsystem == "com.jmortiz.inventario" AND category == "Siri"'`.
+let registroSiri = Logger(subsystem: "com.jmortiz.inventario", category: "Siri")
 
 // Los títulos, las frases y las preguntas son literales: Apple los lee al
 // compilar. Están revisados en docs/textos-interfaz.md, apartado «Siri».
@@ -138,8 +143,12 @@ struct CrearProducto: AppIntent {
     @Parameter(title: "Nombre", requestValueDialog: "¿Cómo se llama?")
     var nombre: String
 
+    // Texto y no `CategoriaEntidad`: con una entidad, Siri pregunta ofreciendo
+    // una lista y, si se contesta otra cosa, reinicia la acción y vuelve a
+    // preguntar sin fin (probado en el iPhone con iOS 27). Con texto, la
+    // categoría se busca aquí, sin tildes y en singular o plural.
     @Parameter(title: "Categoría", requestValueDialog: "¿En qué categoría?")
-    var categoria: CategoriaEntidad
+    var categoria: String
 
     @Parameter(title: "Unidades", inclusiveRange: (0, 999), requestValueDialog: "¿Cuántas unidades?")
     var unidades: Int
@@ -152,23 +161,28 @@ struct CrearProducto: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        registroSiri.info("CrearProducto: nombre «\(nombre, privacy: .public)», categoría «\(categoria, privacy: .public)», \(unidades) unidades")
         let inventario = try arranque.inventarioParaSiri()
-        guard inventario.categoria(categoria.id) != nil else {
-            throw ErrorSiri.noEncontrado(categoria.nombre, arranque: arranque)
+        let encontradas = inventario.buscarCategorias(categoria)
+        guard let elegida = encontradas.first else {
+            throw ErrorSiri.noEncontrado(categoria, arranque: arranque)
+        }
+        guard encontradas.count == 1 else {
+            throw ErrorSiri(mensaje: Textos.Siri.variasCategorias(encontradas.map(\.nombre)))
         }
         let creado: Producto
         do {
-            creado = try inventario.crearProducto(nombre: nombre, en: categoria.id, cantidad: unidades)
+            creado = try inventario.crearProducto(nombre: nombre, en: elegida.id, cantidad: unidades)
         } catch .nombre(let error) {
             throw ErrorSiri(
-                mensaje: Textos.Errores.nombreProducto(error, categoria: categoria.nombre)
+                mensaje: Textos.Errores.nombreProducto(error, categoria: elegida.nombre)
                     ?? Textos.Errores.noGuardadoMensaje
             )
         } catch {
             throw ErrorSiri.noGuardado
         }
         arranque.enviarEnSegundoPlano()
-        return .result(dialog: "\(Textos.Siri.creado(creado.nombre, en: categoria.nombre))")
+        return .result(dialog: "\(Textos.Siri.creado(creado.nombre, en: elegida.nombre))")
     }
 }
 

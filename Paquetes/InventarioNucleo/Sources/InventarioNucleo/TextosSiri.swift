@@ -36,6 +36,11 @@ extension Textos {
             "No se ha eliminado \(producto)"
         }
 
+        /// Lo dicho encaja con varias: «Nevera» con «Nevera grande» y «Nevera pequeña».
+        public static func variasCategorias(_ nombres: [String]) -> String {
+            "Hay varias categorías así: \(enumerar(nombres)). Dilo con el nombre entero."
+        }
+
         /// Sin hogar (sin cuenta o sin hogar todavía), no se nombra ninguno.
         public static func noEncontrado(_ texto: String, en hogar: String?) -> String {
             let limpio = Nombres.limpiar(texto)

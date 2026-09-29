@@ -1,7 +1,10 @@
 import AppIntents
 
-/// Las frases que Siri reconoce sin que el usuario configure nada. Siri exige
-/// el nombre de la app en cada una. Los productos de las frases salen de
+/// Las frases que Siri reconoce sin que el usuario configure nada. Una o dos
+/// por acción: Siri ya acepta formas parecidas (flexible matching, desde
+/// iOS 17), y según Apple las variantes casi iguales empeoran el
+/// reconocimiento. Siri exige el nombre de la app en cada una. Los productos
+/// de las frases salen de
 /// `ConsultaProductos.suggestedEntities`, y hay que avisar al sistema cuando
 /// cambian (`updateAppShortcutParameters`).
 struct Atajos: AppShortcutsProvider {
@@ -41,7 +44,10 @@ struct Atajos: AppShortcutsProvider {
         )
         AppShortcut(
             intent: CrearProducto(),
-            phrases: ["Crea un producto en \(.applicationName)"],
+            phrases: [
+                "Crea un producto en \(.applicationName)",
+                "Nuevo producto en \(.applicationName)",
+            ],
             shortTitle: "Crear producto",
             systemImageName: "square.and.pencil"
         )

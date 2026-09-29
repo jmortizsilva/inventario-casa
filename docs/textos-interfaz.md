@@ -585,9 +585,13 @@ lee al compilar); las respuestas están en `Textos.Siri`, con pruebas.
 | Añadir unidades | Añade {producto} en Inventario Casa · He comprado {producto} en Inventario Casa |
 | Quitar unidades | Quita {producto} en Inventario Casa · He gastado {producto} en Inventario Casa |
 | Cambiar la cantidad | Cambia la cantidad de {producto} en Inventario Casa |
-| Crear producto | Crea un producto en Inventario Casa |
+| Crear producto | Crea un producto en Inventario Casa · Nuevo producto en Inventario Casa |
 | Eliminar producto | Elimina {producto} de Inventario Casa |
 | Consultar un producto | ¿Cuántas unidades de {producto} hay en Inventario Casa? · Consulta {producto} en Inventario Casa |
+
+Pocas frases por acción: Siri acepta formas parecidas (flexible matching,
+desde iOS 17), y según la guía de Apple las variantes casi iguales empeoran
+el reconocimiento.
 
 Para consultar no se usa «¿cuánta leche queda?»: la frase tendría que
 concordar con cada producto y Siri no la adapta.
@@ -612,7 +616,8 @@ concordar con cada producto y Siri no la adapta.
 | Crear | Creado, {producto} en {categoría} |
 | Eliminar | Eliminado, {producto} |
 | Eliminar, contestando que no | No se ha eliminado {producto} |
-| No encuentra el producto | No encuentro {lo dicho} en {hogar}. (sin hogar: No encuentro {lo dicho}.) |
+| No encuentra el producto o la categoría | No encuentro {lo dicho} en {hogar}. (sin hogar: No encuentro {lo dicho}.) |
+| Lo dicho encaja con varias categorías | Hay varias categorías así: {nombres}. Dilo con el nombre entero. |
 | Nombre repetido al crear | Ya hay un producto con ese nombre en {categoría} |
 
 El hogar no se nombra en las respuestas, salvo cuando no se encuentra el

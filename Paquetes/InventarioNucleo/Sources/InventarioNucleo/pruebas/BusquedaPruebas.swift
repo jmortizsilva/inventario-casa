@@ -71,6 +71,10 @@ import Testing
         #expect(Textos.Siri.confirmarEliminar("Leche", de: "Despensa") == "¿Elimino Leche de Despensa?")
         #expect(Textos.Siri.eliminado("Leche") == "Eliminado, Leche")
         #expect(Textos.Siri.noEliminado("Leche") == "No se ha eliminado Leche")
+        #expect(
+            Textos.Siri.variasCategorias(["Nevera grande", "Nevera pequeña"])
+                == "Hay varias categorías así: Nevera grande y Nevera pequeña. Dilo con el nombre entero."
+        )
         #expect(Textos.Siri.noEncontrado("  leche ", en: "Casa") == "No encuentro leche en Casa.")
         #expect(Textos.Siri.noEncontrado("leche", en: nil) == "No encuentro leche.")
     }

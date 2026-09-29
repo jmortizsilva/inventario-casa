@@ -37,6 +37,7 @@
 				pruebas/ProductosPruebasUI.swift,
 				pruebas/CategoriasPruebasUI.swift,
 				pruebas/CuentaPruebasUI.swift,
+				pruebas/SiriAccionesPruebasUI.swift,
 			);
 			target = A10000000000000000000006 /* InventarioCasa */;
 		};
