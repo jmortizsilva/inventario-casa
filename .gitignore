@@ -27,3 +27,4 @@ node_modules/
 
 # Salida de scripts/publicar
 .build-publicar/
+.build-iphone/

@@ -1,0 +1,42 @@
+#!/bin/zsh
+# Compila y pasa la app al iPhone conectado por cable, sin TestFlight: para
+# probar en el aparato sin que les llegue a los testers.
+#
+#    scripts/publicar/instalar-en-iphone
+#
+# Firma de desarrollo y configuración Debug: las notificaciones van por el
+# entorno de pruebas de Apple (sandbox), así que con esta copia instalada no
+# llegan las del servidor, que envía por producción. Reinstalar desde
+# TestFlight lo deja como estaba; los datos de la app se conservan.
+set -euo pipefail
+
+cd "$(dirname "$0")/../.."
+
+clave_api=2V5QGQLFXK
+emisor_api=f313d445-9ae7-4b5d-a10f-65aa272f36f1
+
+# Igual que en `publicar`: desbloqueado en la misma sesión que firma.
+llavero=~/Library/Keychains/guardalo-firma.keychain-db
+security unlock-keychain -p "$(cat ~/.appstoreconnect/llavero-firma.txt)" "$llavero"
+security list-keychains -d user -s "$llavero" ~/Library/Keychains/login.keychain-db
+
+# «unavailable» también contiene «available»: sin el espacio delante, cogía un
+# iPhone desconectado y xcodebuild fallaba sin decir por qué.
+iphone=$(xcrun devicectl list devices 2>/dev/null | awk '/physical/ && / available/ {for (i=1;i<=NF;i++) if ($i ~ /^[0-9A-F]{8}-[0-9A-F]{16}$/) print $i}' | head -1)
+if [[ -z "$iphone" ]]; then
+  echo "No hay ningún iPhone conectado y desbloqueado." >&2
+  exit 1
+fi
+
+echo "== Compilando para $iphone =="
+xcodebuild -project InventarioCasa.xcodeproj -scheme InventarioCasa -configuration Debug \
+  -destination "id=$iphone" -derivedDataPath .build-iphone \
+  DEVELOPMENT_TEAM=S92QZXCW54 CODE_SIGN_STYLE=Automatic \
+  -allowProvisioningUpdates -allowProvisioningDeviceRegistration \
+  -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_$clave_api.p8 \
+  -authenticationKeyID $clave_api -authenticationKeyIssuerID $emisor_api \
+  -quiet build
+
+echo "== Instalando =="
+xcrun devicectl device install app --device "$iphone" .build-iphone/Build/Products/Debug-iphoneos/InventarioCasa.app >/dev/null
+echo "Instalada."
