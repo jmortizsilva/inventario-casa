@@ -10,26 +10,13 @@ let registroSiri = Logger(subsystem: "com.jmortiz.inventario", category: "Siri")
 // compilar. Están revisados en docs/textos-interfaz.md, apartado «Siri».
 // Las respuestas vienen de `Textos.Siri`.
 
-/// Lo común a las acciones sobre un producto que ya existe: buscarlo en el
-/// hogar abierto, cambiarlo y enviar el cambio sin que Siri espere a la red.
 @MainActor
 private func cambiar(
     _ entidad: ProductoEntidad,
     arranque: Arranque,
     _ cambio: (Inventario, Producto) throws(ErrorInventario) -> Producto
 ) throws -> Producto {
-    let inventario = try arranque.inventarioParaSiri()
-    guard let producto = inventario.producto(entidad.id) else {
-        throw ErrorSiri.noEncontrado(entidad.nombre, arranque: arranque)
-    }
-    let cambiado: Producto
-    do {
-        cambiado = try cambio(inventario, producto)
-    } catch {
-        throw ErrorSiri.noGuardado
-    }
-    arranque.enviarEnSegundoPlano()
-    return cambiado
+    try cambiarProducto(entidad.id, nombre: entidad.nombre, arranque: arranque, cambio)
 }
 
 struct AnadirUnidades: AppIntent {
@@ -161,28 +148,8 @@ struct CrearProducto: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        registroSiri.info("CrearProducto: nombre «\(nombre, privacy: .public)», categoría «\(categoria, privacy: .public)», \(unidades) unidades")
-        let inventario = try arranque.inventarioParaSiri()
-        let encontradas = inventario.buscarCategorias(categoria)
-        guard let elegida = encontradas.first else {
-            throw ErrorSiri.noEncontrado(categoria, arranque: arranque)
-        }
-        guard encontradas.count == 1 else {
-            throw ErrorSiri(mensaje: Textos.Siri.variasCategorias(encontradas.map(\.nombre)))
-        }
-        let creado: Producto
-        do {
-            creado = try inventario.crearProducto(nombre: nombre, en: elegida.id, cantidad: unidades)
-        } catch .nombre(let error) {
-            throw ErrorSiri(
-                mensaje: Textos.Errores.nombreProducto(error, categoria: elegida.nombre)
-                    ?? Textos.Errores.noGuardadoMensaje
-            )
-        } catch {
-            throw ErrorSiri.noGuardado
-        }
-        arranque.enviarEnSegundoPlano()
-        return .result(dialog: "\(Textos.Siri.creado(creado.nombre, en: elegida.nombre))")
+        let respuesta = try crearProductoPorVoz(nombre: nombre, categoria: categoria, unidades: unidades, arranque: arranque)
+        return .result(dialog: "\(respuesta)")
     }
 }
 

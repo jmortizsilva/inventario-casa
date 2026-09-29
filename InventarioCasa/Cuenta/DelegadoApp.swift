@@ -1,3 +1,4 @@
+import Intents
 import UIKit
 import UserNotifications
 
@@ -26,6 +27,18 @@ final class DelegadoApp: NSObject, UIApplicationDelegate, UNUserNotificationCent
         if let token = tokenSinEntregar {
             tokenSinEntregar = nil
             Task { await cuenta.recibirToken(token) }
+        }
+    }
+
+    /// Las acciones de «Añadir a Siri» (SiriKit). iOS solo llama aquí en apps
+    /// que admiten varias escenas; la nuestra las admite (plantilla de SwiftUI).
+    func application(_ application: UIApplication, handlerFor intent: INIntent) -> Any? {
+        switch intent {
+        case is CrearProductoVozIntent, is AnadirUnidadesVozIntent, is QuitarUnidadesVozIntent,
+             is CambiarCantidadVozIntent, is ConsultarProductoVozIntent, is EliminarProductoVozIntent:
+            ManejadorVoz()
+        default:
+            nil
         }
     }
 
