@@ -78,4 +78,17 @@ import Testing
         #expect(Textos.Siri.noEncontrado("  leche ", en: "Casa") == "No encuentro leche en Casa.")
         #expect(Textos.Siri.noEncontrado("leche", en: nil) == "No encuentro leche.")
     }
+
+    @Test func pantallaSiri() {
+        #expect(AccionVoz.allCases.map(Textos.Siri.titulo) == [
+            "Crear producto", "Añadir unidades", "Quitar unidades",
+            "Cambiar la cantidad", "Consultar un producto", "Eliminar producto",
+        ])
+        #expect(AccionVoz.allCases.map(Textos.Siri.fraseSugerida) == [
+            "Nuevo producto", "He comprado", "He gastado", "Cambiar cantidad", "Cuánto queda", "Eliminar producto",
+        ])
+        #expect(Textos.Siri.frase("Nuevo producto") == "«Nuevo producto»")
+        #expect(Textos.Siri.sinFrase == "Sin frase")
+        #expect(Textos.Siri.pie == "Elige una frase para cada acción y díselo a Siri tal cual.")
+    }
 }

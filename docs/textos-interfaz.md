@@ -232,11 +232,10 @@ puedes copiar del actual las categorías, o las categorías y los productos.
 avisa: productos y categorías nuevos, lo que entra y sale de la lista, y las
 personas que se unen. Solo avisa de lo que hacen las demás personas.
 
-**Siri.** Di, por ejemplo, "Añade leche en Inventario Casa", "He gastado leche
-en Inventario Casa", "Consulta leche en Inventario Casa" o "Crea un producto en
-Inventario Casa". Siri pregunta lo que falte. Todo va al hogar abierto. Crear y
-eliminar piden desbloquear el iPhone. En la app Atajos puedes hacerte frases
-propias con estas acciones.
+**Siri.** En Ajustes, Siri, elige una frase para cada acción: crear un
+producto, añadir o quitar unidades, cambiar la cantidad, consultar un producto
+o eliminarlo. Después, dísela a Siri tal cual; Siri pregunta lo que falte. Todo
+va al hogar abierto.
 
 ## Concordancias
 
@@ -571,6 +570,29 @@ El anuncio al eliminar termina en «Agita para deshacer.»: sin decirlo, nadie
 sabe que se puede.
 
 ## Siri
+
+### Pantalla «Siri» en Ajustes
+
+Revisados el 29 de septiembre de 2026. Cada fila es un solo botón; VoiceOver
+lee «Crear producto, Sin frase, botón» o «Crear producto, «Nuevo producto»,
+botón». Al pulsarla se abre la hoja de Apple («Añadir a Siri» o editar la
+frase), con sus propios textos.
+
+| Elemento | Texto |
+|---|---|
+| Fila en Ajustes | Siri |
+| Título | Siri |
+| Filas | Crear producto · Añadir unidades · Quitar unidades · Cambiar la cantidad · Consultar un producto · Eliminar producto |
+| Debajo, sin frase | Sin frase |
+| Debajo, con frase | «{frase}» |
+| Frase que propone la hoja | Nuevo producto · He comprado · He gastado · Cambiar cantidad · Cuánto queda · Eliminar producto |
+| Pie | Elige una frase para cada acción y díselo a Siri tal cual. |
+| Botón a Atajos | Lo pone Apple: «Atajos de InventarioCasa» (toma el nombre interno; se decidió dejarlo así) |
+
+Las preguntas y respuestas de las acciones de «Añadir a Siri» son las mismas
+que las de abajo; las preguntas están en `Siri/Voz.intentdefinition`.
+
+### Frases de la app
 
 Todas las acciones van al hogar abierto. Las frases, los títulos de las
 acciones y las preguntas son literales en `InventarioCasa/Siri` (Apple los

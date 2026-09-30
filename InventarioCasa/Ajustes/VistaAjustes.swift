@@ -24,6 +24,7 @@ struct VistaAjustes: View {
             List {
                 SeccionesCuenta(estado: estadoCuenta)
                 Section {
+                    NavigationLink(Textos.Siri.titulo) { PantallaSiri() }
                     Button(Textos.Importacion.boton) { elegirArchivo = true }
                     Button(Textos.Botones.manual) { mostrarManual = true }
                 }

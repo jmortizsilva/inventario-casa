@@ -1,5 +1,16 @@
 import Foundation
 
+/// Las acciones que se pueden guardar con «Añadir a Siri», en el orden en
+/// que salen en Ajustes.
+public enum AccionVoz: CaseIterable, Sendable {
+    case crearProducto
+    case anadirUnidades
+    case quitarUnidades
+    case cambiarCantidad
+    case consultarProducto
+    case eliminarProducto
+}
+
 /// Lo que Siri dice al usar las acciones de la app. Revisados en
 /// `docs/textos-interfaz.md`, apartado «Siri».
 ///
@@ -8,9 +19,43 @@ import Foundation
 /// literales en el código de la app (`InventarioCasa/Siri`).
 extension Textos {
     public enum Siri {
+        // MARK: Pantalla «Siri» en Ajustes
+
+        public static let titulo = "Siri"
+        public static let sinFrase = "Sin frase"
+        public static let pie = "Elige una frase para cada acción y díselo a Siri tal cual."
+
+        /// Debajo de la acción, la frase que se eligió.
+        public static func frase(_ frase: String) -> String { "«\(frase)»" }
+
+        public static func titulo(_ accion: AccionVoz) -> String {
+            switch accion {
+            case .crearProducto: "Crear producto"
+            case .anadirUnidades: "Añadir unidades"
+            case .quitarUnidades: "Quitar unidades"
+            case .cambiarCantidad: "Cambiar la cantidad"
+            case .consultarProducto: "Consultar un producto"
+            case .eliminarProducto: "Eliminar producto"
+            }
+        }
+
+        /// La que propone la hoja de «Añadir a Siri»; cada persona la cambia.
+        public static func fraseSugerida(_ accion: AccionVoz) -> String {
+            switch accion {
+            case .crearProducto: "Nuevo producto"
+            case .anadirUnidades: "He comprado"
+            case .quitarUnidades: "He gastado"
+            case .cambiarCantidad: "Cambiar cantidad"
+            case .consultarProducto: "Cuánto queda"
+            case .eliminarProducto: "Eliminar producto"
+            }
+        }
+
+        // MARK: Lo que dice Siri
+
         public static let apartado = Apartado(
             titulo: "Siri",
-            texto: "Di, por ejemplo, \u{201C}Añade leche en Inventario Casa\u{201D}, \u{201C}He gastado leche en Inventario Casa\u{201D}, \u{201C}Consulta leche en Inventario Casa\u{201D} o \u{201C}Crea un producto en Inventario Casa\u{201D}. Siri pregunta lo que falte. Todo va al hogar abierto. Crear y eliminar piden desbloquear el iPhone. En la app Atajos puedes hacerte frases propias con estas acciones."
+            texto: "En Ajustes, Siri, elige una frase para cada acción: crear un producto, añadir o quitar unidades, cambiar la cantidad, consultar un producto o eliminarlo. Después, dísela a Siri tal cual; Siri pregunta lo que falte. Todo va al hogar abierto."
         )
 
         /// Tras añadir, quitar, cambiar la cantidad o consultar: lo mismo que
