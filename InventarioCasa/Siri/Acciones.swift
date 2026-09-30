@@ -15,7 +15,7 @@ private func cambiar(
     _ entidad: ProductoEntidad,
     arranque: Arranque,
     _ cambio: (Inventario, Producto) throws(ErrorInventario) -> Producto
-) throws -> Producto {
+) throws -> (antes: Producto, despues: Producto) {
     try cambiarProducto(entidad.id, nombre: entidad.nombre, arranque: arranque, cambio)
 }
 
@@ -40,7 +40,7 @@ struct AnadirUnidades: AppIntent {
         let cambiado = try cambiar(producto, arranque: arranque) { inventario, producto throws(ErrorInventario) in
             try inventario.ajustarCantidad(producto.id, en: unidades)
         }
-        return .result(dialog: "\(Textos.Siri.resultado(cambiado))")
+        return .result(dialog: "\(Textos.Siri.cambio(antes: cambiado.antes, despues: cambiado.despues))")
     }
 }
 
@@ -65,7 +65,7 @@ struct QuitarUnidades: AppIntent {
         let cambiado = try cambiar(producto, arranque: arranque) { inventario, producto throws(ErrorInventario) in
             try inventario.ajustarCantidad(producto.id, en: -unidades)
         }
-        return .result(dialog: "\(Textos.Siri.resultado(cambiado))")
+        return .result(dialog: "\(Textos.Siri.cambio(antes: cambiado.antes, despues: cambiado.despues))")
     }
 }
 
@@ -96,7 +96,7 @@ struct CambiarCantidad: AppIntent {
                 autoListaCompra: producto.autoListaCompra
             )
         }
-        return .result(dialog: "\(Textos.Siri.resultado(cambiado))")
+        return .result(dialog: "\(Textos.Siri.cambio(antes: cambiado.antes, despues: cambiado.despues))")
     }
 }
 

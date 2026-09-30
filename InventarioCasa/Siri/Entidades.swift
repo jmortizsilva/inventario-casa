@@ -35,7 +35,7 @@ struct ConsultaProductos: EntityStringQuery {
     func entities(matching string: String) async throws -> [ProductoEntidad] {
         let inventario = try arranque.inventarioParaSiri()
         let encontrados = inventario.buscarProductos(string)
-        registroSiri.info("Buscar producto «\(string, privacy: .public)»: \(encontrados.count) encontrados")
+        registroSiri.notice("Buscar producto «\(string, privacy: .public)»: \(encontrados.count) encontrados")
         return encontrados.map { ProductoEntidad($0, en: inventario) }
     }
 

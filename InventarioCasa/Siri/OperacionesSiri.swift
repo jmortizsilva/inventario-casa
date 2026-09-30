@@ -7,14 +7,15 @@ import InventarioNucleo
 // con el texto que dice Siri.
 
 /// Cambia un producto que ya existe en el hogar abierto y envía el cambio
-/// sin que Siri espere a la red.
+/// sin que Siri espere a la red. Devuelve cómo estaba y cómo queda, para
+/// decir si ha entrado o salido de la lista de la compra.
 @MainActor
 func cambiarProducto(
     _ id: UUID,
     nombre: String,
     arranque: Arranque,
     _ cambio: (Inventario, Producto) throws(ErrorInventario) -> Producto
-) throws -> Producto {
+) throws -> (antes: Producto, despues: Producto) {
     let inventario = try arranque.inventarioParaSiri()
     guard let producto = inventario.producto(id) else {
         // Otra persona lo eliminó mientras Siri preguntaba.
@@ -27,14 +28,14 @@ func cambiarProducto(
         throw ErrorSiri.noGuardado
     }
     arranque.enviarEnSegundoPlano()
-    return cambiado
+    return (producto, cambiado)
 }
 
 /// Crea un producto buscando la categoría por lo que se ha dicho, sin tildes
 /// y en singular o plural. Devuelve lo que contesta Siri.
 @MainActor
 func crearProductoPorVoz(nombre: String, categoria: String, unidades: Int, arranque: Arranque) throws -> String {
-    registroSiri.info("Crear producto: nombre «\(nombre, privacy: .public)», categoría «\(categoria, privacy: .public)», \(unidades) unidades")
+    registroSiri.notice("Crear producto: nombre «\(nombre, privacy: .public)», categoría «\(categoria, privacy: .public)», \(unidades) unidades")
     let inventario = try arranque.inventarioParaSiri()
     let encontradas = inventario.buscarCategorias(categoria)
     guard let elegida = encontradas.first else {

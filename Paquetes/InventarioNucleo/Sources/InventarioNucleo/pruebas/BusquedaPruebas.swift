@@ -111,4 +111,15 @@ import Testing
         #expect(inventario.productosParaSiri("arroz").map(\.id) == [arroz.id])
         #expect(inventario.productosParaSiri("huevos").isEmpty)
     }
+
+    @Test func cambioDeUnidadesYListaDeLaCompra() {
+        // Mínimo 2: con 2 o menos entra en la lista.
+        func garbanzos(_ n: Int) -> Producto {
+            Producto(categoriaId: despensa, nombre: "Garbanzos", cantidad: n, umbralCompra: 2, creado: instante)
+        }
+        #expect(Textos.Siri.cambio(antes: garbanzos(3), despues: garbanzos(2)) == "Garbanzos, 2 unidades. Añadido a la lista de la compra.")
+        #expect(Textos.Siri.cambio(antes: garbanzos(2), despues: garbanzos(1)) == "Garbanzos, 1 unidad. Sigue en la lista de la compra.")
+        #expect(Textos.Siri.cambio(antes: garbanzos(1), despues: garbanzos(5)) == "Garbanzos, 5 unidades. Quitado de la lista de la compra.")
+        #expect(Textos.Siri.cambio(antes: garbanzos(5), despues: garbanzos(8)) == "Garbanzos, 8 unidades.")
+    }
 }

@@ -607,6 +607,20 @@ productos se llaman igual («Leche, Nevera»).
 | Eliminar producto | ¿Qué producto quieres eliminar? | — |
 | Si encaja con varios | Hay varios: (Siri los lee) ¿Cuál de ellos? | — |
 
+Lo que no vale se dice en el momento, con lo que se acaba de decir, y Siri
+vuelve a preguntar (antes llegaba al final, después de pedir las unidades):
+
+| Cuándo | Texto |
+|---|---|
+| Producto que no existe | No encuentro {lo dicho}. |
+| Categoría que no existe | No encuentro la categoría {lo dicho}. |
+| Encaja con varias categorías | Hay varias categorías así. Dilo con el nombre entero. |
+| Ya hay un producto con ese nombre en la categoría | Ya hay un producto con ese nombre en {lo dicho}. |
+
+Estos textos están en `Siri/Voz.intentdefinition` y no pueden nombrar el
+hogar. Siri a veces no recoge lo que se dice para la categoría y llega vacío
+(pasó con «despensa», que no existía): la app vuelve a preguntar.
+
 La confirmación antes de eliminar la compone Siri con el título «Eliminar
 {producto}»; sus palabras exactas no se pueden cambiar desde la definición.
 
@@ -652,7 +666,8 @@ concordar con cada producto y Siri no la adapta.
 
 | Cuándo | Texto |
 |---|---|
-| Añadir, quitar, cambiar o consultar | {producto}, {n} unidades (y «, en la lista» si está en la lista) |
+| Añadir, quitar o cambiar la cantidad | {producto}, {n} unidades. y, según la lista de la compra: Añadido a la lista de la compra. · Sigue en la lista de la compra. · Quitado de la lista de la compra. |
+| Consultar | {producto}, {n} unidades (y «, en la lista» si está en la lista) |
 | Crear | Creado, {producto} en {categoría} |
 | Eliminar | Eliminado, {producto} |
 | Eliminar, contestando que no | No se ha eliminado {producto} |

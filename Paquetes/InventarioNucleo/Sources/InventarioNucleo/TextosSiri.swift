@@ -58,10 +58,21 @@ extension Textos {
             texto: "En Ajustes, Siri, elige una frase para cada acción: crear un producto, añadir o quitar unidades, cambiar la cantidad, consultar un producto o eliminarlo. Después, dísela a Siri tal cual; Siri pregunta lo que falte. Todo va al hogar abierto."
         )
 
-        /// Tras añadir, quitar, cambiar la cantidad o consultar: lo mismo que
-        /// dice la fila del producto en la app.
+        /// Al consultar: lo mismo que dice la fila del producto en la app.
         public static func resultado(_ producto: Producto) -> String {
             Textos.filaProducto(producto)
+        }
+
+        /// Tras añadir, quitar o cambiar la cantidad: las unidades y, si toca,
+        /// qué ha pasado con la lista de la compra.
+        public static func cambio(antes: Producto, despues: Producto) -> String {
+            let unidades = "\(despues.nombre), \(Textos.unidades(despues.cantidad))"
+            switch (ListaCompra.incluye(antes), ListaCompra.incluye(despues)) {
+            case (false, true): return "\(unidades). Añadido a la lista de la compra."
+            case (true, true): return "\(unidades). Sigue en la lista de la compra."
+            case (true, false): return "\(unidades). Quitado de la lista de la compra."
+            case (false, false): return "\(unidades)."
+            }
         }
 
         public static func creado(_ producto: String, en categoria: String) -> String {
