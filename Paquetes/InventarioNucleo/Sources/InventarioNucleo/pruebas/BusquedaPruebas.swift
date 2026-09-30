@@ -91,4 +91,24 @@ import Testing
         #expect(Textos.Siri.sinFrase == "Sin frase")
         #expect(Textos.Siri.pie == "Elige una frase para cada acción y díselo a Siri tal cual.")
     }
+
+    @MainActor
+    @Test func nombreParaSiriConCategoriaSoloSiSeRepite() throws {
+        let inventario = Inventario(almacen: AlmacenEnMemoria(), ahora: { instante })
+        let nevera = try inventario.crearCategoria(nombre: "Nevera")
+        let despensa = try inventario.crearCategoria(nombre: "Despensa")
+        let lecheNevera = try inventario.crearProducto(nombre: "Leche", en: nevera.id)
+        let lecheDespensa = try inventario.crearProducto(nombre: "leche", en: despensa.id)
+        let arroz = try inventario.crearProducto(nombre: "Arroz", en: despensa.id)
+
+        #expect(inventario.nombreParaSiri(arroz) == "Arroz")
+        #expect(inventario.nombreParaSiri(lecheNevera) == "Leche, Nevera")
+        #expect(inventario.nombreParaSiri(lecheDespensa) == "leche, Despensa")
+
+        // Lo elegido vuelve a su producto; lo dicho, a todos los que encajan.
+        #expect(inventario.productosParaSiri("Leche, Nevera").map(\.id) == [lecheNevera.id])
+        #expect(Set(inventario.productosParaSiri("leches").map(\.id)) == [lecheNevera.id, lecheDespensa.id])
+        #expect(inventario.productosParaSiri("arroz").map(\.id) == [arroz.id])
+        #expect(inventario.productosParaSiri("huevos").isEmpty)
+    }
 }

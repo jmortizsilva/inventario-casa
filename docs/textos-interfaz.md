@@ -589,8 +589,26 @@ frase), con sus propios textos.
 | Pie | Elige una frase para cada acción y díselo a Siri tal cual. |
 | Botón a Atajos | Lo pone Apple: «Atajos de InventarioCasa» (toma el nombre interno; se decidió dejarlo así) |
 
-Las preguntas y respuestas de las acciones de «Añadir a Siri» son las mismas
-que las de abajo; las preguntas están en `Siri/Voz.intentdefinition`.
+### Preguntas de las acciones de «Añadir a Siri»
+
+Revisadas el 30 de septiembre de 2026. Están en `Siri/Voz.intentdefinition`
+(se genera con un script); las respuestas son las de `Textos.Siri`, abajo. El
+producto se dice, no se elige de una lista: con lista, Siri la leía entera,
+con las categorías, y preguntaba «¿Cuál?». La categoría solo se nombra si dos
+productos se llaman igual («Leche, Nevera»).
+
+| Acción | Producto | Unidades |
+|---|---|---|
+| Crear producto | ¿Qué producto? · ¿En qué categoría lo guardo? | ¿Cuántas unidades? |
+| Añadir unidades | ¿Qué has comprado? | ¿Cuántas unidades? |
+| Quitar unidades | ¿Qué producto? | ¿Cuántas unidades? |
+| Cambiar la cantidad | ¿De qué producto? | ¿Cuántas unidades? |
+| Consultar un producto | ¿De qué producto? | — |
+| Eliminar producto | ¿Qué producto quieres eliminar? | — |
+| Si encaja con varios | Hay varios: (Siri los lee) ¿Cuál de ellos? | — |
+
+La confirmación antes de eliminar la compone Siri con el título «Eliminar
+{producto}»; sus palabras exactas no se pueden cambiar desde la definición.
 
 ### Frases de la app
 

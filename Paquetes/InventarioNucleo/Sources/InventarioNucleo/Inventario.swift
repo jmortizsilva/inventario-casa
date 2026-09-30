@@ -92,6 +92,23 @@ public final class Inventario {
         Busqueda.productos(texto, en: Array(todosProductos.values))
     }
 
+    /// Cómo se nombra el producto al decírselo a Siri: el nombre, y la
+    /// categoría solo si otro producto se llama igual («Leche, Nevera»).
+    public func nombreParaSiri(_ producto: Producto) -> String {
+        let clave = Nombres.clave(producto.nombre)
+        let repetido = todosLosProductos.contains { $0.id != producto.id && Nombres.clave($0.nombre) == clave }
+        guard repetido, let categoria = categoria(producto.categoriaId) else { return producto.nombre }
+        return "\(producto.nombre), \(categoria.nombre)"
+    }
+
+    /// Lo contrario: lo que se eligió o se dijo, de vuelta a productos. Primero
+    /// los que se nombran así exactamente; si no hay, la búsqueda normal.
+    public func productosParaSiri(_ texto: String) -> [Producto] {
+        let clave = Nombres.clave(texto)
+        let exactos = todosLosProductos.filter { Nombres.clave(nombreParaSiri($0)) == clave }
+        return exactos.isEmpty ? buscarProductos(texto) : exactos
+    }
+
     public func buscarCategorias(_ texto: String) -> [Categoria] {
         Busqueda.categorias(texto, en: categorias)
     }

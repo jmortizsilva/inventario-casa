@@ -16,47 +16,34 @@ final class ManejadorVoz: NSObject {
 
     // MARK: Producto
 
-    private func voz(_ producto: Producto, en inventario: Inventario) -> ProductoVoz {
-        let voz = ProductoVoz(identifier: producto.id.uuidString, display: producto.nombre)
-        voz.subtitleString = inventario.categoria(producto.categoriaId)?.nombre
-        return voz
-    }
-
-    /// Los productos del hogar abierto: Siri empareja con ellos lo que se dice.
-    fileprivate func opciones() throws -> INObjectCollection<ProductoVoz> {
-        let inventario = try arranque.inventarioParaSiri()
-        return INObjectCollection(items: inventario.todosLosProductos.map { voz($0, en: inventario) })
-    }
-
-    /// Si Siri no lo emparejó con una opción, llega solo lo dicho, y se busca
-    /// igual que en la app. Sin coincidencias se da por bueno: al atenderlo
-    /// falla con «No encuentro…», que dice más que volver a preguntar.
-    fileprivate func resolver(_ dicho: ProductoVoz?) -> ProductoVozResolutionResult {
-        guard let dicho else { return .needsValue() }
+    /// Lo dicho se busca igual que en la app, sin tildes y en singular o
+    /// plural. Si encaja con varios, Siri ofrece solo esos; sin ninguno se da
+    /// por bueno y, al atenderlo, contesta «No encuentro…», que dice más que
+    /// volver a preguntar.
+    fileprivate func resolver(_ dicho: String?) -> INStringResolutionResult {
+        guard let dicho, !Nombres.limpiar(dicho).isEmpty else { return .needsValue() }
         guard let inventario = try? arranque.inventarioParaSiri() else { return .success(with: dicho) }
-        if let id = dicho.identifier.flatMap(UUID.init(uuidString:)), inventario.producto(id) != nil {
-            return .success(with: dicho)
-        }
-        let encontrados = inventario.buscarProductos(dicho.displayString)
-        registroSiri.info("Buscar producto «\(dicho.displayString, privacy: .public)»: \(encontrados.count) encontrados")
+        let encontrados = inventario.productosParaSiri(dicho)
+        registroSiri.info("Buscar producto «\(dicho, privacy: .public)»: \(encontrados.count) encontrados")
         switch encontrados.count {
         case 0: return .success(with: dicho)
-        case 1: return .success(with: voz(encontrados[0], en: inventario))
-        default: return .disambiguation(with: encontrados.map { voz($0, en: inventario) })
+        case 1: return .success(with: inventario.nombreParaSiri(encontrados[0]))
+        default: return .disambiguation(with: encontrados.map(inventario.nombreParaSiri))
         }
     }
 
     /// El producto elegido, o el error con lo que dice Siri.
-    fileprivate func elegido(_ dicho: ProductoVoz?) throws -> (id: UUID, nombre: String) {
-        let nombre = dicho?.displayString ?? ""
-        guard let id = dicho?.identifier.flatMap(UUID.init(uuidString:)) else {
+    fileprivate func elegido(_ dicho: String?) throws -> (id: UUID, nombre: String) {
+        let nombre = dicho ?? ""
+        let inventario = try arranque.inventarioParaSiri()
+        guard let producto = inventario.productosParaSiri(nombre).first else {
             throw ErrorSiri.noEncontrado(nombre, arranque: arranque)
         }
-        return (id, nombre)
+        return (producto.id, producto.nombre)
     }
 
     /// Suma (o resta) unidades, o las fija. Devuelve lo que contesta Siri.
-    fileprivate func cambiarUnidades(_ dicho: ProductoVoz?, _ cambio: (Inventario, Producto) throws(ErrorInventario) -> Producto) -> (ok: Bool, texto: String) {
+    fileprivate func cambiarUnidades(_ dicho: String?, _ cambio: (Inventario, Producto) throws(ErrorInventario) -> Producto) -> (ok: Bool, texto: String) {
         do {
             let (id, nombre) = try elegido(dicho)
             return (true, Textos.Siri.resultado(try cambiarProducto(id, nombre: nombre, arranque: arranque, cambio)))
@@ -102,11 +89,7 @@ extension ManejadorVoz: @preconcurrency CrearProductoVozIntentHandling {
 // MARK: Añadir, quitar y cambiar unidades
 
 extension ManejadorVoz: @preconcurrency AnadirUnidadesVozIntentHandling {
-    func provideProductoOptionsCollection(for intent: AnadirUnidadesVozIntent) async throws -> INObjectCollection<ProductoVoz> {
-        try opciones()
-    }
-
-    func resolveProducto(for intent: AnadirUnidadesVozIntent) async -> ProductoVozResolutionResult {
+    func resolveProducto(for intent: AnadirUnidadesVozIntent) async -> INStringResolutionResult {
         resolver(intent.producto)
     }
 
@@ -125,11 +108,7 @@ extension ManejadorVoz: @preconcurrency AnadirUnidadesVozIntentHandling {
 }
 
 extension ManejadorVoz: @preconcurrency QuitarUnidadesVozIntentHandling {
-    func provideProductoOptionsCollection(for intent: QuitarUnidadesVozIntent) async throws -> INObjectCollection<ProductoVoz> {
-        try opciones()
-    }
-
-    func resolveProducto(for intent: QuitarUnidadesVozIntent) async -> ProductoVozResolutionResult {
+    func resolveProducto(for intent: QuitarUnidadesVozIntent) async -> INStringResolutionResult {
         resolver(intent.producto)
     }
 
@@ -148,11 +127,7 @@ extension ManejadorVoz: @preconcurrency QuitarUnidadesVozIntentHandling {
 }
 
 extension ManejadorVoz: @preconcurrency CambiarCantidadVozIntentHandling {
-    func provideProductoOptionsCollection(for intent: CambiarCantidadVozIntent) async throws -> INObjectCollection<ProductoVoz> {
-        try opciones()
-    }
-
-    func resolveProducto(for intent: CambiarCantidadVozIntent) async -> ProductoVozResolutionResult {
+    func resolveProducto(for intent: CambiarCantidadVozIntent) async -> INStringResolutionResult {
         resolver(intent.producto)
     }
 
@@ -179,11 +154,7 @@ extension ManejadorVoz: @preconcurrency CambiarCantidadVozIntentHandling {
 // MARK: Consultar y eliminar
 
 extension ManejadorVoz: @preconcurrency ConsultarProductoVozIntentHandling {
-    func provideProductoOptionsCollection(for intent: ConsultarProductoVozIntent) async throws -> INObjectCollection<ProductoVoz> {
-        try opciones()
-    }
-
-    func resolveProducto(for intent: ConsultarProductoVozIntent) async -> ProductoVozResolutionResult {
+    func resolveProducto(for intent: ConsultarProductoVozIntent) async -> INStringResolutionResult {
         resolver(intent.producto)
     }
 
@@ -201,11 +172,7 @@ extension ManejadorVoz: @preconcurrency ConsultarProductoVozIntentHandling {
 }
 
 extension ManejadorVoz: @preconcurrency EliminarProductoVozIntentHandling {
-    func provideProductoOptionsCollection(for intent: EliminarProductoVozIntent) async throws -> INObjectCollection<ProductoVoz> {
-        try opciones()
-    }
-
-    func resolveProducto(for intent: EliminarProductoVozIntent) async -> ProductoVozResolutionResult {
+    func resolveProducto(for intent: EliminarProductoVozIntent) async -> INStringResolutionResult {
         resolver(intent.producto)
     }
 
