@@ -55,7 +55,7 @@ extension Textos {
 
         public static let apartado = Apartado(
             titulo: "Siri",
-            texto: "En Ajustes, Siri, elige una frase para cada acción: crear un producto, añadir o quitar unidades, cambiar la cantidad, consultar un producto o eliminarlo. Después, dísela a Siri tal cual; Siri pregunta lo que falte. Todo va al hogar abierto."
+            texto: "En Ajustes, Siri, pulsa cada acción y guarda la frase que quieras decir, por ejemplo \u{201C}He comprado\u{201D}. Después dísela a Siri tal cual. Siri pregunta lo que falte, y puedes contestar el producto y las unidades de una vez: \u{201C}5 unidades de leche\u{201D}. Si no te entiende una palabra, dila de otra forma. Todo va al hogar abierto."
         )
 
         /// Al consultar: lo mismo que dice la fila del producto en la app.

@@ -232,10 +232,11 @@ puedes copiar del actual las categorías, o las categorías y los productos.
 avisa: productos y categorías nuevos, lo que entra y sale de la lista, y las
 personas que se unen. Solo avisa de lo que hacen las demás personas.
 
-**Siri.** En Ajustes, Siri, elige una frase para cada acción: crear un
-producto, añadir o quitar unidades, cambiar la cantidad, consultar un producto
-o eliminarlo. Después, dísela a Siri tal cual; Siri pregunta lo que falte. Todo
-va al hogar abierto.
+**Siri.** En Ajustes, Siri, pulsa cada acción y guarda la frase que quieras
+decir, por ejemplo "He comprado". Después dísela a Siri tal cual. Siri pregunta
+lo que falte, y puedes contestar el producto y las unidades de una vez: "5
+unidades de leche". Si no te entiende una palabra, dila de otra forma. Todo va
+al hogar abierto.
 
 ## Concordancias
 
