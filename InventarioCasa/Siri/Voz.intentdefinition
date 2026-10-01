@@ -24,7 +24,7 @@
 			<key>INIntentDescription</key>
 			<string>Crea un producto en el hogar abierto</string>
 			<key>INIntentDescriptionID</key>
-			<string>CsMehG</string>
+			<string>WJKY40</string>
 			<key>INIntentEligibleForWidgets</key>
 			<false/>
 			<key>INIntentIneligibleForSuggestions</key>
@@ -40,7 +40,7 @@
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Crear ${nombre} en ${categoria}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>FAc9Qe</string>
+					<string>LZDe1f</string>
 					<key>INIntentParameterCombinationUpdatesLinked</key>
 					<true/>
 				</dict>
@@ -58,7 +58,7 @@
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Crear ${nombre} en ${categoria}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>AkWvj7</string>
+					<string>uvSwMF</string>
 				</dict>
 			</dict>
 			<key>INIntentParameters</key>
@@ -108,14 +108,27 @@
 					<integer>1</integer>
 					<key>INIntentParameterType</key>
 					<string>String</string>
+					<key>INIntentParameterUnsupportedReasons</key>
+					<array>
+						<dict>
+							<key>INIntentParameterUnsupportedReasonCode</key>
+							<string>noEntendido</string>
+							<key>INIntentParameterUnsupportedReasonFormatString</key>
+							<string>No te he entendido. Dilo de otra forma.</string>
+							<key>INIntentParameterUnsupportedReasonFormatStringID</key>
+							<string>BAepfJ</string>
+						</dict>
+					</array>
 				</dict>
 				<dict>
 					<key>INIntentParameterConfigurable</key>
 					<true/>
+					<key>INIntentParameterCustomDisambiguation</key>
+					<true/>
 					<key>INIntentParameterDisplayName</key>
 					<string>Categoría</string>
 					<key>INIntentParameterDisplayNameID</key>
-					<string>Bd0Kh8</string>
+					<string>oOOL8d</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>2</integer>
 					<key>INIntentParameterMetadata</key>
@@ -123,7 +136,7 @@
 						<key>INIntentParameterMetadataCapitalization</key>
 						<string>Sentences</string>
 						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>BAepfJ</string>
+						<string>Bd0Kh8</string>
 					</dict>
 					<key>INIntentParameterName</key>
 					<string>categoria</string>
@@ -141,9 +154,29 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿En qué categoría lo guardo?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>oOOL8d</string>
+							<string>KLzdoc</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>Primary</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>Estas son tus categorías:</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>J2isAj</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationIntroduction</string>
+						</dict>
+						<dict>
+							<key>INIntentParameterPromptDialogCustom</key>
+							<true/>
+							<key>INIntentParameterPromptDialogFormatString</key>
+							<string>¿En cuál lo guardo?</string>
+							<key>INIntentParameterPromptDialogFormatStringID</key>
+							<string>IhKtJ0</string>
+							<key>INIntentParameterPromptDialogType</key>
+							<string>DisambiguationSelection</string>
 						</dict>
 					</array>
 					<key>INIntentParameterSupportsMultipleValues</key>
@@ -162,7 +195,7 @@
 							<key>INIntentParameterUnsupportedReasonFormatString</key>
 							<string>No encuentro la categoría ${categoria}.</string>
 							<key>INIntentParameterUnsupportedReasonFormatStringID</key>
-							<string>KLzdoc</string>
+							<string>RlgLKO</string>
 						</dict>
 						<dict>
 							<key>INIntentParameterUnsupportedReasonCode</key>
@@ -170,7 +203,7 @@
 							<key>INIntentParameterUnsupportedReasonFormatString</key>
 							<string>Hay varias categorías así. Dilo con el nombre entero.</string>
 							<key>INIntentParameterUnsupportedReasonFormatStringID</key>
-							<string>J2isAj</string>
+							<string>mxgJTe</string>
 						</dict>
 						<dict>
 							<key>INIntentParameterUnsupportedReasonCode</key>
@@ -178,7 +211,7 @@
 							<key>INIntentParameterUnsupportedReasonFormatString</key>
 							<string>Ya hay un producto con ese nombre en ${categoria}.</string>
 							<key>INIntentParameterUnsupportedReasonFormatStringID</key>
-							<string>IhKtJ0</string>
+							<string>KdNnFR</string>
 						</dict>
 					</array>
 				</dict>
@@ -188,7 +221,7 @@
 					<key>INIntentParameterDisplayName</key>
 					<string>Unidades</string>
 					<key>INIntentParameterDisplayNameID</key>
-					<string>RlgLKO</string>
+					<string>IBXuDL</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>3</integer>
 					<key>INIntentParameterMetadata</key>
@@ -216,7 +249,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿Cuántas unidades?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>mxgJTe</string>
+							<string>7DxtpY</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>Primary</string>
 						</dict>
@@ -239,11 +272,11 @@
 						<key>INIntentResponseCodeConciseFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeConciseFormatStringID</key>
-						<string>KdNnFR</string>
+						<string>lSXpfK</string>
 						<key>INIntentResponseCodeFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>IBXuDL</string>
+						<string>tHF4vU</string>
 						<key>INIntentResponseCodeName</key>
 						<string>success</string>
 						<key>INIntentResponseCodeSuccess</key>
@@ -253,11 +286,11 @@
 						<key>INIntentResponseCodeConciseFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeConciseFormatStringID</key>
-						<string>7DxtpY</string>
+						<string>CsMehG</string>
 						<key>INIntentResponseCodeFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>lSXpfK</string>
+						<string>AkWvj7</string>
 						<key>INIntentResponseCodeName</key>
 						<string>failure</string>
 					</dict>
@@ -270,7 +303,7 @@
 						<key>INIntentResponseParameterDisplayName</key>
 						<string>Texto</string>
 						<key>INIntentResponseParameterDisplayNameID</key>
-						<string>WJKY40</string>
+						<string>8rESQe</string>
 						<key>INIntentResponseParameterDisplayPriority</key>
 						<integer>1</integer>
 						<key>INIntentResponseParameterName</key>
@@ -285,7 +318,7 @@
 			<key>INIntentTitle</key>
 			<string>Crear producto</string>
 			<key>INIntentTitleID</key>
-			<string>tHF4vU</string>
+			<string>FAc9Qe</string>
 			<key>INIntentType</key>
 			<string>Custom</string>
 			<key>INIntentUserConfirmationRequired</key>
@@ -301,7 +334,7 @@
 			<key>INIntentDescription</key>
 			<string>Suma unidades a un producto</string>
 			<key>INIntentDescriptionID</key>
-			<string>oQoaF1</string>
+			<string>8iS2G8</string>
 			<key>INIntentEligibleForWidgets</key>
 			<false/>
 			<key>INIntentIneligibleForSuggestions</key>
@@ -317,7 +350,7 @@
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Añadir ${unidades} a ${producto}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>AIxNKu</string>
+					<string>53X83R</string>
 					<key>INIntentParameterCombinationUpdatesLinked</key>
 					<true/>
 				</dict>
@@ -335,7 +368,7 @@
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Añadir ${unidades} a ${producto}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>Llqsaj</string>
+					<string>NPRVdD</string>
 				</dict>
 			</dict>
 			<key>INIntentParameters</key>
@@ -348,7 +381,7 @@
 					<key>INIntentParameterDisplayName</key>
 					<string>Producto</string>
 					<key>INIntentParameterDisplayNameID</key>
-					<string>LZDe1f</string>
+					<string>R0CsTy</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>1</integer>
 					<key>INIntentParameterMetadata</key>
@@ -356,7 +389,7 @@
 						<key>INIntentParameterMetadataCapitalization</key>
 						<string>Sentences</string>
 						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>uvSwMF</string>
+						<string>dUStPK</string>
 					</dict>
 					<key>INIntentParameterName</key>
 					<string>producto</string>
@@ -374,7 +407,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿Qué has comprado?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>8rESQe</string>
+							<string>4Qwb8D</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>Primary</string>
 						</dict>
@@ -384,7 +417,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>Hay varios:</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>R0CsTy</string>
+							<string>nXsiVp</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>DisambiguationIntroduction</string>
 						</dict>
@@ -394,7 +427,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿Cuál de ellos?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>4Qwb8D</string>
+							<string>zz63Ff</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>DisambiguationSelection</string>
 						</dict>
@@ -415,7 +448,7 @@
 							<key>INIntentParameterUnsupportedReasonFormatString</key>
 							<string>No encuentro ${producto}.</string>
 							<key>INIntentParameterUnsupportedReasonFormatStringID</key>
-							<string>dUStPK</string>
+							<string>wkNhFd</string>
 						</dict>
 					</array>
 				</dict>
@@ -425,7 +458,7 @@
 					<key>INIntentParameterDisplayName</key>
 					<string>Unidades</string>
 					<key>INIntentParameterDisplayNameID</key>
-					<string>wkNhFd</string>
+					<string>kCzJr4</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>2</integer>
 					<key>INIntentParameterMetadata</key>
@@ -453,7 +486,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿Cuántas unidades?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>nXsiVp</string>
+							<string>i0B3Jr</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>Primary</string>
 						</dict>
@@ -476,11 +509,11 @@
 						<key>INIntentResponseCodeConciseFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeConciseFormatStringID</key>
-						<string>zz63Ff</string>
+						<string>TAwR4y</string>
 						<key>INIntentResponseCodeFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>kCzJr4</string>
+						<string>9ojflj</string>
 						<key>INIntentResponseCodeName</key>
 						<string>success</string>
 						<key>INIntentResponseCodeSuccess</key>
@@ -490,11 +523,11 @@
 						<key>INIntentResponseCodeConciseFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeConciseFormatStringID</key>
-						<string>i0B3Jr</string>
+						<string>oQoaF1</string>
 						<key>INIntentResponseCodeFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>TAwR4y</string>
+						<string>Llqsaj</string>
 						<key>INIntentResponseCodeName</key>
 						<string>failure</string>
 					</dict>
@@ -507,7 +540,7 @@
 						<key>INIntentResponseParameterDisplayName</key>
 						<string>Texto</string>
 						<key>INIntentResponseParameterDisplayNameID</key>
-						<string>8iS2G8</string>
+						<string>ZJzzzz</string>
 						<key>INIntentResponseParameterDisplayPriority</key>
 						<integer>1</integer>
 						<key>INIntentResponseParameterName</key>
@@ -522,7 +555,7 @@
 			<key>INIntentTitle</key>
 			<string>Añadir unidades</string>
 			<key>INIntentTitleID</key>
-			<string>9ojflj</string>
+			<string>AIxNKu</string>
 			<key>INIntentType</key>
 			<string>Custom</string>
 			<key>INIntentUserConfirmationRequired</key>
@@ -538,7 +571,7 @@
 			<key>INIntentDescription</key>
 			<string>Resta unidades a un producto</string>
 			<key>INIntentDescriptionID</key>
-			<string>8HxjSI</string>
+			<string>x6kwXo</string>
 			<key>INIntentEligibleForWidgets</key>
 			<false/>
 			<key>INIntentIneligibleForSuggestions</key>
@@ -554,7 +587,7 @@
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Quitar ${unidades} a ${producto}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>3fS2qH</string>
+					<string>oNZYW2</string>
 					<key>INIntentParameterCombinationUpdatesLinked</key>
 					<true/>
 				</dict>
@@ -572,7 +605,7 @@
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Quitar ${unidades} a ${producto}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>6bWHtP</string>
+					<string>IIXGvO</string>
 				</dict>
 			</dict>
 			<key>INIntentParameters</key>
@@ -585,7 +618,7 @@
 					<key>INIntentParameterDisplayName</key>
 					<string>Producto</string>
 					<key>INIntentParameterDisplayNameID</key>
-					<string>53X83R</string>
+					<string>enCkhv</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>1</integer>
 					<key>INIntentParameterMetadata</key>
@@ -593,7 +626,7 @@
 						<key>INIntentParameterMetadataCapitalization</key>
 						<string>Sentences</string>
 						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>NPRVdD</string>
+						<string>gEOzdm</string>
 					</dict>
 					<key>INIntentParameterName</key>
 					<string>producto</string>
@@ -611,7 +644,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿Qué producto?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>ZJzzzz</string>
+							<string>MdgaKj</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>Primary</string>
 						</dict>
@@ -621,7 +654,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>Hay varios:</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>enCkhv</string>
+							<string>e3nNyj</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>DisambiguationIntroduction</string>
 						</dict>
@@ -631,7 +664,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿Cuál de ellos?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>MdgaKj</string>
+							<string>Oq9wMx</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>DisambiguationSelection</string>
 						</dict>
@@ -652,7 +685,7 @@
 							<key>INIntentParameterUnsupportedReasonFormatString</key>
 							<string>No encuentro ${producto}.</string>
 							<key>INIntentParameterUnsupportedReasonFormatStringID</key>
-							<string>gEOzdm</string>
+							<string>Ig8xNb</string>
 						</dict>
 					</array>
 				</dict>
@@ -662,7 +695,7 @@
 					<key>INIntentParameterDisplayName</key>
 					<string>Unidades</string>
 					<key>INIntentParameterDisplayNameID</key>
-					<string>Ig8xNb</string>
+					<string>Ehh2FD</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>2</integer>
 					<key>INIntentParameterMetadata</key>
@@ -690,7 +723,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿Cuántas unidades?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>e3nNyj</string>
+							<string>EEtfjg</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>Primary</string>
 						</dict>
@@ -713,11 +746,11 @@
 						<key>INIntentResponseCodeConciseFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeConciseFormatStringID</key>
-						<string>Oq9wMx</string>
+						<string>VvVqE1</string>
 						<key>INIntentResponseCodeFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>Ehh2FD</string>
+						<string>SkHbn8</string>
 						<key>INIntentResponseCodeName</key>
 						<string>success</string>
 						<key>INIntentResponseCodeSuccess</key>
@@ -727,11 +760,11 @@
 						<key>INIntentResponseCodeConciseFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeConciseFormatStringID</key>
-						<string>EEtfjg</string>
+						<string>8HxjSI</string>
 						<key>INIntentResponseCodeFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>VvVqE1</string>
+						<string>6bWHtP</string>
 						<key>INIntentResponseCodeName</key>
 						<string>failure</string>
 					</dict>
@@ -744,7 +777,7 @@
 						<key>INIntentResponseParameterDisplayName</key>
 						<string>Texto</string>
 						<key>INIntentResponseParameterDisplayNameID</key>
-						<string>x6kwXo</string>
+						<string>mZp0zV</string>
 						<key>INIntentResponseParameterDisplayPriority</key>
 						<integer>1</integer>
 						<key>INIntentResponseParameterName</key>
@@ -759,7 +792,7 @@
 			<key>INIntentTitle</key>
 			<string>Quitar unidades</string>
 			<key>INIntentTitleID</key>
-			<string>SkHbn8</string>
+			<string>3fS2qH</string>
 			<key>INIntentType</key>
 			<string>Custom</string>
 			<key>INIntentUserConfirmationRequired</key>
@@ -775,7 +808,7 @@
 			<key>INIntentDescription</key>
 			<string>Pone las unidades de un producto</string>
 			<key>INIntentDescriptionID</key>
-			<string>OvfZ8U</string>
+			<string>L5DZPj</string>
 			<key>INIntentEligibleForWidgets</key>
 			<false/>
 			<key>INIntentIneligibleForSuggestions</key>
@@ -791,7 +824,7 @@
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Poner ${producto} a ${unidades}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>Ukkibj</string>
+					<string>wjJJib</string>
 					<key>INIntentParameterCombinationUpdatesLinked</key>
 					<true/>
 				</dict>
@@ -809,7 +842,7 @@
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Poner ${producto} a ${unidades}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>zDzV8f</string>
+					<string>N0MEQ7</string>
 				</dict>
 			</dict>
 			<key>INIntentParameters</key>
@@ -822,7 +855,7 @@
 					<key>INIntentParameterDisplayName</key>
 					<string>Producto</string>
 					<key>INIntentParameterDisplayNameID</key>
-					<string>oNZYW2</string>
+					<string>UbbYrE</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>1</integer>
 					<key>INIntentParameterMetadata</key>
@@ -830,7 +863,7 @@
 						<key>INIntentParameterMetadataCapitalization</key>
 						<string>Sentences</string>
 						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>IIXGvO</string>
+						<string>ZomHFw</string>
 					</dict>
 					<key>INIntentParameterName</key>
 					<string>producto</string>
@@ -848,7 +881,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿De qué producto?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>mZp0zV</string>
+							<string>qmSM9w</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>Primary</string>
 						</dict>
@@ -858,7 +891,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>Hay varios:</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>UbbYrE</string>
+							<string>xfogoE</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>DisambiguationIntroduction</string>
 						</dict>
@@ -868,7 +901,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿Cuál de ellos?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>qmSM9w</string>
+							<string>mvnEN5</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>DisambiguationSelection</string>
 						</dict>
@@ -889,7 +922,7 @@
 							<key>INIntentParameterUnsupportedReasonFormatString</key>
 							<string>No encuentro ${producto}.</string>
 							<key>INIntentParameterUnsupportedReasonFormatStringID</key>
-							<string>ZomHFw</string>
+							<string>CZ7Uw9</string>
 						</dict>
 					</array>
 				</dict>
@@ -899,7 +932,7 @@
 					<key>INIntentParameterDisplayName</key>
 					<string>Unidades</string>
 					<key>INIntentParameterDisplayNameID</key>
-					<string>CZ7Uw9</string>
+					<string>N1aE6P</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>2</integer>
 					<key>INIntentParameterMetadata</key>
@@ -927,7 +960,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿Cuántas unidades?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>xfogoE</string>
+							<string>wZPf1Q</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>Primary</string>
 						</dict>
@@ -950,11 +983,11 @@
 						<key>INIntentResponseCodeConciseFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeConciseFormatStringID</key>
-						<string>mvnEN5</string>
+						<string>h6yYTW</string>
 						<key>INIntentResponseCodeFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>N1aE6P</string>
+						<string>mE4lBY</string>
 						<key>INIntentResponseCodeName</key>
 						<string>success</string>
 						<key>INIntentResponseCodeSuccess</key>
@@ -964,11 +997,11 @@
 						<key>INIntentResponseCodeConciseFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeConciseFormatStringID</key>
-						<string>wZPf1Q</string>
+						<string>OvfZ8U</string>
 						<key>INIntentResponseCodeFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>h6yYTW</string>
+						<string>zDzV8f</string>
 						<key>INIntentResponseCodeName</key>
 						<string>failure</string>
 					</dict>
@@ -981,7 +1014,7 @@
 						<key>INIntentResponseParameterDisplayName</key>
 						<string>Texto</string>
 						<key>INIntentResponseParameterDisplayNameID</key>
-						<string>L5DZPj</string>
+						<string>aZUPgH</string>
 						<key>INIntentResponseParameterDisplayPriority</key>
 						<integer>1</integer>
 						<key>INIntentResponseParameterName</key>
@@ -996,7 +1029,7 @@
 			<key>INIntentTitle</key>
 			<string>Cambiar la cantidad</string>
 			<key>INIntentTitleID</key>
-			<string>mE4lBY</string>
+			<string>Ukkibj</string>
 			<key>INIntentType</key>
 			<string>Custom</string>
 			<key>INIntentUserConfirmationRequired</key>
@@ -1012,7 +1045,7 @@
 			<key>INIntentDescription</key>
 			<string>Dice cuántas unidades quedan</string>
 			<key>INIntentDescriptionID</key>
-			<string>lMaXZj</string>
+			<string>JEYXg4</string>
 			<key>INIntentEligibleForWidgets</key>
 			<false/>
 			<key>INIntentIneligibleForSuggestions</key>
@@ -1028,7 +1061,7 @@
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Consultar ${producto}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>JduRHH</string>
+					<string>XgGCJb</string>
 					<key>INIntentParameterCombinationUpdatesLinked</key>
 					<true/>
 				</dict>
@@ -1046,7 +1079,7 @@
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Consultar ${producto}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>ljENUh</string>
+					<string>Jdpmrc</string>
 				</dict>
 			</dict>
 			<key>INIntentParameters</key>
@@ -1059,7 +1092,7 @@
 					<key>INIntentParameterDisplayName</key>
 					<string>Producto</string>
 					<key>INIntentParameterDisplayNameID</key>
-					<string>wjJJib</string>
+					<string>03nbqn</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>1</integer>
 					<key>INIntentParameterMetadata</key>
@@ -1067,7 +1100,7 @@
 						<key>INIntentParameterMetadataCapitalization</key>
 						<string>Sentences</string>
 						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>N0MEQ7</string>
+						<string>V7iB3m</string>
 					</dict>
 					<key>INIntentParameterName</key>
 					<string>producto</string>
@@ -1085,7 +1118,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿De qué producto?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>aZUPgH</string>
+							<string>sGpWLu</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>Primary</string>
 						</dict>
@@ -1095,7 +1128,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>Hay varios:</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>03nbqn</string>
+							<string>6Vw5DQ</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>DisambiguationIntroduction</string>
 						</dict>
@@ -1105,7 +1138,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿Cuál de ellos?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>sGpWLu</string>
+							<string>L05HA0</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>DisambiguationSelection</string>
 						</dict>
@@ -1126,7 +1159,7 @@
 							<key>INIntentParameterUnsupportedReasonFormatString</key>
 							<string>No encuentro ${producto}.</string>
 							<key>INIntentParameterUnsupportedReasonFormatStringID</key>
-							<string>V7iB3m</string>
+							<string>qIA1id</string>
 						</dict>
 					</array>
 				</dict>
@@ -1139,11 +1172,11 @@
 						<key>INIntentResponseCodeConciseFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeConciseFormatStringID</key>
-						<string>qIA1id</string>
+						<string>64GiIj</string>
 						<key>INIntentResponseCodeFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>6Vw5DQ</string>
+						<string>HGb3CX</string>
 						<key>INIntentResponseCodeName</key>
 						<string>success</string>
 						<key>INIntentResponseCodeSuccess</key>
@@ -1153,11 +1186,11 @@
 						<key>INIntentResponseCodeConciseFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeConciseFormatStringID</key>
-						<string>L05HA0</string>
+						<string>lMaXZj</string>
 						<key>INIntentResponseCodeFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>64GiIj</string>
+						<string>ljENUh</string>
 						<key>INIntentResponseCodeName</key>
 						<string>failure</string>
 					</dict>
@@ -1170,7 +1203,7 @@
 						<key>INIntentResponseParameterDisplayName</key>
 						<string>Texto</string>
 						<key>INIntentResponseParameterDisplayNameID</key>
-						<string>JEYXg4</string>
+						<string>W56eCu</string>
 						<key>INIntentResponseParameterDisplayPriority</key>
 						<integer>1</integer>
 						<key>INIntentResponseParameterName</key>
@@ -1185,7 +1218,7 @@
 			<key>INIntentTitle</key>
 			<string>Consultar un producto</string>
 			<key>INIntentTitleID</key>
-			<string>HGb3CX</string>
+			<string>JduRHH</string>
 			<key>INIntentType</key>
 			<string>Custom</string>
 			<key>INIntentUserConfirmationRequired</key>
@@ -1201,7 +1234,7 @@
 			<key>INIntentDescription</key>
 			<string>Elimina un producto</string>
 			<key>INIntentDescriptionID</key>
-			<string>8TPQxj</string>
+			<string>kQ1okT</string>
 			<key>INIntentEligibleForWidgets</key>
 			<false/>
 			<key>INIntentIneligibleForSuggestions</key>
@@ -1217,7 +1250,7 @@
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Eliminar ${producto}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>V8gz4F</string>
+					<string>wufUxb</string>
 					<key>INIntentParameterCombinationUpdatesLinked</key>
 					<true/>
 				</dict>
@@ -1235,7 +1268,7 @@
 					<key>INIntentParameterCombinationTitle</key>
 					<string>Eliminar ${producto}</string>
 					<key>INIntentParameterCombinationTitleID</key>
-					<string>q4i9Do</string>
+					<string>BGzvAm</string>
 				</dict>
 			</dict>
 			<key>INIntentParameters</key>
@@ -1248,7 +1281,7 @@
 					<key>INIntentParameterDisplayName</key>
 					<string>Producto</string>
 					<key>INIntentParameterDisplayNameID</key>
-					<string>XgGCJb</string>
+					<string>rCGIZE</string>
 					<key>INIntentParameterDisplayPriority</key>
 					<integer>1</integer>
 					<key>INIntentParameterMetadata</key>
@@ -1256,7 +1289,7 @@
 						<key>INIntentParameterMetadataCapitalization</key>
 						<string>Sentences</string>
 						<key>INIntentParameterMetadataDefaultValueID</key>
-						<string>Jdpmrc</string>
+						<string>NGMGmS</string>
 					</dict>
 					<key>INIntentParameterName</key>
 					<string>producto</string>
@@ -1274,7 +1307,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿Qué producto quieres eliminar?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>W56eCu</string>
+							<string>G8pSH4</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>Primary</string>
 						</dict>
@@ -1284,7 +1317,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>Hay varios:</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>rCGIZE</string>
+							<string>58m1Ci</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>DisambiguationIntroduction</string>
 						</dict>
@@ -1294,7 +1327,7 @@
 							<key>INIntentParameterPromptDialogFormatString</key>
 							<string>¿Cuál de ellos?</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
-							<string>G8pSH4</string>
+							<string>AhzCue</string>
 							<key>INIntentParameterPromptDialogType</key>
 							<string>DisambiguationSelection</string>
 						</dict>
@@ -1315,7 +1348,7 @@
 							<key>INIntentParameterUnsupportedReasonFormatString</key>
 							<string>No encuentro ${producto}.</string>
 							<key>INIntentParameterUnsupportedReasonFormatStringID</key>
-							<string>NGMGmS</string>
+							<string>487q7J</string>
 						</dict>
 					</array>
 				</dict>
@@ -1328,11 +1361,11 @@
 						<key>INIntentResponseCodeConciseFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeConciseFormatStringID</key>
-						<string>487q7J</string>
+						<string>QpBenQ</string>
 						<key>INIntentResponseCodeFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>58m1Ci</string>
+						<string>tYh5Xj</string>
 						<key>INIntentResponseCodeName</key>
 						<string>success</string>
 						<key>INIntentResponseCodeSuccess</key>
@@ -1342,11 +1375,11 @@
 						<key>INIntentResponseCodeConciseFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeConciseFormatStringID</key>
-						<string>AhzCue</string>
+						<string>8TPQxj</string>
 						<key>INIntentResponseCodeFormatString</key>
 						<string>${texto}</string>
 						<key>INIntentResponseCodeFormatStringID</key>
-						<string>QpBenQ</string>
+						<string>q4i9Do</string>
 						<key>INIntentResponseCodeName</key>
 						<string>failure</string>
 					</dict>
@@ -1359,7 +1392,7 @@
 						<key>INIntentResponseParameterDisplayName</key>
 						<string>Texto</string>
 						<key>INIntentResponseParameterDisplayNameID</key>
-						<string>kQ1okT</string>
+						<string>vJDCTb</string>
 						<key>INIntentResponseParameterDisplayPriority</key>
 						<integer>1</integer>
 						<key>INIntentResponseParameterName</key>
@@ -1374,7 +1407,7 @@
 			<key>INIntentTitle</key>
 			<string>Eliminar producto</string>
 			<key>INIntentTitleID</key>
-			<string>tYh5Xj</string>
+			<string>V8gz4F</string>
 			<key>INIntentType</key>
 			<string>Custom</string>
 			<key>INIntentUserConfirmationRequired</key>

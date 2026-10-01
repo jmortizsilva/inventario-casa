@@ -14,6 +14,26 @@ import InventarioNucleo
 final class ManejadorVoz: NSObject {
     private var arranque: Arranque { .compartido }
 
+    /// Qué preguntas se han hecho ya en cada acción en curso. La primera vez
+    /// el valor llega vacío porque aún no se ha preguntado; si vuelve a llegar
+    /// vacío es que Siri tomó la respuesta por una orden («despensa»,
+    /// «fregona») y la perdió. Por identificador de la acción: está sin
+    /// comprobar que Siri lo mantenga entre pregunta y pregunta (se anota).
+    private static var yaPreguntado: Set<String> = []
+
+    /// Verdadero si esta pregunta ya se hizo en esta acción; si no, la apunta.
+    fileprivate func segundaVez(_ intent: INIntent, _ parametro: String) -> Bool {
+        let clave = "\(intent.identifier ?? "sin identificador")·\(parametro)"
+        Self.anotar("Pregunta", "\(clave) en \(ObjectIdentifier(self).debugDescription)")
+        return !Self.yaPreguntado.insert(clave).inserted
+    }
+
+    /// Al terminar una acción ya no hace falta recordar sus preguntas.
+    fileprivate func olvidarPreguntas(_ intent: INIntent) {
+        let prefijo = "\(intent.identifier ?? "sin identificador")·"
+        Self.yaPreguntado = Self.yaPreguntado.filter { !$0.hasPrefix(prefijo) }
+    }
+
     // MARK: Producto
 
     /// Lo que se hace con el producto que se acaba de decir.
@@ -76,9 +96,11 @@ final class ManejadorVoz: NSObject {
 // MARK: Crear producto
 
 extension ManejadorVoz: @preconcurrency CrearProductoVozIntentHandling {
-    func resolveNombre(for intent: CrearProductoVozIntent) async -> INStringResolutionResult {
+    func resolveNombre(for intent: CrearProductoVozIntent) async -> CrearProductoVozNombreResolutionResult {
         Self.anotar("Crear", "nombre «\(intent.nombre ?? "")»")
-        guard let nombre = intent.nombre, !Nombres.limpiar(nombre).isEmpty else { return .needsValue() }
+        guard let nombre = intent.nombre, !Nombres.limpiar(nombre).isEmpty else {
+            return segundaVez(intent, "nombre") ? .unsupported(forReason: .noEntendido) : .needsValue()
+        }
         return .success(with: nombre)
     }
 
@@ -86,8 +108,14 @@ extension ManejadorVoz: @preconcurrency CrearProductoVozIntentHandling {
     /// vuelve a preguntar, en lugar de después de pedir las unidades.
     func resolveCategoria(for intent: CrearProductoVozIntent) async -> CrearProductoVozCategoriaResolutionResult {
         Self.anotar("Crear", "categoría «\(intent.categoria ?? "")»")
-        guard let dicha = intent.categoria, !Nombres.limpiar(dicha).isEmpty else { return .needsValue() }
-        guard let inventario = try? arranque.inventarioParaSiri() else { return .success(with: dicha) }
+        guard let inventario = try? arranque.inventarioParaSiri() else {
+            return intent.categoria.map { .success(with: $0) } ?? .needsValue()
+        }
+        guard let dicha = intent.categoria, !Nombres.limpiar(dicha).isEmpty else {
+            // Respuesta perdida: se ofrecen las categorías que hay.
+            let nombres = inventario.categorias.map(\.nombre)
+            return segundaVez(intent, "categoria") && !nombres.isEmpty ? .disambiguation(with: nombres) : .needsValue()
+        }
         let encontradas = inventario.buscarCategorias(dicha)
         guard let categoria = encontradas.first else { return .unsupported(forReason: .noEncontrada) }
         guard encontradas.count == 1 else { return .unsupported(forReason: .varias) }
@@ -106,6 +134,7 @@ extension ManejadorVoz: @preconcurrency CrearProductoVozIntentHandling {
 
     func handle(intent: CrearProductoVozIntent) async -> CrearProductoVozIntentResponse {
         Self.anotar("CrearProducto", "atender")
+        olvidarPreguntas(intent)
         do {
             let texto = try crearProductoPorVoz(
                 nombre: intent.nombre ?? "",

@@ -618,8 +618,16 @@ vuelve a preguntar (antes llegaba al final, después de pedir las unidades):
 | Ya hay un producto con ese nombre en la categoría | Ya hay un producto con ese nombre en {lo dicho}. |
 
 Estos textos están en `Siri/Voz.intentdefinition` y no pueden nombrar el
-hogar. Siri a veces no recoge lo que se dice para la categoría y llega vacío
-(pasó con «despensa», que no existía): la app vuelve a preguntar.
+hogar.
+
+Siri a veces toma una respuesta por una orden («ejecuta el comando
+despensa») y a la app le llega vacía; pasó con «despensa» y «fregona», no
+con «cubo», «casa» ni «conservas». La segunda vez que llega vacía:
+
+| Qué | Texto |
+|---|---|
+| Nombre al crear | No te he entendido. Dilo de otra forma. (y vuelve a preguntar) |
+| Categoría | Estas son tus categorías: (Siri las lee) ¿En cuál lo guardo? |
 
 La confirmación antes de eliminar la compone Siri con el título «Eliminar
 {producto}»; sus palabras exactas no se pueden cambiar desde la definición.
