@@ -21,6 +21,15 @@ final class ManejadorVoz: NSObject {
     /// comprobar que Siri lo mantenga entre pregunta y pregunta (se anota).
     private static var yaPreguntado: Set<String> = []
 
+    /// Las unidades que venían en la respuesta del producto («5 unidades de
+    /// leche»), para no preguntarlas. Por identificador de la acción, que se
+    /// mantiene entre preguntas (comprobado en el iPhone; el manejador, no).
+    private static var unidadesDichas: [String: Int] = [:]
+
+    private static func clave(_ intent: INIntent) -> String { intent.identifier ?? "sin identificador" }
+
+    fileprivate func unidadesDichas(en intent: INIntent) -> Int? { Self.unidadesDichas[Self.clave(intent)] }
+
     /// Verdadero si esta pregunta ya se hizo en esta acción; si no, la apunta.
     fileprivate func segundaVez(_ intent: INIntent, _ parametro: String) -> Bool {
         let clave = "\(intent.identifier ?? "sin identificador")·\(parametro)"
@@ -30,8 +39,9 @@ final class ManejadorVoz: NSObject {
 
     /// Al terminar una acción ya no hace falta recordar sus preguntas.
     fileprivate func olvidarPreguntas(_ intent: INIntent) {
-        let prefijo = "\(intent.identifier ?? "sin identificador")·"
+        let prefijo = "\(Self.clave(intent))·"
         Self.yaPreguntado = Self.yaPreguntado.filter { !$0.hasPrefix(prefijo) }
+        Self.unidadesDichas[Self.clave(intent)] = nil
     }
 
     // MARK: Producto
@@ -47,9 +57,20 @@ final class ManejadorVoz: NSObject {
     /// Lo dicho se busca igual que en la app, sin tildes y en singular o
     /// plural. Si no hay ninguno, Siri lo dice en el momento y vuelve a
     /// preguntar; si encaja con varios, ofrece solo esos.
-    fileprivate func buscar(_ dicho: String?) -> Busqueda {
+    /// Con `unidadesDe`, si lo dicho empieza por unidades («5 unidades de
+    /// leche») y el resto es un producto, se apuntan para no preguntarlas.
+    /// Si no encaja así, se busca la frase entera («Tres Ases» es un nombre).
+    fileprivate func buscar(_ dicho: String?, unidadesDe intent: INIntent? = nil) -> Busqueda {
         guard let dicho, !Nombres.limpiar(dicho).isEmpty else { return .falta }
         guard let inventario = try? arranque.inventarioParaSiri() else { return .uno(dicho) }
+        if let intent {
+            let partes = PeticionVoz.separar(dicho)
+            if let unidades = partes.unidades, !inventario.productosParaSiri(partes.producto).isEmpty {
+                Self.unidadesDichas[Self.clave(intent)] = unidades
+                Self.anotar("Unidades dichas", "\(unidades) en «\(dicho)»")
+                return buscar(partes.producto)
+            }
+        }
         let encontrados = inventario.productosParaSiri(dicho)
         Self.anotar("Buscar producto", "«\(dicho)»: \(encontrados.count) encontrados")
         switch encontrados.count {
@@ -156,7 +177,7 @@ extension ManejadorVoz: @preconcurrency CrearProductoVozIntentHandling {
 
 extension ManejadorVoz: @preconcurrency AnadirUnidadesVozIntentHandling {
     func resolveProducto(for intent: AnadirUnidadesVozIntent) async -> AnadirUnidadesVozProductoResolutionResult {
-        switch buscar(intent.producto) {
+        switch buscar(intent.producto, unidadesDe: intent) {
         case .falta: .needsValue()
         case .noEncontrado: .unsupported(forReason: .noEncontrado)
         case .uno(let nombre): .success(with: nombre)
@@ -166,13 +187,14 @@ extension ManejadorVoz: @preconcurrency AnadirUnidadesVozIntentHandling {
 
     func resolveUnidades(for intent: AnadirUnidadesVozIntent) async -> AnadirUnidadesVozUnidadesResolutionResult {
         Self.anotar("AnadirUnidades", "unidades \(intent.unidades?.intValue ?? -1)")
-        guard let unidades = intent.unidades?.intValue else { return .needsValue() }
+        guard let unidades = intent.unidades?.intValue ?? unidadesDichas(en: intent) else { return .needsValue() }
         return .success(with: unidades)
     }
 
     func handle(intent: AnadirUnidadesVozIntent) async -> AnadirUnidadesVozIntentResponse {
         Self.anotar("AnadirUnidades", "atender")
-        let unidades = intent.unidades?.intValue ?? 1
+        let unidades = intent.unidades?.intValue ?? unidadesDichas(en: intent) ?? 1
+        olvidarPreguntas(intent)
         let (ok, texto) = cambiarUnidades(intent.producto) { inventario, producto throws(ErrorInventario) in
             try inventario.ajustarCantidad(producto.id, en: unidades)
         }
@@ -183,7 +205,7 @@ extension ManejadorVoz: @preconcurrency AnadirUnidadesVozIntentHandling {
 
 extension ManejadorVoz: @preconcurrency QuitarUnidadesVozIntentHandling {
     func resolveProducto(for intent: QuitarUnidadesVozIntent) async -> QuitarUnidadesVozProductoResolutionResult {
-        switch buscar(intent.producto) {
+        switch buscar(intent.producto, unidadesDe: intent) {
         case .falta: .needsValue()
         case .noEncontrado: .unsupported(forReason: .noEncontrado)
         case .uno(let nombre): .success(with: nombre)
@@ -193,13 +215,14 @@ extension ManejadorVoz: @preconcurrency QuitarUnidadesVozIntentHandling {
 
     func resolveUnidades(for intent: QuitarUnidadesVozIntent) async -> QuitarUnidadesVozUnidadesResolutionResult {
         Self.anotar("QuitarUnidades", "unidades \(intent.unidades?.intValue ?? -1)")
-        guard let unidades = intent.unidades?.intValue else { return .needsValue() }
+        guard let unidades = intent.unidades?.intValue ?? unidadesDichas(en: intent) else { return .needsValue() }
         return .success(with: unidades)
     }
 
     func handle(intent: QuitarUnidadesVozIntent) async -> QuitarUnidadesVozIntentResponse {
         Self.anotar("QuitarUnidades", "atender")
-        let unidades = intent.unidades?.intValue ?? 1
+        let unidades = intent.unidades?.intValue ?? unidadesDichas(en: intent) ?? 1
+        olvidarPreguntas(intent)
         let (ok, texto) = cambiarUnidades(intent.producto) { inventario, producto throws(ErrorInventario) in
             try inventario.ajustarCantidad(producto.id, en: -unidades)
         }
@@ -210,7 +233,7 @@ extension ManejadorVoz: @preconcurrency QuitarUnidadesVozIntentHandling {
 
 extension ManejadorVoz: @preconcurrency CambiarCantidadVozIntentHandling {
     func resolveProducto(for intent: CambiarCantidadVozIntent) async -> CambiarCantidadVozProductoResolutionResult {
-        switch buscar(intent.producto) {
+        switch buscar(intent.producto, unidadesDe: intent) {
         case .falta: .needsValue()
         case .noEncontrado: .unsupported(forReason: .noEncontrado)
         case .uno(let nombre): .success(with: nombre)
@@ -220,13 +243,14 @@ extension ManejadorVoz: @preconcurrency CambiarCantidadVozIntentHandling {
 
     func resolveUnidades(for intent: CambiarCantidadVozIntent) async -> CambiarCantidadVozUnidadesResolutionResult {
         Self.anotar("CambiarCantidad", "unidades \(intent.unidades?.intValue ?? -1)")
-        guard let unidades = intent.unidades?.intValue else { return .needsValue() }
+        guard let unidades = intent.unidades?.intValue ?? unidadesDichas(en: intent) else { return .needsValue() }
         return .success(with: unidades)
     }
 
     func handle(intent: CambiarCantidadVozIntent) async -> CambiarCantidadVozIntentResponse {
         Self.anotar("CambiarCantidad", "atender")
-        let unidades = intent.unidades?.intValue ?? 0
+        let unidades = intent.unidades?.intValue ?? unidadesDichas(en: intent) ?? 0
+        olvidarPreguntas(intent)
         let (ok, texto) = cambiarUnidades(intent.producto) { inventario, producto throws(ErrorInventario) in
             try inventario.editarProducto(
                 producto.id,

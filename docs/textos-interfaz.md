@@ -607,6 +607,10 @@ productos se llaman igual («Leche, Nevera»).
 | Eliminar producto | ¿Qué producto quieres eliminar? | — |
 | Si encaja con varios | Hay varios: (Siri los lee) ¿Cuál de ellos? | — |
 
+En añadir, quitar y cambiar la cantidad se puede contestar todo de una vez:
+«5 unidades de leche», «2 latas de atún», «una leche». Entonces Siri no
+pregunta las unidades. Si solo se dice el producto, las pregunta.
+
 Lo que no vale se dice en el momento, con lo que se acaba de decir, y Siri
 vuelve a preguntar (antes llegaba al final, después de pedir las unidades):
 
