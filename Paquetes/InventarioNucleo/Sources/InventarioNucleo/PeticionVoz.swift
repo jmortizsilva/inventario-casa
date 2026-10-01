@@ -23,9 +23,11 @@ public enum PeticionVoz {
     ]
 
     /// Envases y medidas que se dicen entre el número y el producto: no forman
-    /// parte del nombre («2 latas de atún» es atún).
+    /// parte del nombre («2 latas de atún» es atún). Siri escribe «unidades»
+    /// como «U» («5 U de leche», visto en el iPhone).
     private static let envases: Set<String> = [
-        "unidad", "unidades", "lata", "latas", "paquete", "paquetes", "botella", "botellas",
+        "unidad", "unidades", "u", "ud", "uds", "unid", "kilo", "kilos", "kg", "litro", "litros",
+        "lata", "latas", "paquete", "paquetes", "botella", "botellas",
         "bolsa", "bolsas", "caja", "cajas", "bote", "botes", "brik", "briks", "tarro", "tarros",
     ]
 

@@ -11,6 +11,9 @@ import Testing
         ("un paquete de arroz integral", 1, "arroz integral"),
         ("  3   botellas  de agua ", 3, "agua"),
         ("Dos Unidades De Huevos", 2, "Huevos"),
+        ("5 U de leche", 5, "leche"),
+        ("3 uds de yogur", 3, "yogur"),
+        ("2 kilos de patatas", 2, "patatas"),
     ])
     func conUnidades(texto: String, unidades: Int, producto: String) {
         #expect(PeticionVoz.separar(texto) == PeticionVoz.Partes(unidades: unidades, producto: producto))
