@@ -612,9 +612,9 @@ productos se llaman igual («Leche, Nevera»).
 | Acción | Producto | Unidades |
 |---|---|---|
 | Crear producto | ¿Qué producto? · ¿En qué categoría lo guardo? | ¿Cuántas unidades? |
-| Añadir unidades | ¿Qué has comprado? | ¿Cuántas unidades? |
-| Quitar unidades | ¿Qué producto? | ¿Cuántas unidades? |
-| Cambiar la cantidad | ¿De qué producto? | ¿Cuántas unidades? |
+| Añadir unidades | ¿Qué has comprado? | ¿Cuántas {unidades}? |
+| Quitar unidades | ¿Qué producto? | ¿Cuántas {unidades}? |
+| Cambiar la cantidad | ¿De qué producto? | ¿Cuántas {unidades} hay? |
 | Consultar un producto | ¿De qué producto? | — |
 | Eliminar producto | ¿Qué producto quieres eliminar? | — |
 | Si encaja con varios | Hay varios: (Siri los lee) ¿Cuál de ellos? | — |
@@ -622,6 +622,15 @@ productos se llaman igual («Leche, Nevera»).
 En añadir, quitar y cambiar la cantidad se puede contestar todo de una vez:
 «5 unidades de leche», «2 latas de atún», «una leche». Entonces Siri no
 pregunta las unidades. Si solo se dice el producto, las pregunta.
+
+La pregunta por las unidades lleva el envase del producto y concuerda:
+«¿Cuántas latas?», «¿Cuántos paquetes hay?». Crear producto sigue con
+«¿Cuántas unidades?»: el producto aún no existe y por voz no se elige envase.
+La definición solo admite textos fijos, así que la pregunta va en un
+parámetro oculto (`pregunta`) que la app rellena después del producto, y la
+de las unidades es «${pregunta}». Sin comprobar en el iPhone (2 de octubre de
+2026); si Siri no lo lee, la alternativa es «¿Qué cantidad?», que no
+depende del género.
 
 Lo que no vale se dice en el momento, con lo que se acaba de decir, y Siri
 vuelve a preguntar (antes llegaba al final, después de pedir las unidades):
@@ -679,8 +688,8 @@ concordar con cada producto y Siri no la adapta.
 | Cuándo | Texto |
 |---|---|
 | Falta el producto | ¿Qué producto? |
-| Añadir o quitar | ¿Cuántas unidades? |
-| Cambiar la cantidad | ¿Cuántas unidades hay? |
+| Añadir o quitar | ¿Cuántas {unidades}? (¿Cuántos paquetes?) |
+| Cambiar la cantidad | ¿Cuántas {unidades} hay? |
 | Crear: nombre | ¿Cómo se llama? |
 | Crear: categoría | ¿En qué categoría? |
 | Crear: unidades | ¿Cuántas unidades? |

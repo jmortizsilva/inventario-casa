@@ -8,7 +8,10 @@ let registroSiri = Logger(subsystem: "com.jmortiz.inventario", category: "Siri")
 
 // Los títulos, las frases y las preguntas son literales: Apple los lee al
 // compilar. Están revisados en docs/textos-interfaz.md, apartado «Siri».
-// Las respuestas vienen de `Textos.Siri`.
+// Las respuestas vienen de `Textos.Siri`. La pregunta por las unidades de un
+// producto que ya existe tampoco es literal: lleva su envase («¿Cuántas
+// latas?»). Por eso esas unidades son opcionales y, si faltan, se piden
+// desde `perform` con `needsValueError`.
 
 @MainActor
 private func cambiar(
@@ -19,6 +22,18 @@ private func cambiar(
     try cambiarProducto(entidad.id, nombre: entidad.nombre, arranque: arranque, cambio)
 }
 
+/// Pide las unidades que faltan, con el envase del producto.
+@MainActor
+private func pedirUnidades(
+    _ parametro: IntentParameter<Int?>,
+    de entidad: ProductoEntidad,
+    arranque: Arranque,
+    hay: Bool = false
+) -> some Error {
+    let unidad = (try? arranque.inventarioParaSiri())?.producto(entidad.id)?.unidad ?? .unidad
+    return parametro.needsValueError("\(Textos.Siri.preguntaCantidad(unidad, hay: hay))")
+}
+
 struct AnadirUnidades: AppIntent {
     static let title: LocalizedStringResource = "Añadir unidades"
     static let authenticationPolicy: IntentAuthenticationPolicy = .alwaysAllowed
@@ -26,8 +41,8 @@ struct AnadirUnidades: AppIntent {
     @Parameter(title: "Producto", requestValueDialog: "¿Qué producto?")
     var producto: ProductoEntidad
 
-    @Parameter(title: "Unidades", inclusiveRange: (1, 999), requestValueDialog: "¿Cuántas unidades?")
-    var unidades: Int
+    @Parameter(title: "Unidades", inclusiveRange: (1, 999))
+    var unidades: Int?
 
     @Dependency private var arranque: Arranque
 
@@ -37,6 +52,7 @@ struct AnadirUnidades: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        guard let unidades else { throw pedirUnidades($unidades, de: producto, arranque: arranque) }
         let cambiado = try cambiar(producto, arranque: arranque) { inventario, producto throws(ErrorInventario) in
             try inventario.ajustarCantidad(producto.id, en: unidades)
         }
@@ -51,8 +67,8 @@ struct QuitarUnidades: AppIntent {
     @Parameter(title: "Producto", requestValueDialog: "¿Qué producto?")
     var producto: ProductoEntidad
 
-    @Parameter(title: "Unidades", inclusiveRange: (1, 999), requestValueDialog: "¿Cuántas unidades?")
-    var unidades: Int
+    @Parameter(title: "Unidades", inclusiveRange: (1, 999))
+    var unidades: Int?
 
     @Dependency private var arranque: Arranque
 
@@ -62,6 +78,7 @@ struct QuitarUnidades: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        guard let unidades else { throw pedirUnidades($unidades, de: producto, arranque: arranque) }
         let cambiado = try cambiar(producto, arranque: arranque) { inventario, producto throws(ErrorInventario) in
             try inventario.ajustarCantidad(producto.id, en: -unidades)
         }
@@ -76,8 +93,8 @@ struct CambiarCantidad: AppIntent {
     @Parameter(title: "Producto", requestValueDialog: "¿Qué producto?")
     var producto: ProductoEntidad
 
-    @Parameter(title: "Unidades", inclusiveRange: (0, 999), requestValueDialog: "¿Cuántas unidades hay?")
-    var unidades: Int
+    @Parameter(title: "Unidades", inclusiveRange: (0, 999))
+    var unidades: Int?
 
     @Dependency private var arranque: Arranque
 
@@ -87,6 +104,7 @@ struct CambiarCantidad: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
+        guard let unidades else { throw pedirUnidades($unidades, de: producto, arranque: arranque, hay: true) }
         let cambiado = try cambiar(producto, arranque: arranque) { inventario, producto throws(ErrorInventario) in
             try inventario.editarProducto(
                 producto.id,

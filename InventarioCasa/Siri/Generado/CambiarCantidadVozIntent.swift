@@ -13,6 +13,7 @@ import Intents
 internal class CambiarCantidadVozIntent: INIntent {
 
     @NSManaged internal var producto: String?
+    @NSManaged internal var pregunta: String?
     @NSManaged internal var unidades: NSNumber?
 
 }
@@ -59,6 +60,15 @@ internal protocol CambiarCantidadVozIntentHandling: NSObjectProtocol {
     @available(iOS 13.0, macOS 11.0, watchOS 6.0, *)
     @objc(resolveProductoForCambiarCantidadVoz:withCompletion:)
     func resolveProducto(for intent: CambiarCantidadVozIntent) async -> CambiarCantidadVozProductoResolutionResult
+
+    @available(iOS 13.0, macOS 11.0, watchOS 6.0, *)
+    @available(*, renamed: "resolvePregunta(for:)")
+    @objc(resolvePreguntaForCambiarCantidadVoz:withCompletion:)
+    func resolvePregunta(for intent: CambiarCantidadVozIntent, with completion: @escaping (INStringResolutionResult) -> Swift.Void)
+
+    @available(iOS 13.0, macOS 11.0, watchOS 6.0, *)
+    @objc(resolvePreguntaForCambiarCantidadVoz:withCompletion:)
+    func resolvePregunta(for intent: CambiarCantidadVozIntent) async -> INStringResolutionResult
 
     @available(iOS 13.0, macOS 11.0, watchOS 6.0, *)
     @available(*, renamed: "resolveUnidades(for:)")

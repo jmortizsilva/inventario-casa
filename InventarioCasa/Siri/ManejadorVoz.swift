@@ -90,6 +90,17 @@ final class ManejadorVoz: NSObject {
         return (producto.id, producto.nombre)
     }
 
+    /// La pregunta por las unidades con el envase del producto ya elegido
+    /// («¿Cuántas latas?»). Va en el parámetro oculto `pregunta`, que se
+    /// resuelve entre el producto y las unidades: la definición solo admite
+    /// textos fijos y la pregunta de las unidades es «${pregunta}».
+    fileprivate func preguntaCantidad(_ dicho: String?, hay: Bool = false) -> INStringResolutionResult {
+        let producto = (try? arranque.inventarioParaSiri())?.productosParaSiri(dicho ?? "").first
+        let pregunta = Textos.Siri.preguntaCantidad(producto?.unidad ?? .unidad, hay: hay)
+        Self.anotar("Pregunta por la cantidad", "«\(pregunta)» para «\(dicho ?? "")»")
+        return .success(with: pregunta)
+    }
+
     /// Suma (o resta) unidades, o las fija. Devuelve lo que contesta Siri.
     fileprivate func cambiarUnidades(_ dicho: String?, _ cambio: (Inventario, Producto) throws(ErrorInventario) -> Producto) -> (ok: Bool, texto: String) {
         do {
@@ -185,6 +196,10 @@ extension ManejadorVoz: @preconcurrency AnadirUnidadesVozIntentHandling {
         }
     }
 
+    func resolvePregunta(for intent: AnadirUnidadesVozIntent) async -> INStringResolutionResult {
+        preguntaCantidad(intent.producto)
+    }
+
     func resolveUnidades(for intent: AnadirUnidadesVozIntent) async -> AnadirUnidadesVozUnidadesResolutionResult {
         Self.anotar("AnadirUnidades", "unidades \(intent.unidades?.intValue ?? -1)")
         guard let unidades = intent.unidades?.intValue ?? unidadesDichas(en: intent) else { return .needsValue() }
@@ -213,6 +228,10 @@ extension ManejadorVoz: @preconcurrency QuitarUnidadesVozIntentHandling {
         }
     }
 
+    func resolvePregunta(for intent: QuitarUnidadesVozIntent) async -> INStringResolutionResult {
+        preguntaCantidad(intent.producto)
+    }
+
     func resolveUnidades(for intent: QuitarUnidadesVozIntent) async -> QuitarUnidadesVozUnidadesResolutionResult {
         Self.anotar("QuitarUnidades", "unidades \(intent.unidades?.intValue ?? -1)")
         guard let unidades = intent.unidades?.intValue ?? unidadesDichas(en: intent) else { return .needsValue() }
@@ -239,6 +258,10 @@ extension ManejadorVoz: @preconcurrency CambiarCantidadVozIntentHandling {
         case .uno(let nombre): .success(with: nombre)
         case .varios(let nombres): .disambiguation(with: nombres)
         }
+    }
+
+    func resolvePregunta(for intent: CambiarCantidadVozIntent) async -> INStringResolutionResult {
+        preguntaCantidad(intent.producto, hay: true)
     }
 
     func resolveUnidades(for intent: CambiarCantidadVozIntent) async -> CambiarCantidadVozUnidadesResolutionResult {

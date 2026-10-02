@@ -13,6 +13,7 @@ import Intents
 internal class QuitarUnidadesVozIntent: INIntent {
 
     @NSManaged internal var producto: String?
+    @NSManaged internal var pregunta: String?
     @NSManaged internal var unidades: NSNumber?
 
 }
@@ -59,6 +60,15 @@ internal protocol QuitarUnidadesVozIntentHandling: NSObjectProtocol {
     @available(iOS 13.0, macOS 11.0, watchOS 6.0, *)
     @objc(resolveProductoForQuitarUnidadesVoz:withCompletion:)
     func resolveProducto(for intent: QuitarUnidadesVozIntent) async -> QuitarUnidadesVozProductoResolutionResult
+
+    @available(iOS 13.0, macOS 11.0, watchOS 6.0, *)
+    @available(*, renamed: "resolvePregunta(for:)")
+    @objc(resolvePreguntaForQuitarUnidadesVoz:withCompletion:)
+    func resolvePregunta(for intent: QuitarUnidadesVozIntent, with completion: @escaping (INStringResolutionResult) -> Swift.Void)
+
+    @available(iOS 13.0, macOS 11.0, watchOS 6.0, *)
+    @objc(resolvePreguntaForQuitarUnidadesVoz:withCompletion:)
+    func resolvePregunta(for intent: QuitarUnidadesVozIntent) async -> INStringResolutionResult
 
     @available(iOS 13.0, macOS 11.0, watchOS 6.0, *)
     @available(*, renamed: "resolveUnidades(for:)")

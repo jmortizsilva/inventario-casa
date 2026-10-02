@@ -53,6 +53,20 @@ final class SiriAccionesPruebasUI: XCTestCase {
         try await definiciones.intents["ConsultarProducto"].makeIntent(producto: arroz).run()
     }
 
+    /// Sin unidades, la acción las pide (con el envase del producto, que
+    /// AppIntentsTesting no deja leer) y no cambia nada.
+    func testSinUnidadesLasPide() async throws {
+        let arroz = try await producto("arroz")
+        do {
+            try await definiciones.intents["AnadirUnidades"].makeIntent(producto: arroz).run()
+            XCTFail("Tendría que pedir las unidades")
+        } catch {
+            // AppIntentsTesting no contesta preguntas: dice qué parámetro se pidió.
+            XCTAssertTrue(String(describing: error).contains("parameter 'unidades'"), "\(error)")
+        }
+        XCTAssertTrue(app.buttons["Arroz, 3 unidades"].exists)
+    }
+
     func testCrearYEliminarProducto() async throws {
         // La categoría se dice de viva voz: sin mayúsculas ni tildes.
         try await definiciones.intents["CrearProducto"]

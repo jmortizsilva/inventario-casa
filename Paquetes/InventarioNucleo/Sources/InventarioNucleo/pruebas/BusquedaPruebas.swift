@@ -112,6 +112,14 @@ import Testing
         #expect(inventario.productosParaSiri("huevos").isEmpty)
     }
 
+    @Test func preguntaConElEnvase() {
+        #expect(Textos.Siri.preguntaCantidad(.unidad) == "¿Cuántas unidades?")
+        #expect(Textos.Siri.preguntaCantidad(.lata) == "¿Cuántas latas?")
+        #expect(Textos.Siri.preguntaCantidad(.paquete) == "¿Cuántos paquetes?")
+        #expect(Textos.Siri.preguntaCantidad(.unidad, hay: true) == "¿Cuántas unidades hay?")
+        #expect(Textos.Siri.preguntaCantidad(.brick, hay: true) == "¿Cuántos bricks hay?")
+    }
+
     @Test func cambioDeUnidadesYListaDeLaCompra() {
         // Mínimo 2: con 2 o menos entra en la lista.
         func garbanzos(_ n: Int) -> Producto {

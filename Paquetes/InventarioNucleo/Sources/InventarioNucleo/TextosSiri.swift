@@ -16,7 +16,8 @@ public enum AccionVoz: CaseIterable, Sendable {
 ///
 /// Las frases de los atajos, los títulos de las acciones y las preguntas por
 /// cada dato no están aquí: Apple las lee al compilar y tienen que ser
-/// literales en el código de la app (`InventarioCasa/Siri`).
+/// literales en el código de la app (`InventarioCasa/Siri`). La excepción es
+/// la pregunta por la cantidad, que depende del envase del producto.
 extension Textos {
     public enum Siri {
         // MARK: Pantalla «Siri» en Ajustes
@@ -61,6 +62,13 @@ extension Textos {
         /// Al consultar: lo mismo que dice la fila del producto en la app.
         public static func resultado(_ producto: Producto) -> String {
             Textos.filaProducto(producto)
+        }
+
+        /// Lo que pregunta Siri cuando falta la cantidad, con el envase del
+        /// producto: «¿Cuántas latas?», «¿Cuántos paquetes hay?» (`hay`, al
+        /// cambiar la cantidad).
+        public static func preguntaCantidad(_ unidad: Unidad, hay: Bool = false) -> String {
+            "¿\(unidad.esFemenina ? "Cuántas" : "Cuántos") \(unidad.plural)\(hay ? " hay" : "")?"
         }
 
         /// Tras añadir, quitar o cambiar la cantidad: las unidades y, si toca,

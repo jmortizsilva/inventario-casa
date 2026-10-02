@@ -69,11 +69,21 @@ def producto(pregunta, tag=1):
     ]
     return p
 
-def unidades(tag, pregunta, minimo):
+def unidades(tag, pregunta, minimo, prioridad=None):
     return param(tag, 'unidades', 'Unidades', 'Integer', pregunta,
+                 INIntentParameterDisplayPriority=prioridad or tag,
                  INIntentParameterMetadata={'INIntentParameterMetadataMinimumValue': minimo,
                                             'INIntentParameterMetadataMaximumValue': 999,
                                             'INIntentParameterMetadataSupportsNegativeNumbers': False})
+
+def pregunta_cantidad(tag, prioridad):
+    # La pregunta por las unidades depende del envase del producto («¿Cuántas
+    # latas?», «¿Cuántos paquetes?») y la definición solo admite textos fijos.
+    # Este parámetro, oculto, lo rellena la app al resolverlo (va después del
+    # producto) y la pregunta de las unidades es «${pregunta}». Sin comprobar
+    # todavía en el iPhone; si no lo lee, volver a «¿Qué cantidad?».
+    return dict(texto(tag, 'pregunta', 'Pregunta', '¿Cuántas unidades?'),
+                INIntentParameterConfigurable=False, INIntentParameterDisplayPriority=prioridad)
 
 def texto(tag, nombre, titulo, pregunta):
     return param(tag, nombre, titulo, 'String', pregunta,
@@ -89,6 +99,8 @@ def intent(nombre, titulo, descripcion, categoria, params, combinacion, confirma
          'INIntentResponseCodeConciseFormatString': '${texto}', 'INIntentResponseCodeConciseFormatStringID': rid(),
          'INIntentResponseCodeFormatString': '${texto}', 'INIntentResponseCodeFormatStringID': rid()},
     ]
+    # Las combinaciones son lo que se puede configurar: sin los parámetros ocultos.
+    combinables = ','.join(p['INIntentParameterName'] for p in params if p['INIntentParameterConfigurable'])
     return {
         'INIntentName': nombre, 'INIntentTitle': titulo, 'INIntentTitleID': rid(),
         'INIntentDescription': descripcion, 'INIntentDescriptionID': rid(),
@@ -97,16 +109,16 @@ def intent(nombre, titulo, descripcion, categoria, params, combinacion, confirma
         'INIntentConfigurable': True, 'INIntentEligibleForWidgets': False,
         'INIntentIneligibleForSuggestions': False,
         'INIntentUserConfirmationRequired': confirmar,
-        'INIntentLastParameterTag': len(params), 'INIntentParameters': params,
+        'INIntentLastParameterTag': max(p['INIntentParameterTag'] for p in params), 'INIntentParameters': params,
         'INIntentParameterCombinations': {
-            ','.join(p['INIntentParameterName'] for p in params): {
+            combinables: {
                 'INIntentParameterCombinationIsPrimary': True,
                 'INIntentParameterCombinationSupportsBackgroundExecution': True,
                 'INIntentParameterCombinationTitle': combinacion, 'INIntentParameterCombinationTitleID': rid(),
             }
         },
         'INIntentManagedParameterCombinations': {
-            ','.join(p['INIntentParameterName'] for p in params): {
+            combinables: {
                 'INIntentParameterCombinationSupportsBackgroundExecution': True,
                 'INIntentParameterCombinationTitle': combinacion, 'INIntentParameterCombinationTitleID': rid(),
                 'INIntentParameterCombinationUpdatesLinked': True,
@@ -153,11 +165,14 @@ definicion = {
                 unidades(3, '¿Cuántas unidades?', 0)],
                'Crear ${nombre} en ${categoria}'),
         intent('AnadirUnidadesVoz', 'Añadir unidades', 'Suma unidades a un producto', 'generic',
-               [producto('¿Qué has comprado?'), unidades(2, '¿Cuántas unidades?', 1)], 'Añadir ${unidades} a ${producto}'),
+               [producto('¿Qué has comprado?'), pregunta_cantidad(3, 2), unidades(2, '${pregunta}', 1, prioridad=3)],
+               'Añadir ${unidades} a ${producto}'),
         intent('QuitarUnidadesVoz', 'Quitar unidades', 'Resta unidades a un producto', 'generic',
-               [producto('¿Qué producto?'), unidades(2, '¿Cuántas unidades?', 1)], 'Quitar ${unidades} a ${producto}'),
+               [producto('¿Qué producto?'), pregunta_cantidad(3, 2), unidades(2, '${pregunta}', 1, prioridad=3)],
+               'Quitar ${unidades} a ${producto}'),
         intent('CambiarCantidadVoz', 'Cambiar la cantidad', 'Pone las unidades de un producto', 'generic',
-               [producto('¿De qué producto?'), unidades(2, '¿Cuántas unidades?', 0)], 'Poner ${producto} a ${unidades}'),
+               [producto('¿De qué producto?'), pregunta_cantidad(3, 2), unidades(2, '${pregunta}', 0, prioridad=3)],
+               'Poner ${producto} a ${unidades}'),
         intent('ConsultarProductoVoz', 'Consultar un producto', 'Dice cuántas unidades quedan', 'information',
                [producto('¿De qué producto?')], 'Consultar ${producto}'),
         intent('EliminarProductoVoz', 'Eliminar producto', 'Elimina un producto', 'generic',
