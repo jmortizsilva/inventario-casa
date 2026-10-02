@@ -72,6 +72,10 @@ private func cargarCasosCantidadMovil() throws -> [CasoCantidadMovil] {
         #expect(campos["creado"] as? Int64 == instante.milisegundos)
     }
 
+    @Test func mandaLaUnidad() {
+        #expect(Api.Producto(producto("Atún", unidad: .lata), fijada: nil).unidad == "lata")
+    }
+
     @Test func conFijadaMandaCantidadYHora() {
         let p = producto("Arroz", cantidad: 7)
         let api = Api.Producto(p, fijada: CantidadFijada(cantidad: 7, en: despues))
@@ -223,10 +227,12 @@ private func indice<T: Identifiable>(_ elementos: [T]) -> [T.ID: T] {
 @Suite struct FusionarPruebas {
     let despensa = Categoria(nombre: "Despensa", creado: instante)
 
-    private func deServidor(_ p: Producto, cantidad: Int, nombre: String? = nil, borrado: Bool = false) -> Api.Producto {
+    private func deServidor(
+        _ p: Producto, cantidad: Int, nombre: String? = nil, unidad: String?? = .none, borrado: Bool = false
+    ) -> Api.Producto {
         Api.Producto(
             id: p.id.enTexto, categoriaId: p.categoriaId.enTexto, nombre: nombre ?? p.nombre,
-            cantidad: cantidad, cantidadFijadaEn: nil, umbralCompra: p.umbralCompra,
+            unidad: unidad ?? p.unidad.rawValue, cantidad: cantidad, cantidadFijadaEn: nil, umbralCompra: p.umbralCompra,
             autoListaCompra: p.autoListaCompra, enListaCompraManual: p.enListaCompraManual,
             creado: p.creado.milisegundos, modificado: despues.milisegundos, borrado: borrado
         )
@@ -245,6 +251,32 @@ private func indice<T: Identifiable>(_ elementos: [T]) -> [T.ID: T] {
         #expect(categorias.map(\.id) == [despensa.id])
         #expect(productos.first?.cantidad == 3)
         #expect(productos.first?.modificado == despues)
+    }
+
+    @Test func laUnidadDelServidorEntra() {
+        let atun = producto("Atún", categoriaId: despensa.id)
+        let (_, productos) = Sincronizacion.fusionar(
+            categorias: [],
+            productos: [deServidor(atun, cantidad: 2, unidad: "lata")],
+            en: ([:], indice([atun])),
+            pendientes: Pendientes()
+        )
+        #expect(productos.first?.unidad == .lata)
+    }
+
+    /// Un servidor anterior a la unidad no la manda, y uno más nuevo puede
+    /// mandar una que esta versión no conoce: en los dos casos, unidades.
+    @Test func sinUnidadOConUnaDesconocidaSeCuentaEnUnidades() {
+        for unidad: String? in [nil, "garrafa"] {
+            let agua = producto("Agua", categoriaId: despensa.id)
+            let (_, productos) = Sincronizacion.fusionar(
+                categorias: [],
+                productos: [deServidor(agua, cantidad: 2, unidad: .some(unidad))],
+                en: ([:], [:]),
+                pendientes: Pendientes()
+            )
+            #expect(productos.first?.unidad == .unidad)
+        }
     }
 
     @Test func loQueSigueEnLaColaNoSePisa() {
@@ -338,7 +370,7 @@ private func indice<T: Identifiable>(_ elementos: [T]) -> [T.ID: T] {
         cola.anotar(categoria: despensa.id)
         let borrado = Api.Producto(local, fijada: nil)
         let productoBorrado = Api.Producto(
-            id: borrado.id, categoriaId: borrado.categoriaId, nombre: "Legía", cantidad: 2, cantidadFijadaEn: nil,
+            id: borrado.id, categoriaId: borrado.categoriaId, nombre: "Legía", unidad: nil, cantidad: 2, cantidadFijadaEn: nil,
             umbralCompra: borrado.umbralCompra, autoListaCompra: true, enListaCompraManual: false,
             creado: borrado.creado, modificado: despues.milisegundos, borrado: true
         )

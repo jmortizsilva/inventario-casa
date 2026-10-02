@@ -113,7 +113,7 @@ private let instante = Date(timeIntervalSince1970: 1_750_000_000)
             )
             let contexto = ModelContext(v1)
             contexto.insert(CategoriaGuardada(categoria))
-            contexto.insert(ProductoGuardado(producto))
+            contexto.insert(productoV1(producto))
             try contexto.save()
         }
 
@@ -125,5 +125,48 @@ private let instante = Date(timeIntervalSince1970: 1_750_000_000)
         // Y la tabla nueva funciona.
         try almacen.guardar(categorias: [], productos: [], pendientes: nil, estado: EstadoSincronizacion(hogarId: "h", revision: 1))
         #expect(try almacen.reabrir().cargarEstado().hogarId == "h")
+    }
+
+    /// La V3 añade la unidad: lo que ya había se cuenta en unidades, y la
+    /// unidad nueva se guarda.
+    @Test func migraUnFicheroDeLaV2ConLaUnidadPorDefecto() throws {
+        let carpeta = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        try FileManager.default.createDirectory(at: carpeta, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: carpeta) }
+        let url = carpeta.appending(path: "Inventario.store")
+
+        let categoria = Categoria(nombre: "Despensa", creado: instante)
+        let arroz = Producto(categoriaId: categoria.id, nombre: "Arroz", cantidad: 3, creado: instante)
+        do {
+            let v2 = try ModelContainer(
+                for: Schema(versionedSchema: EsquemaV2.self),
+                configurations: ModelConfiguration(url: url)
+            )
+            let contexto = ModelContext(v2)
+            contexto.insert(CategoriaGuardada(categoria))
+            contexto.insert(productoV1(arroz))
+            contexto.insert(SincronizacionGuardada(hogarId: "h", revision: 7, pendientes: Data()))
+            try contexto.save()
+        }
+
+        let almacen = try AlmacenSwiftData.enFichero(url)
+        #expect(try almacen.cargarProductos() == [arroz])
+        #expect(try almacen.cargarProductos().first?.unidad == .unidad)
+        #expect(try almacen.cargarEstado().revision == 7)
+
+        var atun = Producto(categoriaId: categoria.id, nombre: "Atún", unidad: .lata, cantidad: 2, creado: instante)
+        try almacen.guardar(categorias: [], productos: [atun], pendientes: nil, estado: nil)
+        atun.unidad = .paquete
+        try almacen.guardar(categorias: [], productos: [atun], pendientes: nil, estado: nil)
+        #expect(try almacen.reabrir().cargarProductos().first { $0.id == atun.id }?.unidad == .paquete)
+    }
+
+    private func productoV1(_ p: Producto) -> EsquemaV1.ProductoGuardado {
+        EsquemaV1.ProductoGuardado(
+            id: p.id, categoriaId: p.categoriaId, nombre: p.nombre, cantidad: p.cantidad,
+            umbralCompra: p.umbralCompra, autoListaCompra: p.autoListaCompra,
+            enListaCompraManual: p.enListaCompraManual, creado: p.creado,
+            modificado: p.modificado, borrado: p.borrado
+        )
     }
 }

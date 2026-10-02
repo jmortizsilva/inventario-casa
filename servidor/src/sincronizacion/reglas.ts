@@ -9,6 +9,10 @@ export const UMBRAL_MAXIMO = 20;
 export const CAMBIO_MAXIMO = 999;
 export const MAXIMO_POR_LOTE = 1000;
 
+/** En qué se cuenta un producto. La misma lista que la app (pruebas-compartidas/unidades.json). */
+export const UNIDADES = ['unidad', 'lata', 'paquete', 'botella', 'brick', 'bote', 'bolsa', 'caja', 'rollo'];
+export const UNIDAD_POR_DEFECTO = 'unidad';
+
 export interface Movimiento {
   cambio: number;
   momento: number;
@@ -65,6 +69,8 @@ export interface ProductoEntrante {
   id: string;
   categoriaId: string;
   nombre: string;
+  // Sin ella (una app anterior, o una unidad que este servidor no conoce) se queda la que había.
+  unidad?: string;
   umbralCompra: number;
   autoListaCompra: boolean;
   enListaCompraManual: boolean;
@@ -127,6 +133,7 @@ export function validarProducto(dato: Record<string, unknown>): ProductoEntrante
     id: dato.id,
     categoriaId: dato.categoriaId,
     nombre,
+    unidad: typeof dato.unidad === 'string' && UNIDADES.includes(dato.unidad) ? dato.unidad : undefined,
     umbralCompra: umbral,
     autoListaCompra: dato.autoListaCompra,
     enListaCompraManual: dato.enListaCompraManual,

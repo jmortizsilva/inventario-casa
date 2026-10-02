@@ -56,7 +56,7 @@ public final class ServidorEnMemoria {
         var lote = Api.Lote()
         lote.categorias = [Api.Categoria(id: categoriaId, nombre: categoria, creado: ahora, modificado: ahora, borrado: false)]
         lote.productos = [Api.Producto(
-            id: UUID().uuidString.lowercased(), categoriaId: categoriaId, nombre: producto, cantidad: 2,
+            id: UUID().uuidString.lowercased(), categoriaId: categoriaId, nombre: producto, unidad: nil, cantidad: 2,
             cantidadFijadaEn: ahora, umbralCompra: 1, autoListaCompra: true, enListaCompraManual: false,
             creado: ahora, modificado: ahora, borrado: false
         )]
@@ -72,7 +72,7 @@ public final class ServidorEnMemoria {
         else { return }
         let ahora = Date().milisegundos
         let lote = Api.Lote(productos: [Api.Producto(
-            id: UUID().uuidString.lowercased(), categoriaId: categoria.api.id, nombre: nombre, cantidad: 1,
+            id: UUID().uuidString.lowercased(), categoriaId: categoria.api.id, nombre: nombre, unidad: nil, cantidad: 1,
             cantidadFijadaEn: ahora, umbralCompra: 1, autoListaCompra: true, enListaCompraManual: false,
             creado: ahora, modificado: ahora, borrado: false
         )])
@@ -205,7 +205,10 @@ public final class ServidorEnMemoria {
             let fijadaGana = nuevo.cantidadFijadaEn.map { $0 > (existente?.fijadaEn ?? -1) } ?? false
             // Lo que se guarda es la fila sin la fijada, con la cantidad que ya
             // había: la de verdad sale de `recalcular`.
-            let sinFijada = nuevo.cambiando(cantidad: existente?.api.cantidad ?? 0)
+            // Como el servidor: sin unidad, o con una que no conoce, se queda la que había.
+            let unidad = nuevo.unidad.flatMap(Unidad.init(rawValue:))?.rawValue
+                ?? existente?.api.unidad ?? Unidad.unidad.rawValue
+            let sinFijada = nuevo.cambiando(cantidad: existente?.api.cantidad ?? 0, unidad: unidad)
             var guardado = existente ?? ProductoGuardado(api: sinFijada)
             if gana { guardado.api = sinFijada }
             if categoria.api.borrado { guardado.api = guardado.api.cambiando(borrado: true) }
@@ -365,9 +368,10 @@ public final class ConexionEnMemoria: Conexion {
 }
 
 extension Api.Producto {
-    func cambiando(borrado: Bool? = nil, cantidad: Int? = nil) -> Api.Producto {
+    func cambiando(borrado: Bool? = nil, cantidad: Int? = nil, unidad: String? = nil) -> Api.Producto {
         Api.Producto(
-            id: id, categoriaId: categoriaId, nombre: nombre, cantidad: cantidad ?? self.cantidad,
+            id: id, categoriaId: categoriaId, nombre: nombre, unidad: unidad ?? self.unidad,
+            cantidad: cantidad ?? self.cantidad,
             cantidadFijadaEn: nil, umbralCompra: umbralCompra, autoListaCompra: autoListaCompra,
             enListaCompraManual: enListaCompraManual, creado: creado, modificado: modificado,
             borrado: borrado ?? self.borrado

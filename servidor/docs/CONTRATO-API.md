@@ -259,7 +259,7 @@ movimientos o fijándola (ver abajo).
 
 // Producto
 {
-  "id": "…", "categoriaId": "…", "nombre": "Arroz",
+  "id": "…", "categoriaId": "…", "nombre": "Arroz", "unidad": "paquete",
   "cantidad": 3, "umbralCompra": 2, "autoListaCompra": true, "enListaCompraManual": false,
   "creado": 1735000000000, "modificado": 1735600000000, "borrado": false
 }
@@ -296,6 +296,19 @@ que usan las pruebas del servidor y tendrán que usar las de las apps.
 La cantidad fijada va por su propia hora (`cantidadFijadaEn`): entra aunque el
 resto del producto pierda el conflicto. Un producto nuevo sin cantidad empieza
 en 0.
+
+### En qué se cuenta: `unidad`
+
+Es el nombre de lo que se cuenta («3 latas»), no una medida: la cantidad sigue
+siendo un número entero. Valores en
+[`pruebas-compartidas/unidades.json`](../../pruebas-compartidas/unidades.json).
+Se añadió el 2 de octubre de 2026; el servidor siempre la devuelve.
+
+Al enviar es opcional. Si falta, o trae un valor que el servidor no conoce, el
+producto se acepta igual y se queda con la unidad que tenía (`unidad` si es
+nuevo): así una app anterior que edita el nombre no devuelve el producto a
+unidades. Cuando llega, va con el resto del registro y gana o pierde con él.
+Una app que recibe un valor que no conoce lo muestra como `unidad`.
 
 ### `GET /sincronizar?desde=<revision>&limite=<n>`
 

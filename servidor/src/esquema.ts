@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS productos (
   hogar_id TEXT NOT NULL REFERENCES hogares(id),
   categoria_id TEXT NOT NULL,
   nombre TEXT NOT NULL,
+  unidad TEXT NOT NULL DEFAULT 'unidad',
   umbral_compra INTEGER NOT NULL,
   auto_lista_compra INTEGER NOT NULL,
   en_lista_compra_manual INTEGER NOT NULL,

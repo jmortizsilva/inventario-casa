@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { inicializarBd } from '../db';
 import { obtenerOCrearUsuario } from '../auth/usuarios';
@@ -193,6 +196,43 @@ describe('eliminar es definitivo', () => {
     aplicar({ categorias: [cat('c1', 20, { borrado: true })] });
     const r = aplicar({ categorias: [cat('c1', 30, { nombre: 'Alacena' })] });
     expect(r.categorias[0]).toMatchObject({ borrado: true, nombre: 'Despensa' });
+  });
+});
+
+describe('unidad', () => {
+  it('sin ella, unidades; con ella, la que llega', () => {
+    const r = aplicar({ categorias: [cat('c1', 10)], productos: [prod('p1', 10), prod('p2', 10, { unidad: 'lata' })] });
+    expect(r.productos.map((p) => p.unidad)).toEqual(['unidad', 'lata']);
+  });
+
+  it('una edición sin unidad, de una app anterior, no la cambia', () => {
+    aplicar({ categorias: [cat('c1', 10)], productos: [prod('p1', 10, { unidad: 'paquete' })] });
+    const r = aplicar({ productos: [prod('p1', 20, { nombre: 'Arroz largo' })] });
+    expect(r.productos[0]).toMatchObject({ nombre: 'Arroz largo', unidad: 'paquete' });
+  });
+
+  it('una edición que pierde no cambia la unidad', () => {
+    aplicar({ categorias: [cat('c1', 10)], productos: [prod('p1', 20, { unidad: 'paquete' })] });
+    aplicar({ productos: [prod('p1', 15, { unidad: 'lata' })] });
+    expect(novedadesDesde(hogar, 0, 10).productos[0].unidad).toBe('paquete');
+  });
+
+  it('una base anterior a la unidad la añade, con unidades en lo que había', () => {
+    const carpeta = mkdtempSync(join(tmpdir(), 'inventario-'));
+    try {
+      const ruta = join(carpeta, 'inventario.sqlite');
+      const vieja = inicializarBd(ruta);
+      vieja.exec('ALTER TABLE productos DROP COLUMN unidad');
+      vieja.close();
+
+      const bd = inicializarBd(ruta);
+      hogar = nuevoHogar('ana');
+      aplicar({ categorias: [cat('c1', 10)], productos: [prod('p1', 10)] });
+      expect(novedadesDesde(hogar, 0, 10).productos[0].unidad).toBe('unidad');
+      bd.close();
+    } finally {
+      rmSync(carpeta, { recursive: true, force: true });
+    }
   });
 });
 

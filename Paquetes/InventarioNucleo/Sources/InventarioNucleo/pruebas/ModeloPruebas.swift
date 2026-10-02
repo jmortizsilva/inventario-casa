@@ -14,6 +14,13 @@ import Testing
         #expect(p.unidad == .unidad)
     }
 
+    /// El servidor tiene la misma lista: los valores viajan entre los dos.
+    @Test func lasUnidadesSonLasCompartidas() throws {
+        struct Fichero: Decodable { let unidades: [String] }
+        let fichero = try JSONDecoder().decode(Fichero.self, from: Data(contentsOf: rutaCompartida("unidades.json")))
+        #expect(Unidad.allCases.map(\.rawValue) == fichero.unidades)
+    }
+
     @Test func acotaLosValoresAlCrear() {
         let alto = producto(cantidad: 5000, umbral: 50)
         #expect(alto.cantidad == 999)

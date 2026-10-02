@@ -74,6 +74,10 @@ function migrar(db: Database.Database): void {
         ALTER TABLE avisos_nueva RENAME TO avisos;
       `);
     }
+    // En qué se cuenta cada producto (2 de octubre de 2026). Lo que había, en unidades.
+    if (!tieneColumna(db, 'productos', 'unidad')) {
+      db.exec(`ALTER TABLE productos ADD COLUMN unidad TEXT NOT NULL DEFAULT 'unidad'`);
+    }
   })();
 }
 

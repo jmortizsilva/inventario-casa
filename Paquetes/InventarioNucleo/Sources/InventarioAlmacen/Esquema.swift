@@ -81,14 +81,60 @@ enum EsquemaV2: VersionedSchema {
     }
 }
 
+/// En qué se cuenta cada producto (`Unidad`). Lo demás no cambia.
+enum EsquemaV3: VersionedSchema {
+    static let versionIdentifier = Schema.Version(3, 0, 0)
+    static var models: [any PersistentModel.Type] {
+        [EsquemaV1.CategoriaGuardada.self, ProductoGuardado.self, EsquemaV2.SincronizacionGuardada.self]
+    }
+
+    @Model
+    final class ProductoGuardado {
+        @Attribute(.unique) var id: UUID
+        var categoriaId: UUID
+        var nombre: String
+        /// El valor en bruto de `Unidad`. Con valor por defecto para que los
+        /// productos que ya había se migren solos, como unidades.
+        var unidad: String = "unidad"
+        var cantidad: Int
+        var umbralCompra: Int
+        var autoListaCompra: Bool
+        var enListaCompraManual: Bool
+        var creado: Date
+        var modificado: Date
+        var borrado: Date?
+
+        init(
+            id: UUID, categoriaId: UUID, nombre: String, unidad: String, cantidad: Int, umbralCompra: Int,
+            autoListaCompra: Bool, enListaCompraManual: Bool, creado: Date, modificado: Date, borrado: Date?
+        ) {
+            self.id = id
+            self.categoriaId = categoriaId
+            self.nombre = nombre
+            self.unidad = unidad
+            self.cantidad = cantidad
+            self.umbralCompra = umbralCompra
+            self.autoListaCompra = autoListaCompra
+            self.enListaCompraManual = enListaCompraManual
+            self.creado = creado
+            self.modificado = modificado
+            self.borrado = borrado
+        }
+    }
+}
+
 typealias CategoriaGuardada = EsquemaV1.CategoriaGuardada
-typealias ProductoGuardado = EsquemaV1.ProductoGuardado
+typealias ProductoGuardado = EsquemaV3.ProductoGuardado
 typealias SincronizacionGuardada = EsquemaV2.SincronizacionGuardada
 
 enum PlanMigracion: SchemaMigrationPlan {
-    static var schemas: [any VersionedSchema.Type] { [EsquemaV1.self, EsquemaV2.self] }
-    /// Solo se añade un modelo: SwiftData lo migra sin código.
+    static var schemas: [any VersionedSchema.Type] { [EsquemaV1.self, EsquemaV2.self, EsquemaV3.self] }
+    /// Se añade un modelo y después una columna con valor por defecto: SwiftData
+    /// migra las dos sin código.
     static var stages: [MigrationStage] {
-        [.lightweight(fromVersion: EsquemaV1.self, toVersion: EsquemaV2.self)]
+        [
+            .lightweight(fromVersion: EsquemaV1.self, toVersion: EsquemaV2.self),
+            .lightweight(fromVersion: EsquemaV2.self, toVersion: EsquemaV3.self),
+        ]
     }
 }

@@ -1,0 +1,4 @@
+{
+  "descripcion": "En qué se puede contar un producto: el valor que se guarda y viaja entre la app y el servidor. La app (Unidad) y el servidor (UNIDADES) tienen la misma lista, en este orden. Sin valor, o con uno que no está aquí, el producto se cuenta en unidades.",
+  "unidades": ["unidad", "lata", "paquete", "botella", "brick", "bote", "bolsa", "caja", "rollo"]
+}

@@ -192,7 +192,7 @@ extension Api.Producto {
     /// La misma fila con la cantidad que calcularía el servidor.
     func conCantidad(_ cantidad: Int) -> Api.Producto {
         Api.Producto(
-            id: id, categoriaId: categoriaId, nombre: nombre, cantidad: cantidad, cantidadFijadaEn: nil,
+            id: id, categoriaId: categoriaId, nombre: nombre, unidad: unidad, cantidad: cantidad, cantidadFijadaEn: nil,
             umbralCompra: umbralCompra, autoListaCompra: autoListaCompra,
             enListaCompraManual: enListaCompraManual, creado: creado, modificado: modificado, borrado: borrado
         )

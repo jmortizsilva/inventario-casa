@@ -4,6 +4,7 @@ import {
   MAXIMO_POR_LOTE,
   MovimientoEntrante,
   ProductoEntrante,
+  UNIDAD_POR_DEFECTO,
   calcularCantidad,
   estaEnLista,
   ganaLaNueva,
@@ -26,6 +27,7 @@ export interface Producto {
   id: string;
   categoriaId: string;
   nombre: string;
+  unidad: string;
   cantidad: number;
   umbralCompra: number;
   autoListaCompra: boolean;
@@ -57,6 +59,7 @@ interface FilaProducto {
   hogar_id: string;
   categoria_id: string;
   nombre: string;
+  unidad: string;
   umbral_compra: number;
   auto_lista_compra: number;
   en_lista_compra_manual: number;
@@ -81,6 +84,7 @@ const aProducto = (f: FilaProducto): Producto => ({
   id: f.id,
   categoriaId: f.categoria_id,
   nombre: f.nombre,
+  unidad: f.unidad,
   cantidad: f.cantidad,
   umbralCompra: f.umbral_compra,
   autoListaCompra: f.auto_lista_compra === 1,
@@ -287,6 +291,7 @@ function aplicarProducto(hogarId: string, nuevo: ProductoEntrante): Motivo | und
   const base = existente ?? {
     categoria_id: nuevo.categoriaId,
     nombre: nuevo.nombre,
+    unidad: UNIDAD_POR_DEFECTO,
     umbral_compra: nuevo.umbralCompra,
     auto_lista_compra: nuevo.autoListaCompra ? 1 : 0,
     en_lista_compra_manual: nuevo.enListaCompraManual ? 1 : 0,
@@ -301,6 +306,7 @@ function aplicarProducto(hogarId: string, nuevo: ProductoEntrante): Motivo | und
     hogarId,
     categoriaId: gana ? nuevo.categoriaId : base.categoria_id,
     nombre: gana ? nuevo.nombre : base.nombre,
+    unidad: gana ? (nuevo.unidad ?? base.unidad) : base.unidad,
     umbral: gana ? nuevo.umbralCompra : base.umbral_compra,
     auto: gana ? (nuevo.autoListaCompra ? 1 : 0) : base.auto_lista_compra,
     manual: gana ? (nuevo.enListaCompraManual ? 1 : 0) : base.en_lista_compra_manual,
@@ -312,11 +318,11 @@ function aplicarProducto(hogarId: string, nuevo: ProductoEntrante): Motivo | und
     revision: siguienteRevision(hogarId),
   };
   bd.prepare(
-    `INSERT INTO productos (id, hogar_id, categoria_id, nombre, umbral_compra, auto_lista_compra,
+    `INSERT INTO productos (id, hogar_id, categoria_id, nombre, unidad, umbral_compra, auto_lista_compra,
        en_lista_compra_manual, creado, modificado, borrado, cantidad_fijada, cantidad_fijada_en, revision)
-     VALUES (@id, @hogarId, @categoriaId, @nombre, @umbral, @auto, @manual, @creado, @modificado,
+     VALUES (@id, @hogarId, @categoriaId, @nombre, @unidad, @umbral, @auto, @manual, @creado, @modificado,
        @borrado, @fijada, @fijadaEn, @revision)
-     ON CONFLICT(id) DO UPDATE SET categoria_id = @categoriaId, nombre = @nombre,
+     ON CONFLICT(id) DO UPDATE SET categoria_id = @categoriaId, nombre = @nombre, unidad = @unidad,
        umbral_compra = @umbral, auto_lista_compra = @auto, en_lista_compra_manual = @manual,
        modificado = @modificado, borrado = @borrado, cantidad_fijada = @fijada,
        cantidad_fijada_en = @fijadaEn, revision = @revision`,

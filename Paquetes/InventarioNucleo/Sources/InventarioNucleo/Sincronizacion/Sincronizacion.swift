@@ -179,6 +179,7 @@ public enum Sincronizacion {
                     id: id,
                     categoriaId: categoriaId,
                     nombre: recibido.nombre,
+                    unidad: recibido.unidad.flatMap(Unidad.init(rawValue:)) ?? .unidad,
                     cantidad: cantidad,
                     umbralCompra: recibido.umbralCompra,
                     autoListaCompra: recibido.autoListaCompra,

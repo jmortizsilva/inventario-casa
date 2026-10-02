@@ -35,7 +35,7 @@ public final class AlmacenSwiftData: Almacen {
 
     private init(configuracion: ModelConfiguration) throws {
         contenedor = try ModelContainer(
-            for: Schema(versionedSchema: EsquemaV2.self),
+            for: Schema(versionedSchema: EsquemaV3.self),
             migrationPlan: PlanMigracion.self,
             configurations: configuracion
         )
@@ -168,7 +168,7 @@ extension CategoriaGuardada {
 extension ProductoGuardado {
     convenience init(_ p: Producto) {
         self.init(
-            id: p.id, categoriaId: p.categoriaId, nombre: p.nombre, cantidad: p.cantidad,
+            id: p.id, categoriaId: p.categoriaId, nombre: p.nombre, unidad: p.unidad.rawValue, cantidad: p.cantidad,
             umbralCompra: p.umbralCompra, autoListaCompra: p.autoListaCompra,
             enListaCompraManual: p.enListaCompraManual, creado: p.creado,
             modificado: p.modificado, borrado: p.borrado
@@ -178,6 +178,7 @@ extension ProductoGuardado {
     func copiar(_ p: Producto) {
         categoriaId = p.categoriaId
         nombre = p.nombre
+        unidad = p.unidad.rawValue
         cantidad = p.cantidad
         umbralCompra = p.umbralCompra
         autoListaCompra = p.autoListaCompra
@@ -188,7 +189,8 @@ extension ProductoGuardado {
 
     var comoProducto: Producto {
         Producto(
-            id: id, categoriaId: categoriaId, nombre: nombre, cantidad: cantidad,
+            id: id, categoriaId: categoriaId, nombre: nombre,
+            unidad: Unidad(rawValue: unidad) ?? .unidad, cantidad: cantidad,
             umbralCompra: umbralCompra, autoListaCompra: autoListaCompra,
             enListaCompraManual: enListaCompraManual, creado: creado,
             modificado: modificado, borrado: borrado

@@ -30,6 +30,10 @@ public enum Api {
         public let id: String
         public let categoriaId: String
         public let nombre: String
+        /// El valor en bruto de `Unidad`. Falta en lo que manda un servidor o
+        /// una app anteriores a ella; un valor que el servidor no conoce lo
+        /// trata como si faltara y deja el que había.
+        public let unidad: String?
         public let cantidad: Int?
         public let cantidadFijadaEn: Int64?
         public let umbralCompra: Int
@@ -42,7 +46,7 @@ public enum Api {
         public let restaurar: Bool?
 
         public init(
-            id: String, categoriaId: String, nombre: String, cantidad: Int?, cantidadFijadaEn: Int64?,
+            id: String, categoriaId: String, nombre: String, unidad: String?, cantidad: Int?, cantidadFijadaEn: Int64?,
             umbralCompra: Int, autoListaCompra: Bool, enListaCompraManual: Bool,
             creado: Int64, modificado: Int64, borrado: Bool, restaurar: Bool? = nil
         ) {
@@ -50,6 +54,7 @@ public enum Api {
             self.id = id
             self.categoriaId = categoriaId
             self.nombre = nombre
+            self.unidad = unidad
             self.cantidad = cantidad
             self.cantidadFijadaEn = cantidadFijadaEn
             self.umbralCompra = umbralCompra
@@ -172,6 +177,7 @@ extension Api.Producto {
             id: producto.id.enTexto,
             categoriaId: producto.categoriaId.enTexto,
             nombre: producto.nombre,
+            unidad: producto.unidad.rawValue,
             cantidad: fijada?.cantidad,
             cantidadFijadaEn: fijada?.en.milisegundos,
             umbralCompra: producto.umbralCompra,

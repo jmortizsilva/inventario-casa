@@ -124,6 +124,43 @@ private func hogarDeAnaYLuis() async throws
         #expect(luis.cantidad("Arroz") == 9)
     }
 
+    @Test func laUnidadLlegaAlOtroIphone() async throws {
+        let (ana, luis, _, _) = try await hogarDeAnaYLuis()
+        let arroz = try #require(ana.producto("Arroz"))
+        try ana.inventario.editarProducto(
+            arroz.id, nombre: "Arroz", unidad: .paquete, cantidad: arroz.cantidad,
+            umbralCompra: arroz.umbralCompra, autoListaCompra: true
+        )
+        try await ana.sincronizar()
+        try await luis.sincronizar()
+        #expect(luis.producto("Arroz")?.unidad == .paquete)
+    }
+
+    /// Una app anterior a la unidad que edita el producto no la manda, y no
+    /// por eso vuelve a unidades.
+    @Test func unaEdicionSinUnidadNoLaBorra() async throws {
+        let (ana, luis, _, reloj) = try await hogarDeAnaYLuis()
+        let arroz = try #require(ana.producto("Arroz"))
+        let enPaquetes = try ana.inventario.editarProducto(
+            arroz.id, nombre: "Arroz", unidad: .paquete, cantidad: arroz.cantidad,
+            umbralCompra: arroz.umbralCompra, autoListaCompra: true
+        )
+        try await ana.sincronizar()
+
+        let antigua = Api.Producto(
+            id: enPaquetes.id.uuidString.lowercased(), categoriaId: enPaquetes.categoriaId.uuidString.lowercased(),
+            nombre: "Arroz largo", unidad: nil, cantidad: nil, cantidadFijadaEn: nil,
+            umbralCompra: enPaquetes.umbralCompra, autoListaCompra: true, enListaCompraManual: false,
+            creado: Int64(enPaquetes.creado.timeIntervalSince1970 * 1000),
+            modificado: Int64(reloj.ahora().timeIntervalSince1970 * 1000), borrado: false
+        )
+        let hogar = try #require(luis.inventario.estado.hogarId)
+        _ = try await luis.conexion.enviar(Api.Lote(productos: [antigua]), hogar: hogar)
+        try await ana.sincronizar()
+
+        #expect(ana.producto("Arroz largo")?.unidad == .paquete)
+    }
+
     @Test func gananLosCambiosMasRecientes() async throws {
         let (ana, luis, _, _) = try await hogarDeAnaYLuis()
         let despensa = try #require(ana.inventario.categorias.first)

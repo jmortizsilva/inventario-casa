@@ -1,7 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { calcularCantidad, ganaLaNueva, validarCategoria, validarMovimiento, validarProducto } from '../sincronizacion/reglas';
+import {
+  UNIDADES,
+  calcularCantidad,
+  ganaLaNueva,
+  validarCategoria,
+  validarMovimiento,
+  validarProducto,
+} from '../sincronizacion/reglas';
 
 interface Caso {
   caso: string;
@@ -72,6 +79,21 @@ describe('validación', () => {
     expect(validarProducto({ ...productoValido, umbralCompra: 21 })).toBeUndefined();
     expect(validarProducto({ ...productoValido, umbralCompra: -1 })).toBeUndefined();
     expect(validarProducto({ ...productoValido, autoListaCompra: 'sí' })).toBeUndefined();
+  });
+
+  it('producto: la unidad solo si es una de las conocidas', () => {
+    expect(validarProducto({ ...productoValido, unidad: 'lata' })?.unidad).toBe('lata');
+    // Desconocida o sin ella, el producto vale igual: se queda la unidad que tenía.
+    expect(validarProducto({ ...productoValido, unidad: 'garrafa' })?.unidad).toBeUndefined();
+    expect(validarProducto({ ...productoValido, unidad: 3 })?.unidad).toBeUndefined();
+    expect(validarProducto(productoValido)?.unidad).toBeUndefined();
+  });
+
+  it('las unidades son las mismas que en la app', () => {
+    const compartidas = JSON.parse(
+      readFileSync(join(__dirname, '../../../pruebas-compartidas/unidades.json'), 'utf8'),
+    ).unidades;
+    expect(UNIDADES).toEqual(compartidas);
   });
 
   it('producto: la cantidad fijada va con su hora y se acota', () => {
