@@ -23,13 +23,12 @@ public enum PeticionVoz {
     ]
 
     /// Envases y medidas que se dicen entre el número y el producto: no forman
-    /// parte del nombre («2 latas de atún» es atún). Siri escribe «unidades»
-    /// como «U» («5 U de leche», visto en el iPhone).
-    private static let envases: Set<String> = [
-        "unidad", "unidades", "u", "ud", "uds", "unid", "kilo", "kilos", "kg", "litro", "litros",
-        "lata", "latas", "paquete", "paquetes", "botella", "botellas",
-        "bolsa", "bolsas", "caja", "cajas", "bote", "botes", "brik", "briks", "tarro", "tarros",
-    ]
+    /// parte del nombre («2 latas de atún» es atún). Todas las de `Unidad`, y
+    /// otras formas de decirlas. Siri escribe «unidades» como «U» («5 U de
+    /// leche», visto en el iPhone).
+    private static let envases: Set<String> = Set(Unidad.allCases.flatMap { [$0.singular, $0.plural] }).union([
+        "u", "ud", "uds", "unid", "kilo", "kilos", "kg", "litro", "litros", "brik", "briks", "tarro", "tarros",
+    ])
 
     public static func separar(_ texto: String) -> Partes {
         let limpio = Nombres.limpiar(texto)

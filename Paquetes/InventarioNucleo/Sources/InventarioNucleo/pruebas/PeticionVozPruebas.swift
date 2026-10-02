@@ -14,6 +14,8 @@ import Testing
         ("5 U de leche", 5, "leche"),
         ("3 uds de yogur", 3, "yogur"),
         ("2 kilos de patatas", 2, "patatas"),
+        ("2 bricks de leche", 2, "leche"),
+        ("un rollo de papel de cocina", 1, "papel de cocina"),
     ])
     func conUnidades(texto: String, unidades: Int, producto: String) {
         #expect(PeticionVoz.separar(texto) == PeticionVoz.Partes(unidades: unidades, producto: producto))
@@ -22,6 +24,13 @@ import Testing
     @Test(arguments: ["leche", "Pilas 2", "7up", "dos", "0 leches", "unidades de leche"])
     func sinUnidades(texto: String) {
         #expect(PeticionVoz.separar(texto) == PeticionVoz.Partes(unidades: nil, producto: texto))
+    }
+
+    /// Cualquier unidad que se pueda elegir en la app se entiende delante del producto.
+    @Test(arguments: Unidad.allCases)
+    func entiendeLasUnidadesDeLaApp(_ unidad: Unidad) {
+        #expect(PeticionVoz.separar("1 \(unidad.singular) de sal") == PeticionVoz.Partes(unidades: 1, producto: "sal"))
+        #expect(PeticionVoz.separar("3 \(unidad.plural) de sal") == PeticionVoz.Partes(unidades: 3, producto: "sal"))
     }
 
     /// «2 de» sin nada detrás no deja el producto vacío.
