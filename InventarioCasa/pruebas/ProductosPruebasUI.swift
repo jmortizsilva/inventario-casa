@@ -90,13 +90,55 @@ final class ProductosPruebasUI: XCTestCase {
         app.navigationBars.buttons["Añadir producto"].tap()
         XCTAssertTrue(app.navigationBars["Nuevo producto"].waitForExistence(timeout: 3))
         campoNombre.typeText("Lejía")
-        aumentar("Unidades")
-        aumentar("Unidades")
-        aumentar("Unidades")
-        XCTAssertEqual(selector("Unidades").value as? String, "3")
+        aumentar("Cantidad")
+        aumentar("Cantidad")
+        aumentar("Cantidad")
+        XCTAssertEqual(selector("Cantidad").value as? String, "3 unidades")
         botonGuardar.tap()
 
         XCTAssertTrue(app.buttons["Lejía, 3 unidades"].waitForExistence(timeout: 3))
+    }
+
+    func testCrearProductoEnLatas() {
+        entrar(en: "Limpieza, 0 productos", titulo: "Limpieza")
+        app.navigationBars.buttons["Añadir producto"].tap()
+        XCTAssertTrue(campoNombre.waitForExistence(timeout: 3))
+        campoNombre.typeText("Lejía\n")
+        XCTAssertTrue(app.keyboards.element.waitForNonExistence(timeout: 3), "Hecho cierra el teclado")
+        XCTAssertTrue(app.navigationBars["Nuevo producto"].exists, "Hecho no guarda")
+        XCTAssertGreaterThan(selectorUnidad.frame.minY, campoNombre.frame.minY, "La unidad va después del nombre")
+
+        elegirUnidad("Botellas")
+        aumentar("Cantidad")
+        aumentar("Cantidad")
+        XCTAssertEqual(selector("Cantidad").value as? String, "2 botellas")
+        XCTAssertEqual(selector("Pasa a la lista con").value as? String, "2 botellas o menos")
+        botonGuardar.tap()
+
+        XCTAssertTrue(app.buttons["Lejía, 2 botellas, en la lista"].waitForExistence(timeout: 3))
+    }
+
+    func testCambiarLaUnidadAlEditar() {
+        entrarEnDespensa()
+        app.buttons["Arroz, 3 unidades"].tap()
+        XCTAssertTrue(app.navigationBars["Arroz"].waitForExistence(timeout: 3))
+        elegirUnidad("Paquetes")
+        XCTAssertEqual(selector("Cantidad").value as? String, "3 paquetes")
+        botonGuardar.tap()
+        XCTAssertTrue(app.buttons["Arroz, 3 paquetes"].waitForExistence(timeout: 3))
+    }
+
+    /// La etiqueta del selector lleva detrás el valor elegido.
+    private var selectorUnidad: XCUIElement {
+        app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Se cuenta en")).firstMatch
+    }
+
+    private func elegirUnidad(_ opcion: String) {
+        XCTAssertTrue(selectorUnidad.waitForExistence(timeout: 3))
+        selectorUnidad.tap()
+        let boton = app.buttons[opcion]
+        XCTAssertTrue(boton.waitForExistence(timeout: 3), "No aparece \(opcion) en el selector")
+        boton.tap()
     }
 
     func testProductoNuevoSinUnidadesEntraEnLaLista() {
@@ -126,9 +168,9 @@ final class ProductosPruebasUI: XCTestCase {
 
         let umbral = selector("Pasa a la lista con")
         XCTAssertEqual(umbral.value as? String, "2 unidades o menos")
-        XCTAssertEqual(selector("Unidades").value as? String, "3")
-        aumentar("Unidades")
-        XCTAssertEqual(selector("Unidades").value as? String, "4")
+        XCTAssertEqual(selector("Cantidad").value as? String, "3 unidades")
+        aumentar("Cantidad")
+        XCTAssertEqual(selector("Cantidad").value as? String, "4 unidades")
         app.switches["Añadir a la lista cuando queden pocas"].switches.firstMatch.tap()
         XCTAssertFalse(umbral.exists)
         botonGuardar.tap()

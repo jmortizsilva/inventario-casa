@@ -102,18 +102,26 @@ unidades, deja de estar repuesto. El orden no cambia durante la visita.
 | Título al editar | {producto} | Editar {producto} |
 | Campo | Nombre | Nombre del producto (con ejemplo "Ej: Arroz, Leche, Pan...") |
 | Selector, solo al crear desde el menú de Inventario | Categoría, sin valor hasta elegir. Va antes del nombre y sin teclado abierto. Guardar desactivado hasta elegir | |
-| Cantidad | Unidades: {n} | Seleccionar cantidad (rueda de 0 a 99) |
+| Selector, después del nombre | Se cuenta en. Opciones en plural: Unidades, Latas, Paquetes, Botellas, Bricks, Botes, Bolsas, Cajas, Rollos. Empieza en Unidades | |
+| Cantidad | Cantidad: {n} {unidades} | Seleccionar cantidad (rueda de 0 a 99) |
 | Interruptor | Añadir a la lista cuando queden pocas | Añadir automáticamente a la lista |
-| Umbral (solo si el interruptor está activo) | Cuando queden {n} unidades o menos | Pasar a lista de compra con {n} unidades o menos |
+| Umbral (solo si el interruptor está activo) | Cuando queden {n} {unidades} o menos | Pasar a lista de compra con {n} unidades o menos |
 | Botones | Cancelar · Guardar | Cancelar · Guardar / Guardando... |
 
+Hecho, en el teclado del nombre, cierra el teclado y no guarda: detrás va el
+selector de unidad, y con el teclado abierto VoiceOver pasaba del menú de un
+selector al teclado.
+
+"Cantidad: 3 latas" no va contra "nunca «cantidad: 0»" del vocabulario: lo que
+se evita es el número suelto, y aquí siempre va con su unidad.
+
 Para VoiceOver, los dos selectores llevan etiqueta y valor por separado, para
-que el número no se oiga dos veces. El texto de la pantalla no cambia.
+que no se oiga dos veces. El texto de la pantalla no cambia.
 
 | Selector | Etiqueta | Valor | Se oye |
 |---|---|---|---|
-| Unidades | Unidades | {n} | Unidades, 3, ajustable |
-| Umbral | Pasa a la lista con | {n} unidades o menos (1 unidad o menos; 0 unidades) | Pasa a la lista con, 2 unidades o menos, ajustable |
+| Cantidad | Cantidad | {n} {unidades} | Cantidad, 3 latas, ajustable |
+| Umbral | Pasa a la lista con | {n} {unidades} o menos (1 lata o menos; 0 latas) | Pasa a la lista con, 2 latas o menos, ajustable |
 
 Se quitan el contador de caracteres y el texto "Guardando...": guardar en el
 móvil es instantáneo.
@@ -201,14 +209,15 @@ Pantalla con título "Manual" y botón "Cerrar". Cada apartado es un encabezado,
 para saltar entre ellos con el rotor.
 
 **Categorías y productos.** En Inventario, Añadir categoría crea una categoría.
-Dentro de ella, Añadir producto crea un producto con sus unidades.
+Dentro de ella, Añadir producto crea un producto. En su ficha se elige en qué
+se cuenta: unidades, latas, paquetes…
 
-**Cambiar las unidades.** Con los botones de más y menos de cada producto, o
+**Cambiar la cantidad.** Con los botones de más y menos de cada producto, o
 desde su ficha. Con VoiceOver, con las acciones Aumentar cantidad y Disminuir
 cantidad del rotor.
 
-**Lista de la compra.** Un producto entra solo en la lista cuando le quedan las
-unidades que marca su ficha, o menos, y sale al reponerlo. También se puede
+**Lista de la compra.** Un producto entra solo en la lista cuando le queda la
+cantidad que marca su ficha, o menos, y sale al reponerlo. También se puede
 añadir o quitar a mano. Si no quieres que entre solo, desactiva "Añadir a la
 lista cuando queden pocas" en su ficha.
 
@@ -247,7 +256,7 @@ Casos en los que el texto cambia además del número:
 | Caso | Texto |
 |---|---|
 | Umbral 1 | Cuando quede 1 unidad o menos |
-| Umbral 0 | Cuando no quede ninguna |
+| Umbral 0 | Cuando no quede ninguna (unidad, lata, botella, bolsa, caja) · Cuando no quede ninguno (paquete, brick, bote, rollo) |
 | Sigue en la lista con 1 unidad | Sigue en la lista, queda 1 unidad |
 | Sigue en la lista con 0 unidades | Sigue en la lista, agotado |
 | Eliminar categoría con 1 producto | También se eliminará su producto. |

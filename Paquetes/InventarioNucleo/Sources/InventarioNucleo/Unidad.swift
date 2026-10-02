@@ -42,6 +42,14 @@ public enum Unidad: String, CaseIterable, Hashable, Sendable {
         case .rollo: "rollos"
         }
     }
+
+    /// Para concordar: «Cuando no quede ninguna» (lata), «ninguno» (paquete).
+    public var esFemenina: Bool {
+        switch self {
+        case .unidad, .lata, .botella, .bolsa, .caja: true
+        case .paquete, .brick, .bote, .rollo: false
+        }
+    }
 }
 
 extension Unidad: Codable {

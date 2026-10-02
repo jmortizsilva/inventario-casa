@@ -99,29 +99,32 @@ public enum Textos {
     public enum Formulario {
         public static let nombre = "Nombre"
         public static let categoria = "Categoría"
-        public static func unidades(_ n: Int) -> String {
-            "Unidades: \(n)"
+        public static let seCuentaEn = "Se cuenta en"
+        /// Las opciones del selector, en plural: «Latas».
+        public static func opcion(_ unidad: Unidad) -> String {
+            unidad.plural.prefix(1).uppercased() + unidad.plural.dropFirst()
+        }
+        public static func cantidad(_ n: Int, _ unidad: Unidad) -> String {
+            "Cantidad: \(Textos.cantidad(n, unidad))"
         }
         public static let listaAutomatica = "Añadir a la lista cuando queden pocas"
 
         /// Lo que lee VoiceOver en los Stepper: etiqueta y valor por separado,
-        /// para que el número no se oiga dos veces («Unidades: 3, 3»).
-        public static let etiquetaUnidades = "Unidades"
-        public static func valorUnidades(_ n: Int) -> String { "\(n)" }
+        /// para que no se oiga dos veces («Cantidad: 3 latas, 3 latas»).
+        public static let etiquetaCantidad = "Cantidad"
+        public static func valorCantidad(_ n: Int, _ unidad: Unidad) -> String {
+            Textos.cantidad(n, unidad)
+        }
         public static let etiquetaUmbral = "Pasa a la lista con"
-        public static func valorUmbral(_ n: Int) -> String {
-            switch n {
-            case 0: "0 unidades"
-            case 1: "1 unidad o menos"
-            default: "\(n) unidades o menos"
-            }
+        public static func valorUmbral(_ n: Int, _ unidad: Unidad) -> String {
+            n == 0 ? Textos.cantidad(0, unidad) : "\(Textos.cantidad(n, unidad)) o menos"
         }
 
-        public static func umbral(_ n: Int) -> String {
+        public static func umbral(_ n: Int, _ unidad: Unidad) -> String {
             switch n {
-            case 0: "Cuando no quede ninguna"
-            case 1: "Cuando quede 1 unidad o menos"
-            default: "Cuando queden \(n) unidades o menos"
+            case 0: "Cuando no quede \(unidad.esFemenina ? "ninguna" : "ninguno")"
+            case 1: "Cuando quede \(Textos.cantidad(1, unidad)) o menos"
+            default: "Cuando queden \(Textos.cantidad(n, unidad)) o menos"
             }
         }
     }
@@ -267,15 +270,15 @@ public enum Textos {
     public static let manual: [Apartado] = [
         Apartado(
             titulo: "Categorías y productos",
-            texto: "En Inventario, Añadir categoría crea una categoría. Dentro de ella, Añadir producto crea un producto con sus unidades."
+            texto: "En Inventario, Añadir categoría crea una categoría. Dentro de ella, Añadir producto crea un producto. En su ficha se elige en qué se cuenta: unidades, latas, paquetes…"
         ),
         Apartado(
-            titulo: "Cambiar las unidades",
+            titulo: "Cambiar la cantidad",
             texto: "Con los botones de más y menos de cada producto, o desde su ficha. Con VoiceOver, con las acciones Aumentar cantidad y Disminuir cantidad del rotor."
         ),
         Apartado(
             titulo: "Lista de la compra",
-            texto: "Un producto entra solo en la lista cuando le quedan las unidades que marca su ficha, o menos, y sale al reponerlo. También se puede añadir o quitar a mano. Si no quieres que entre solo, desactiva \u{201C}Añadir a la lista cuando queden pocas\u{201D} en su ficha."
+            texto: "Un producto entra solo en la lista cuando le queda la cantidad que marca su ficha, o menos, y sale al reponerlo. También se puede añadir o quitar a mano. Si no quieres que entre solo, desactiva \u{201C}Añadir a la lista cuando queden pocas\u{201D} en su ficha."
         ),
         Apartado(
             titulo: "Eliminar",

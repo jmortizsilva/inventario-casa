@@ -21,6 +21,7 @@ struct FormularioProducto: View {
     @Environment(\.dismiss) private var cerrar
     @State private var nombre = ""
     @State private var categoriaElegida: UUID?
+    @State private var unidad = Unidad.unidad
     @State private var cantidad = 0
     @State private var autoListaCompra = true
     @State private var umbralCompra = Limites.umbralCompraPorDefecto
@@ -44,7 +45,10 @@ struct FormularioProducto: View {
                     TextField(Textos.Formulario.nombre, text: $nombre)
                         .focused($campoConFoco)
                         .submitLabel(.done)
-                        .onSubmit(guardar)
+                        // «Hecho» cierra el teclado y no guarda: detrás va el
+                        // selector de unidad, y con el teclado abierto VoiceOver
+                        // pasaba del menú de un selector al teclado.
+                        .onSubmit { campoConFoco = false }
                 } footer: {
                     if let errorNombre {
                         Text(errorNombre)
@@ -53,10 +57,15 @@ struct FormularioProducto: View {
                 }
 
                 Section {
+                    Picker(Textos.Formulario.seCuentaEn, selection: $unidad) {
+                        ForEach(Unidad.allCases, id: \.self) { unidad in
+                            Text(Textos.Formulario.opcion(unidad)).tag(unidad)
+                        }
+                    }
                     selector(
-                        visible: Textos.Formulario.unidades(cantidad),
-                        etiqueta: Textos.Formulario.etiquetaUnidades,
-                        valor: Textos.Formulario.valorUnidades(cantidad),
+                        visible: Textos.Formulario.cantidad(cantidad, unidad),
+                        etiqueta: Textos.Formulario.etiquetaCantidad,
+                        valor: Textos.Formulario.valorCantidad(cantidad, unidad),
                         numero: $cantidad,
                         rango: Limites.cantidad
                     )
@@ -66,9 +75,9 @@ struct FormularioProducto: View {
                     Toggle(Textos.Formulario.listaAutomatica, isOn: $autoListaCompra)
                     if autoListaCompra {
                         selector(
-                            visible: Textos.Formulario.umbral(umbralCompra),
+                            visible: Textos.Formulario.umbral(umbralCompra, unidad),
                             etiqueta: Textos.Formulario.etiquetaUmbral,
-                            valor: Textos.Formulario.valorUmbral(umbralCompra),
+                            valor: Textos.Formulario.valorUmbral(umbralCompra, unidad),
                             numero: $umbralCompra,
                             rango: Limites.umbralCompra
                         )
@@ -96,7 +105,7 @@ struct FormularioProducto: View {
     /// ajustable (deslizar arriba o abajo) con etiqueta y valor propios.
     /// El Stepper del sistema exponía sus dos botones por separado, y ponerle
     /// .accessibilityLabel no sustituía la etiqueta de su texto sino que la
-    /// añadía detrás («Unidades: 3, Unidades»).
+    /// añadía detrás («Cantidad: 3 latas, Cantidad»).
     private func selector(
         visible: String,
         etiqueta: String,
@@ -161,6 +170,7 @@ struct FormularioProducto: View {
             // las unidades, y el teclado tapa el formulario y desordena el
             // recorrido con VoiceOver (se vio en la app de Expo).
             nombre = producto.nombre
+            unidad = producto.unidad
             cantidad = producto.cantidad
             autoListaCompra = producto.autoListaCompra
             umbralCompra = producto.umbralCompra
@@ -175,6 +185,7 @@ struct FormularioProducto: View {
                 let creado = try inventario.crearProducto(
                     nombre: nombre,
                     en: categoriaId,
+                    unidad: unidad,
                     cantidad: cantidad,
                     umbralCompra: umbralCompra,
                     autoListaCompra: autoListaCompra
@@ -184,7 +195,7 @@ struct FormularioProducto: View {
                 let guardado = try inventario.editarProducto(
                     producto.id,
                     nombre: nombre,
-                    unidad: producto.unidad,
+                    unidad: unidad,
                     cantidad: cantidad,
                     umbralCompra: umbralCompra,
                     autoListaCompra: autoListaCompra

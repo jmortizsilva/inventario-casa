@@ -14,7 +14,7 @@ final class AjustesPruebasUI: XCTestCase {
 
         app.buttons["Manual"].tap()
         XCTAssertTrue(app.navigationBars["Manual"].waitForExistence(timeout: 3))
-        for titulo in ["Categorías y productos", "Cambiar las unidades", "Lista de la compra", "Eliminar", "Compartir con tu casa"] {
+        for titulo in ["Categorías y productos", "Cambiar la cantidad", "Lista de la compra", "Eliminar", "Compartir con tu casa"] {
             XCTAssertTrue(app.scrollViews.staticTexts[titulo].exists, titulo)
         }
 

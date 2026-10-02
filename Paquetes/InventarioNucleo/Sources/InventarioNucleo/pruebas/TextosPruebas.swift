@@ -43,21 +43,39 @@ import Testing
         #expect(Textos.Botones.categoria == "Categoría")
         #expect(Textos.Botones.producto == "Producto")
         #expect(Textos.Formulario.categoria == "Categoría")
+        #expect(Textos.Formulario.seCuentaEn == "Se cuenta en")
+        #expect(Unidad.allCases.map(Textos.Formulario.opcion) == [
+            "Unidades", "Latas", "Paquetes", "Botellas", "Bricks", "Botes", "Bolsas", "Cajas", "Rollos",
+        ])
+        #expect(Textos.Formulario.cantidad(3, .lata) == "Cantidad: 3 latas")
+        #expect(Textos.Formulario.cantidad(1, .unidad) == "Cantidad: 1 unidad")
     }
 
     @Test func umbral() {
-        #expect(Textos.Formulario.umbral(0) == "Cuando no quede ninguna")
-        #expect(Textos.Formulario.umbral(1) == "Cuando quede 1 unidad o menos")
-        #expect(Textos.Formulario.umbral(2) == "Cuando queden 2 unidades o menos")
+        #expect(Textos.Formulario.umbral(0, .unidad) == "Cuando no quede ninguna")
+        #expect(Textos.Formulario.umbral(1, .unidad) == "Cuando quede 1 unidad o menos")
+        #expect(Textos.Formulario.umbral(2, .unidad) == "Cuando queden 2 unidades o menos")
+        #expect(Textos.Formulario.umbral(0, .lata) == "Cuando no quede ninguna")
+        #expect(Textos.Formulario.umbral(0, .paquete) == "Cuando no quede ninguno")
+        #expect(Textos.Formulario.umbral(1, .paquete) == "Cuando quede 1 paquete o menos")
+        #expect(Textos.Formulario.umbral(2, .lata) == "Cuando queden 2 latas o menos")
     }
 
     @Test func steppersParaVoiceOver() {
-        #expect(Textos.Formulario.etiquetaUnidades == "Unidades")
-        #expect(Textos.Formulario.valorUnidades(3) == "3")
+        #expect(Textos.Formulario.etiquetaCantidad == "Cantidad")
+        #expect(Textos.Formulario.valorCantidad(3, .lata) == "3 latas")
+        #expect(Textos.Formulario.valorCantidad(1, .unidad) == "1 unidad")
         #expect(Textos.Formulario.etiquetaUmbral == "Pasa a la lista con")
-        #expect(Textos.Formulario.valorUmbral(0) == "0 unidades")
-        #expect(Textos.Formulario.valorUmbral(1) == "1 unidad o menos")
-        #expect(Textos.Formulario.valorUmbral(2) == "2 unidades o menos")
+        #expect(Textos.Formulario.valorUmbral(0, .unidad) == "0 unidades")
+        #expect(Textos.Formulario.valorUmbral(1, .unidad) == "1 unidad o menos")
+        #expect(Textos.Formulario.valorUmbral(2, .unidad) == "2 unidades o menos")
+        #expect(Textos.Formulario.valorUmbral(0, .bote) == "0 botes")
+        #expect(Textos.Formulario.valorUmbral(2, .bote) == "2 botes o menos")
+    }
+
+    /// Cada unidad con su género, para «ninguno» o «ninguna».
+    @Test func generoDeLasUnidades() {
+        #expect(Unidad.allCases.filter(\.esFemenina) == [.unidad, .lata, .botella, .bolsa, .caja])
     }
 
     @Test func anuncioDeAjusteSinCambioDeLista() {

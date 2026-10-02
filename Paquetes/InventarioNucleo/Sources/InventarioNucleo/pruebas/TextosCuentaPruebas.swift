@@ -156,7 +156,7 @@ import Testing
 
     @Test func apartadosDelManual() {
         #expect(Textos.manual.map(\.titulo) == [
-            "Categorías y productos", "Cambiar las unidades", "Lista de la compra", "Eliminar",
+            "Categorías y productos", "Cambiar la cantidad", "Lista de la compra", "Eliminar",
             "Deshacer", "Importar datos", "Compartir con tu casa", "Varios hogares",
             "Notificaciones", "Siri",
         ])
