@@ -22,7 +22,7 @@ struct FormularioProducto: View {
     @State private var nombre = ""
     @State private var categoriaElegida: UUID?
     @State private var unidad = Unidad.unidad
-    @State private var cantidad = 0
+    @State private var cantidad = Limites.cantidadAlCrear
     @State private var autoListaCompra = true
     @State private var umbralCompra = Limites.umbralCompraPorDefecto
     @State private var errorNombre: String?

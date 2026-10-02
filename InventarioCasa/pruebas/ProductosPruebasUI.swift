@@ -38,6 +38,10 @@ final class ProductosPruebasUI: XCTestCase {
     private func aumentar(_ etiqueta: String) {
         selector(etiqueta).steppers.firstMatch.buttons["Increment"].tap()
     }
+
+    private func disminuir(_ etiqueta: String) {
+        selector(etiqueta).steppers.firstMatch.buttons["Decrement"].tap()
+    }
     private var botonGuardar: XCUIElement { app.navigationBars.buttons["Guardar"] }
 
     private func menu(de fila: String, _ accion: String) {
@@ -90,7 +94,7 @@ final class ProductosPruebasUI: XCTestCase {
         app.navigationBars.buttons["Añadir producto"].tap()
         XCTAssertTrue(app.navigationBars["Nuevo producto"].waitForExistence(timeout: 3))
         campoNombre.typeText("Lejía")
-        aumentar("Cantidad")
+        XCTAssertEqual(selector("Cantidad").value as? String, "1 unidad", "Empieza en 1")
         aumentar("Cantidad")
         aumentar("Cantidad")
         XCTAssertEqual(selector("Cantidad").value as? String, "3 unidades")
@@ -109,7 +113,6 @@ final class ProductosPruebasUI: XCTestCase {
         XCTAssertGreaterThan(selectorUnidad.frame.minY, campoNombre.frame.minY, "La unidad va después del nombre")
 
         elegirUnidad("Botellas")
-        aumentar("Cantidad")
         aumentar("Cantidad")
         XCTAssertEqual(selector("Cantidad").value as? String, "2 botellas")
         XCTAssertEqual(selector("Pasa a la lista con").value as? String, "2 botellas o menos")
@@ -146,6 +149,7 @@ final class ProductosPruebasUI: XCTestCase {
         app.navigationBars.buttons["Añadir producto"].tap()
         XCTAssertTrue(campoNombre.waitForExistence(timeout: 3))
         campoNombre.typeText("Lejía")
+        disminuir("Cantidad")
         botonGuardar.tap()
         XCTAssertTrue(app.buttons["Lejía, 0 unidades, en la lista"].waitForExistence(timeout: 3))
     }

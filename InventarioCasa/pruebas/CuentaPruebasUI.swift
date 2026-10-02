@@ -247,7 +247,7 @@ final class CuentaPruebasUI: XCTestCase {
         XCTAssertTrue(app.navigationBars["Nuevo producto"].waitForExistence(timeout: 3))
         app.textFields.firstMatch.typeText("Arroz")
         app.navigationBars.buttons["Guardar"].tap()
-        XCTAssertTrue(app.buttons["Arroz, 0 unidades, en la lista"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Arroz, 1 unidad, en la lista"].waitForExistence(timeout: 3))
         app.navigationBars["Despensa"].buttons.element(boundBy: 0).tap()
 
         app.tabBars.buttons["Ajustes"].tap()

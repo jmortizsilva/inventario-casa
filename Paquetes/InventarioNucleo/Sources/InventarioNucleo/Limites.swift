@@ -5,6 +5,9 @@ public enum Limites {
     public static let cantidad = 0...999
     public static let umbralCompra = 0...20
     public static let umbralCompraPorDefecto = 2
+    /// Con lo que empieza el formulario de crear: lo normal es dar de alta lo
+    /// que se acaba de comprar. Se puede bajar a 0 para apuntar algo que falta.
+    public static let cantidadAlCrear = 1
 }
 
 extension ClosedRange {

@@ -103,7 +103,7 @@ unidades, deja de estar repuesto. El orden no cambia durante la visita.
 | Campo | Nombre | Nombre del producto (con ejemplo "Ej: Arroz, Leche, Pan...") |
 | Selector, solo al crear desde el menú de Inventario | Categoría, sin valor hasta elegir. Va antes del nombre y sin teclado abierto. Guardar desactivado hasta elegir | |
 | Selector, después del nombre | Se cuenta en. Opciones en plural: Unidades, Latas, Paquetes, Botellas, Bricks, Botes, Bolsas, Cajas, Rollos. Empieza en Unidades | |
-| Cantidad | Cantidad: {n} {unidades} | Seleccionar cantidad (rueda de 0 a 99) |
+| Cantidad (al crear empieza en 1) | Cantidad: {n} {unidades} | Seleccionar cantidad (rueda de 0 a 99) |
 | Interruptor | Añadir a la lista cuando queden pocas | Añadir automáticamente a la lista |
 | Umbral (solo si el interruptor está activo) | Cuando queden {n} {unidades} o menos | Pasar a lista de compra con {n} unidades o menos |
 | Botones | Cancelar · Guardar | Cancelar · Guardar / Guardando... |
