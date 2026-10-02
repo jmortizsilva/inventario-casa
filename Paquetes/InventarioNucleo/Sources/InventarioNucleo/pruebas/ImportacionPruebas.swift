@@ -24,6 +24,29 @@ import Testing
         let exportacion = try Exportacion.leer(try cargar("exportacion-prueba"))
         #expect(exportacion.categorias.count == 4)
         #expect(exportacion.productos.count == 6)
+        // El archivo es anterior a la unidad: sin ella, se cuenta en unidades.
+        #expect(exportacion.productos.allSatisfy { $0.unidad == .unidad })
+    }
+
+    @Test func laUnidadSeExportaYSeLee() throws {
+        let atun = producto("Atún", unidad: .lata)
+        let leida = try Exportacion.leer(try Exportacion(categorias: [], productos: [atun]).escribir())
+        #expect(leida.productos.first?.unidad == .lata)
+    }
+
+    @Test func unaUnidadDesconocidaSeLeeComoUnidad() throws {
+        let datos = try Exportacion(categorias: [], productos: [producto("Agua", unidad: .botella)]).escribir()
+        let texto = try #require(String(data: datos, encoding: .utf8))
+            .replacingOccurrences(of: "\"botella\"", with: "\"garrafa\"")
+        let leida = try Exportacion.leer(Data(texto.utf8))
+        #expect(leida.productos.first?.unidad == .unidad)
+    }
+
+    @Test func importarConservaLaUnidad() throws {
+        let despensa = Categoria(nombre: "Despensa", creado: instante)
+        let atun = producto("Atún", unidad: .lata, categoriaId: despensa.id)
+        try inventario.importar(Exportacion(categorias: [despensa], productos: [atun]))
+        #expect(inventario.productos(en: try #require(inventario.categorias.first).id).first?.unidad == .lata)
     }
 
     /// `exportacion-script.json` lo generó `scripts/exportar-firestore/convertir.js`.
@@ -148,7 +171,7 @@ import Testing
     @Test func copiaAOtroHogarSinCantidadesNiListaManual() throws {
         let despensa = try inventario.crearCategoria(nombre: "Despensa")
         try inventario.crearCategoria(nombre: "Baño")
-        let arroz = try inventario.crearProducto(nombre: "Arroz", en: despensa.id, cantidad: 4, umbralCompra: 2)
+        let arroz = try inventario.crearProducto(nombre: "Arroz", en: despensa.id, unidad: .paquete, cantidad: 4, umbralCompra: 2)
         try inventario.fijarListaManual(arroz.id, en: true)
         try inventario.borrarProducto(inventario.crearProducto(nombre: "Sal", en: despensa.id).id)
 
@@ -164,6 +187,7 @@ import Testing
         #expect(copiado.id != arroz.id)
         #expect(copiado.cantidad == 0)
         #expect(copiado.umbralCompra == 2)
+        #expect(copiado.unidad == .paquete)
         #expect(!copiado.enListaCompraManual)
         #expect(otro.pendientes.categorias.count == 2)
         #expect(otro.pendientes.productos == [copiado.id])

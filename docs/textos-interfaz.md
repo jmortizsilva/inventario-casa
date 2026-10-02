@@ -2,7 +2,8 @@
 
 Textos de la versión nativa, revisados el 25 de septiembre de 2026. Entre llaves, lo que
 cambia: `{producto}`, `{categoria}`, `{n}`. Los plurales se concuerdan siempre
-("1 unidad", "2 unidades", "1 producto").
+("1 unidad", "2 unidades", "1 producto"). `{unidades}` es en lo que se cuenta
+el producto, concordado con `{n}`: "1 lata", "3 latas", "2 unidades".
 
 La columna **Antes** es el texto de la app de Expo, cuando cambia.
 
@@ -15,6 +16,7 @@ La columna **Antes** es el texto de la app de Expo, cuando cambia.
 | Eliminar | Borrar una categoría o un producto. |
 | Lista de la compra | Siempre así, completo, en títulos. "La lista" cuando el contexto ya lo dice. |
 | Unidades | La cantidad. "0 unidades", nunca "cantidad: 0". |
+| Unidad | En lo que se cuenta un producto, siempre en números enteros: unidad, lata, paquete, botella, brick, bote, bolsa, caja, rollo. Sustituye a "unidades" en lo que se dice del producto ("3 latas"). |
 | Agotado | Producto con 0 unidades. |
 
 ## Pestañas
@@ -50,8 +52,8 @@ nombre conocido del hogar.
 |---|---|---|
 | Título | {categoria} | |
 | Botón de la barra | Añadir producto | Añadir nuevo producto (botón flotante +) |
-| Fila, lo que se lee | {producto}, {n} unidades | igual |
-| Fila, si está en la lista | {producto}, {n} unidades, en la lista | (no se decía) |
+| Fila, lo que se lee | {producto}, {n} {unidades} | igual |
+| Fila, si está en la lista | {producto}, {n} {unidades}, en la lista | (no se decía) |
 | Acción por defecto | Abre la edición | |
 | Acciones del rotor | Aumentar cantidad · Disminuir cantidad | igual |
 | Acción del rotor | Añadir a la lista · Quitar de la lista | Lista de compra: añadir · Lista de compra: quitar |
@@ -66,13 +68,13 @@ Se quita la acción "Editar producto": es la misma que la acción por defecto.
 | Elemento | Texto | Antes |
 |---|---|---|
 | Cabecera | {n} productos | {n} productos para comprar |
-| Fila, lo que se lee | {producto}, {n} unidades, {categoria} | {producto}, {n} unidades, urgente, añadido manualmente |
+| Fila, lo que se lee | {producto}, {n} {unidades}, {categoria} | {producto}, {n} unidades, urgente, añadido manualmente |
 | Fila con 0 unidades | {producto}, agotado, {categoria} | |
 | Fila añadida a mano | … , añadido a mano | |
 | Marca visible con 0 unidades | Agotado | ¡URGENTE! |
 | Acciones del rotor | Aumentar cantidad · Disminuir cantidad | igual |
 | Acción del rotor (solo si se añadió a mano) | Quitar de la lista | (no existía) |
-| Fila repuesta, lo que se lee | {producto}, {n} unidades, {categoria}, repuesto | (desaparecía) |
+| Fila repuesta, lo que se lee | {producto}, {n} {unidades}, {categoria}, repuesto | (desaparecía) |
 | Fila repuesta, a la vista | Repuesto | |
 | Lista vacía, título | No falta nada | ¡Todo bien! No hay productos con pocas unidades |
 
@@ -122,14 +124,14 @@ Solo después de que el cambio se haya guardado.
 
 | Cuándo | Anuncio | Antes |
 |---|---|---|
-| Aumentar o disminuir | {n} unidades | {producto}: cantidad actualizada a {n} |
-| … y entra en la lista | {n} unidades, añadido a la lista | |
-| … y sale de la lista | {n} unidades, fuera de la lista | {producto} eliminado de la lista de compra |
+| Aumentar o disminuir | {n} {unidades} | {producto}: cantidad actualizada a {n} |
+| … y entra en la lista | {n} {unidades}, añadido a la lista | |
+| … y sale de la lista | {n} {unidades}, fuera de la lista | {producto} eliminado de la lista de compra |
 | Disminuir con 0 unidades | Ya está en 0 | (silencio) |
 | Aumentar con 999 unidades | Ya está en 999 | |
 | Añadir a la lista | Añadido a la lista | {producto} añadido manualmente a la lista de compra |
 | Quitar de la lista | Quitado de la lista | {producto} quitado de la lista de compra manual |
-| Quitar, pero sigue por pocas unidades | Sigue en la lista, quedan {n} unidades | |
+| Quitar, pero sigue por pocas unidades | Sigue en la lista, quedan {n} {unidades} | |
 | Producto creado | Añadido, {producto} | Producto {producto} añadido con cantidad {n}. Pasará a lista de compra con… |
 | Producto editado | Guardado, {producto} | Producto actualizado: {producto}, cantidad {n}… |
 | Categoría creada | Añadida, {categoria} | Categoría {categoria} creada correctamente |
@@ -679,8 +681,8 @@ concordar con cada producto y Siri no la adapta.
 
 | Cuándo | Texto |
 |---|---|
-| Añadir, quitar o cambiar la cantidad | {producto}, {n} unidades. y, según la lista de la compra: Añadido a la lista de la compra. · Sigue en la lista de la compra. · Quitado de la lista de la compra. |
-| Consultar | {producto}, {n} unidades (y «, en la lista» si está en la lista) |
+| Añadir, quitar o cambiar la cantidad | {producto}, {n} {unidades}. y, según la lista de la compra: Añadido a la lista de la compra. · Sigue en la lista de la compra. · Quitado de la lista de la compra. |
+| Consultar | {producto}, {n} {unidades} (y «, en la lista» si está en la lista) |
 | Crear | Creado, {producto} en {categoría} |
 | Eliminar | Eliminado, {producto} |
 | Eliminar, contestando que no | No se ha eliminado {producto} |

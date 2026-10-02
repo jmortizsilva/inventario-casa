@@ -66,7 +66,7 @@ struct VistaProductos: View {
             alAjustar: { errorAlGuardar = !inventario.ajustarYAnunciar(producto, en: $0) }
         ) {
             HStack(spacing: 4) {
-                Text(Textos.unidades(producto.cantidad))
+                Text(Textos.cantidad(producto.cantidad, producto.unidad))
                 if ListaCompra.incluye(producto) {
                     Image(systemName: "cart")
                 }

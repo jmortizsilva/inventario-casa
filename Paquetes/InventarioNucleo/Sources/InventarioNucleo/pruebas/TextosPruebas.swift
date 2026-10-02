@@ -6,9 +6,11 @@ import Testing
 /// `docs/textos-interfaz.md`.
 @Suite struct TextosPruebas {
     @Test func plurales() {
-        #expect(Textos.unidades(0) == "0 unidades")
-        #expect(Textos.unidades(1) == "1 unidad")
-        #expect(Textos.unidades(2) == "2 unidades")
+        #expect(Textos.cantidad(0, .unidad) == "0 unidades")
+        #expect(Textos.cantidad(1, .unidad) == "1 unidad")
+        #expect(Textos.cantidad(2, .unidad) == "2 unidades")
+        #expect(Textos.cantidad(1, .brick) == "1 brick")
+        #expect(Textos.cantidad(3, .brick) == "3 bricks")
         #expect(Textos.productos(1) == "1 producto")
         #expect(Textos.productos(12) == "12 productos")
     }
@@ -18,6 +20,8 @@ import Testing
         #expect(Textos.filaCategoria(despensa, productos: 1) == "Despensa, 1 producto")
         #expect(Textos.filaProducto(producto("Arroz", cantidad: 5)) == "Arroz, 5 unidades")
         #expect(Textos.filaProducto(producto("Arroz", cantidad: 1)) == "Arroz, 1 unidad, en la lista")
+        #expect(Textos.filaProducto(producto("Atún", unidad: .lata, cantidad: 3)) == "Atún, 3 latas")
+        #expect(Textos.filaCompra(producto("Atún", unidad: .lata, cantidad: 1), categoria: "Despensa") == "Atún, 1 lata, Despensa")
     }
 
     @Test func filasDeLaCompra() {
@@ -60,6 +64,8 @@ import Testing
         let antes = producto(cantidad: 5)
         let ajustado = antes.ajustandoCantidad(en: 1)
         #expect(Textos.Anuncios.ajusteCantidad(antes: antes, despues: ajustado, cambio: 1) == "6 unidades")
+        let leche = producto(unidad: .brick, cantidad: 3, umbral: 0)
+        #expect(Textos.Anuncios.ajusteCantidad(antes: leche, despues: leche.ajustandoCantidad(en: 1), cambio: 1) == "4 bricks")
     }
 
     @Test func anuncioDeAjusteQueEntraOSaleDeLaLista() {
@@ -87,6 +93,8 @@ import Testing
         #expect(Textos.Anuncios.listaManual(despues: producto(cantidad: 9)) == "Quitado de la lista")
         #expect(Textos.Anuncios.listaManual(despues: producto(cantidad: 2)) == "Sigue en la lista, quedan 2 unidades")
         #expect(Textos.Anuncios.listaManual(despues: producto(cantidad: 1)) == "Sigue en la lista, queda 1 unidad")
+        #expect(Textos.Anuncios.listaManual(despues: producto(unidad: .paquete, cantidad: 2)) == "Sigue en la lista, quedan 2 paquetes")
+        #expect(Textos.Anuncios.listaManual(despues: producto(unidad: .paquete, cantidad: 1)) == "Sigue en la lista, queda 1 paquete")
         #expect(Textos.Anuncios.listaManual(despues: producto(cantidad: 0)) == "Sigue en la lista, agotado")
         #expect(Textos.Anuncios.listaManual(despues: producto(cantidad: 0, auto: false)) == "Quitado de la lista")
     }

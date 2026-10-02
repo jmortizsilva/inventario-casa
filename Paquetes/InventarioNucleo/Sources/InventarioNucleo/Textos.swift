@@ -4,8 +4,9 @@ public enum Textos {
 
     // MARK: Plurales
 
-    public static func unidades(_ n: Int) -> String {
-        n == 1 ? "1 unidad" : "\(n) unidades"
+    /// «1 lata», «3 latas».
+    public static func cantidad(_ n: Int, _ unidad: Unidad) -> String {
+        n == 1 ? "1 \(unidad.singular)" : "\(n) \(unidad.plural)"
     }
 
     public static func productos(_ n: Int) -> String {
@@ -60,7 +61,7 @@ public enum Textos {
     }
 
     public static func filaProducto(_ producto: Producto) -> String {
-        var texto = "\(producto.nombre), \(unidades(producto.cantidad))"
+        var texto = "\(producto.nombre), \(cantidad(producto.cantidad, producto.unidad))"
         if ListaCompra.incluye(producto) {
             texto += ", en la lista"
         }
@@ -70,7 +71,7 @@ public enum Textos {
     /// `repuesto`: ya salió de la lista pero sigue a la vista mientras no se
     /// deje la pestaña, para poder seguir sumando lo comprado.
     public static func filaCompra(_ producto: Producto, categoria: String, repuesto: Bool = false) -> String {
-        let estado = producto.cantidad == 0 ? agotado.lowercased() : unidades(producto.cantidad)
+        let estado = producto.cantidad == 0 ? agotado.lowercased() : cantidad(producto.cantidad, producto.unidad)
         var texto = "\(producto.nombre), \(estado), \(categoria)"
         if repuesto {
             texto += ", \(Self.repuesto.lowercased())"
@@ -140,7 +141,7 @@ public enum Textos {
                 let limite = cambio < 0 ? Limites.cantidad.lowerBound : Limites.cantidad.upperBound
                 return "Ya está en \(limite)"
             }
-            let texto = unidades(despues.cantidad)
+            let texto = cantidad(despues.cantidad, despues.unidad)
             switch (ListaCompra.incluye(antes), ListaCompra.incluye(despues)) {
             case (false, true): return texto + ", añadido a la lista"
             case (true, false): return texto + ", fuera de la lista"
@@ -159,8 +160,8 @@ public enum Textos {
             }
             switch despues.cantidad {
             case 0: return "Sigue en la lista, agotado"
-            case 1: return "Sigue en la lista, queda 1 unidad"
-            default: return "Sigue en la lista, quedan \(despues.cantidad) unidades"
+            case 1: return "Sigue en la lista, queda \(cantidad(1, despues.unidad))"
+            default: return "Sigue en la lista, quedan \(cantidad(despues.cantidad, despues.unidad))"
             }
         }
 

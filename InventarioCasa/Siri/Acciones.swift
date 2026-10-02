@@ -91,6 +91,7 @@ struct CambiarCantidad: AppIntent {
             try inventario.editarProducto(
                 producto.id,
                 nombre: producto.nombre,
+                unidad: producto.unidad,
                 cantidad: unidades,
                 umbralCompra: producto.umbralCompra,
                 autoListaCompra: producto.autoListaCompra

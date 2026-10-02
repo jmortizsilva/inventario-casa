@@ -51,7 +51,7 @@ import Testing
         let despensa = try inventario.crearCategoria(nombre: "Despensa")
         let arroz = try inventario.crearProducto(nombre: "Arroz", en: despensa.id, cantidad: 1)
         let editado = try inventario.editarProducto(
-            arroz.id, nombre: "Arroz", cantidad: 6, umbralCompra: arroz.umbralCompra, autoListaCompra: true
+            arroz.id, nombre: "Arroz", unidad: .unidad, cantidad: 6, umbralCompra: arroz.umbralCompra, autoListaCompra: true
         )
         let fijada = try #require(inventario.pendientes.fijadas[arroz.id])
         #expect(fijada.cantidad == 6)
@@ -64,7 +64,7 @@ import Testing
         let despensa = try inventario.crearCategoria(nombre: "Despensa")
         let arroz = try inventario.crearProducto(nombre: "Arroz", en: despensa.id, cantidad: 1)
         try inventario.editarProducto(
-            arroz.id, nombre: "Arroz largo", cantidad: 1, umbralCompra: arroz.umbralCompra, autoListaCompra: true
+            arroz.id, nombre: "Arroz largo", unidad: .unidad, cantidad: 1, umbralCompra: arroz.umbralCompra, autoListaCompra: true
         )
         #expect(inventario.pendientes.fijadas[arroz.id]?.en == arroz.creado)
     }

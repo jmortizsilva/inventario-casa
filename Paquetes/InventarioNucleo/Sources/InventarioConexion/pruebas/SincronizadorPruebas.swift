@@ -112,7 +112,7 @@ private func hogarDeAnaYLuis() async throws
         let arroz = try #require(ana.producto("Arroz"))
 
         try ana.inventario.editarProducto(
-            arroz.id, nombre: "Arroz", cantidad: 10, umbralCompra: arroz.umbralCompra, autoListaCompra: true
+            arroz.id, nombre: "Arroz", unidad: .unidad, cantidad: 10, umbralCompra: arroz.umbralCompra, autoListaCompra: true
         )
         try await ana.sincronizar()
         try await luis.sincronizar()
@@ -211,7 +211,7 @@ private func hogarDeAnaYLuis() async throws
         try ana.inventario.ajustarCantidad(arroz.id, en: 1)
         let enAna = try #require(ana.producto("Arroz"))
         try ana.inventario.editarProducto(
-            arroz.id, nombre: "Arroz largo", cantidad: enAna.cantidad, umbralCompra: enAna.umbralCompra, autoListaCompra: true
+            arroz.id, nombre: "Arroz largo", unidad: .unidad, cantidad: enAna.cantidad, umbralCompra: enAna.umbralCompra, autoListaCompra: true
         )
         try await ana.sincronizar()
         try await luis.sincronizar()

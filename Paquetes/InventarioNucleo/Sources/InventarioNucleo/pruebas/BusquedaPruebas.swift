@@ -121,5 +121,7 @@ import Testing
         #expect(Textos.Siri.cambio(antes: garbanzos(2), despues: garbanzos(1)) == "Garbanzos, 1 unidad. Sigue en la lista de la compra.")
         #expect(Textos.Siri.cambio(antes: garbanzos(1), despues: garbanzos(5)) == "Garbanzos, 5 unidades. Quitado de la lista de la compra.")
         #expect(Textos.Siri.cambio(antes: garbanzos(5), despues: garbanzos(8)) == "Garbanzos, 8 unidades.")
+        let botes = Producto(categoriaId: despensa, nombre: "Garbanzos", unidad: .bote, cantidad: 2, umbralCompra: 0, creado: instante)
+        #expect(Textos.Siri.cambio(antes: botes, despues: botes.ajustandoCantidad(en: -1)) == "Garbanzos, 1 bote.")
     }
 }

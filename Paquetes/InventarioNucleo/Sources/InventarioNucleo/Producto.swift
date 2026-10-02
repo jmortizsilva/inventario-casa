@@ -4,6 +4,7 @@ public struct Producto: Identifiable, Hashable, Codable, Sendable {
     public let id: UUID
     public var categoriaId: UUID
     public var nombre: String
+    public var unidad: Unidad
     public private(set) var cantidad: Int
     public private(set) var umbralCompra: Int
     public var autoListaCompra: Bool
@@ -19,6 +20,7 @@ public struct Producto: Identifiable, Hashable, Codable, Sendable {
         id: UUID = UUID(),
         categoriaId: UUID,
         nombre: String,
+        unidad: Unidad = .unidad,
         cantidad: Int = 0,
         umbralCompra: Int = Limites.umbralCompraPorDefecto,
         autoListaCompra: Bool = true,
@@ -30,6 +32,7 @@ public struct Producto: Identifiable, Hashable, Codable, Sendable {
         self.id = id
         self.categoriaId = categoriaId
         self.nombre = nombre
+        self.unidad = unidad
         self.cantidad = Limites.cantidad.acotar(cantidad)
         self.umbralCompra = Limites.umbralCompra.acotar(umbralCompra)
         self.autoListaCompra = autoListaCompra
@@ -40,6 +43,31 @@ public struct Producto: Identifiable, Hashable, Codable, Sendable {
     }
 
     public var estaBorrado: Bool { borrado != nil }
+}
+
+extension Producto {
+    private enum CodingKeys: String, CodingKey {
+        case id, categoriaId, nombre, unidad, cantidad, umbralCompra
+        case autoListaCompra, enListaCompraManual, creado, modificado, borrado
+    }
+
+    /// `unidad` puede faltar: las exportaciones anteriores a ella no la llevan.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(
+            id: try c.decode(UUID.self, forKey: .id),
+            categoriaId: try c.decode(UUID.self, forKey: .categoriaId),
+            nombre: try c.decode(String.self, forKey: .nombre),
+            unidad: try c.decodeIfPresent(Unidad.self, forKey: .unidad) ?? .unidad,
+            cantidad: try c.decode(Int.self, forKey: .cantidad),
+            umbralCompra: try c.decode(Int.self, forKey: .umbralCompra),
+            autoListaCompra: try c.decode(Bool.self, forKey: .autoListaCompra),
+            enListaCompraManual: try c.decode(Bool.self, forKey: .enListaCompraManual),
+            creado: try c.decode(Date.self, forKey: .creado),
+            modificado: try c.decode(Date.self, forKey: .modificado),
+            borrado: try c.decodeIfPresent(Date.self, forKey: .borrado)
+        )
+    }
 }
 
 extension Producto {

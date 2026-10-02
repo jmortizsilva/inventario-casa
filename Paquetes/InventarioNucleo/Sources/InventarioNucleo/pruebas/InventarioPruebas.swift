@@ -124,7 +124,7 @@ final class RelojDePrueba {
         let c = try inventario.crearCategoria(nombre: "Despensa")
         let p = try inventario.crearProducto(nombre: "Arroz", en: c.id, cantidad: 5)
         let editado = try inventario.editarProducto(
-            p.id, nombre: "Arroz integral", cantidad: 1, umbralCompra: 0, autoListaCompra: false
+            p.id, nombre: "Arroz integral", unidad: .unidad, cantidad: 1, umbralCompra: 0, autoListaCompra: false
         )
         #expect(editado.nombre == "Arroz integral")
         #expect(editado.cantidad == 1)
@@ -134,11 +134,23 @@ final class RelojDePrueba {
         #expect(almacen.productos[p.id] == editado)
     }
 
+    @Test func crearYCambiarLaUnidad() throws {
+        let c = try inventario.crearCategoria(nombre: "Despensa")
+        let p = try inventario.crearProducto(nombre: "Atún", en: c.id, unidad: .lata, cantidad: 3)
+        #expect(almacen.productos[p.id]?.unidad == .lata)
+        let editado = try inventario.editarProducto(
+            p.id, nombre: "Atún", unidad: .paquete, cantidad: 3, umbralCompra: p.umbralCompra, autoListaCompra: true
+        )
+        #expect(editado.unidad == .paquete)
+        #expect(editado.modificado > p.modificado)
+        #expect(almacen.productos[p.id] == editado)
+    }
+
     @Test func editarSinCambiosNoGuarda() throws {
         let c = try inventario.crearCategoria(nombre: "Despensa")
         let p = try inventario.crearProducto(nombre: "Arroz", en: c.id, cantidad: 5)
         let guardadosAntes = almacen.vecesGuardado
-        try inventario.editarProducto(p.id, nombre: "Arroz ", cantidad: 5, umbralCompra: 2, autoListaCompra: true)
+        try inventario.editarProducto(p.id, nombre: "Arroz ", unidad: .unidad, cantidad: 5, umbralCompra: 2, autoListaCompra: true)
         #expect(almacen.vecesGuardado == guardadosAntes)
     }
 

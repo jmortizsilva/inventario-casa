@@ -66,13 +66,13 @@ struct VistaListaCompra: View {
                         .labelStyle(.titleAndIcon)
                         .foregroundStyle(.green)
                     Text("·")
-                    Text(Textos.unidades(producto.cantidad))
+                    Text(Textos.cantidad(producto.cantidad, producto.unidad))
                 } else if producto.cantidad == 0 {
                     Text(Textos.agotado)
                         .bold()
                         .foregroundStyle(.red)
                 } else {
-                    Text(Textos.unidades(producto.cantidad))
+                    Text(Textos.cantidad(producto.cantidad, producto.unidad))
                 }
                 Text("·")
                 Text(categoria)

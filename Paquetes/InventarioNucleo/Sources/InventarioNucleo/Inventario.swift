@@ -163,6 +163,7 @@ public final class Inventario {
     public func crearProducto(
         nombre: String,
         en categoriaId: UUID,
+        unidad: Unidad = .unidad,
         cantidad: Int = 0,
         umbralCompra: Int = Limites.umbralCompraPorDefecto,
         autoListaCompra: Bool = true
@@ -172,6 +173,7 @@ public final class Inventario {
         let nuevo = Producto(
             categoriaId: categoriaId,
             nombre: limpio,
+            unidad: unidad,
             cantidad: cantidad,
             umbralCompra: umbralCompra,
             autoListaCompra: autoListaCompra,
@@ -190,6 +192,7 @@ public final class Inventario {
     public func editarProducto(
         _ id: UUID,
         nombre: String,
+        unidad: Unidad,
         cantidad: Int,
         umbralCompra: Int,
         autoListaCompra: Bool
@@ -204,6 +207,10 @@ public final class Inventario {
             .fijandoUmbralCompra(umbralCompra, ahora: momento)
         if editado.nombre != limpio {
             editado.nombre = limpio
+            editado.modificado = momento
+        }
+        if editado.unidad != unidad {
+            editado.unidad = unidad
             editado.modificado = momento
         }
         if editado.autoListaCompra != autoListaCompra {
@@ -315,6 +322,7 @@ public final class Inventario {
                 Producto(
                     categoriaId: $0.categoriaId,
                     nombre: $0.nombre,
+                    unidad: $0.unidad,
                     umbralCompra: $0.umbralCompra,
                     autoListaCompra: $0.autoListaCompra,
                     creado: $0.creado
@@ -380,6 +388,7 @@ public final class Inventario {
             nuevosProductos.append(Producto(
                 categoriaId: categoriaId,
                 nombre: nombre,
+                unidad: original.unidad,
                 cantidad: original.cantidad,
                 umbralCompra: original.umbralCompra,
                 autoListaCompra: original.autoListaCompra,

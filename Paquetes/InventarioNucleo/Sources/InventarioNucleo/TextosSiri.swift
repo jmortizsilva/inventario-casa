@@ -66,7 +66,7 @@ extension Textos {
         /// Tras añadir, quitar o cambiar la cantidad: las unidades y, si toca,
         /// qué ha pasado con la lista de la compra.
         public static func cambio(antes: Producto, despues: Producto) -> String {
-            let unidades = "\(despues.nombre), \(Textos.unidades(despues.cantidad))"
+            let unidades = "\(despues.nombre), \(Textos.cantidad(despues.cantidad, despues.unidad))"
             switch (ListaCompra.incluye(antes), ListaCompra.incluye(despues)) {
             case (false, true): return "\(unidades). Añadido a la lista de la compra."
             case (true, true): return "\(unidades). Sigue en la lista de la compra."

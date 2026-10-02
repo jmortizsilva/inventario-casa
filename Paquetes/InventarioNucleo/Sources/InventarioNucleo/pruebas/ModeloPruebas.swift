@@ -11,6 +11,7 @@ import Testing
         #expect(!p.enListaCompraManual)
         #expect(p.modificado == instante)
         #expect(!p.estaBorrado)
+        #expect(p.unidad == .unidad)
     }
 
     @Test func acotaLosValoresAlCrear() {

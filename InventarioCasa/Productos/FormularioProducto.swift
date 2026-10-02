@@ -184,6 +184,7 @@ struct FormularioProducto: View {
                 let guardado = try inventario.editarProducto(
                     producto.id,
                     nombre: nombre,
+                    unidad: producto.unidad,
                     cantidad: cantidad,
                     umbralCompra: umbralCompra,
                     autoListaCompra: autoListaCompra

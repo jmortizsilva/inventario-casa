@@ -7,6 +7,7 @@ let despues = instante.addingTimeInterval(60)
 
 func producto(
     _ nombre: String = "Leche",
+    unidad: Unidad = .unidad,
     cantidad: Int = 5,
     umbral: Int = 2,
     auto: Bool = true,
@@ -16,6 +17,7 @@ func producto(
     Producto(
         categoriaId: categoriaId,
         nombre: nombre,
+        unidad: unidad,
         cantidad: cantidad,
         umbralCompra: umbral,
         autoListaCompra: auto,
