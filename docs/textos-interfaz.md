@@ -628,9 +628,10 @@ La pregunta por las unidades lleva el envase del producto y concuerda:
 «¿Cuántas unidades?»: el producto aún no existe y por voz no se elige envase.
 La definición solo admite textos fijos, así que la pregunta va en un
 parámetro oculto (`pregunta`) que la app rellena después del producto, y la
-de las unidades es «${pregunta}». Sin comprobar en el iPhone (2 de octubre de
-2026); si Siri no lo lee, la alternativa es «¿Qué cantidad?», que no
-depende del género.
+de las unidades es «${pregunta}». Comprobado en el iPhone el 2 de octubre de
+2026. Siri resuelve por número de parámetro: con la pregunta detrás de las
+unidades decía la suya, «¿Qué valor de unidades quieres?», que no deja claro
+si pide el número o el envase.
 
 Lo que no vale se dice en el momento, con lo que se acaba de decir, y Siri
 vuelve a preguntar (antes llegaba al final, después de pedir las unidades):

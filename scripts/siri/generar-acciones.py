@@ -69,21 +69,21 @@ def producto(pregunta, tag=1):
     ]
     return p
 
-def unidades(tag, pregunta, minimo, prioridad=None):
+def unidades(tag, pregunta, minimo):
     return param(tag, 'unidades', 'Unidades', 'Integer', pregunta,
-                 INIntentParameterDisplayPriority=prioridad or tag,
                  INIntentParameterMetadata={'INIntentParameterMetadataMinimumValue': minimo,
                                             'INIntentParameterMetadataMaximumValue': 999,
                                             'INIntentParameterMetadataSupportsNegativeNumbers': False})
 
-def pregunta_cantidad(tag, prioridad):
+def pregunta_cantidad(tag):
     # La pregunta por las unidades depende del envase del producto («¿Cuántas
     # latas?», «¿Cuántos paquetes?») y la definición solo admite textos fijos.
-    # Este parámetro, oculto, lo rellena la app al resolverlo (va después del
-    # producto) y la pregunta de las unidades es «${pregunta}». Sin comprobar
-    # todavía en el iPhone; si no lo lee, volver a «¿Qué cantidad?».
-    return dict(texto(tag, 'pregunta', 'Pregunta', '¿Cuántas unidades?'),
-                INIntentParameterConfigurable=False, INIntentParameterDisplayPriority=prioridad)
+    # Este parámetro, oculto, lo rellena la app al resolverlo y la pregunta de
+    # las unidades es «${pregunta}». Siri resuelve por número (tag), no por el
+    # orden de la lista: con la pregunta en el 3 y las unidades en el 2, la
+    # pedía después y decía la suya, «¿Qué valor de unidades quieres?» (visto
+    # en el iPhone el 2 de octubre de 2026). Va entre el producto y las unidades.
+    return dict(texto(tag, 'pregunta', 'Pregunta', '¿Cuántas unidades?'), INIntentParameterConfigurable=False)
 
 def texto(tag, nombre, titulo, pregunta):
     return param(tag, nombre, titulo, 'String', pregunta,
@@ -165,13 +165,13 @@ definicion = {
                 unidades(3, '¿Cuántas unidades?', 0)],
                'Crear ${nombre} en ${categoria}'),
         intent('AnadirUnidadesVoz', 'Añadir unidades', 'Suma unidades a un producto', 'generic',
-               [producto('¿Qué has comprado?'), pregunta_cantidad(3, 2), unidades(2, '${pregunta}', 1, prioridad=3)],
+               [producto('¿Qué has comprado?'), pregunta_cantidad(2), unidades(3, '${pregunta}', 1)],
                'Añadir ${unidades} a ${producto}'),
         intent('QuitarUnidadesVoz', 'Quitar unidades', 'Resta unidades a un producto', 'generic',
-               [producto('¿Qué producto?'), pregunta_cantidad(3, 2), unidades(2, '${pregunta}', 1, prioridad=3)],
+               [producto('¿Qué producto?'), pregunta_cantidad(2), unidades(3, '${pregunta}', 1)],
                'Quitar ${unidades} a ${producto}'),
         intent('CambiarCantidadVoz', 'Cambiar la cantidad', 'Pone las unidades de un producto', 'generic',
-               [producto('¿De qué producto?'), pregunta_cantidad(3, 2), unidades(2, '${pregunta}', 0, prioridad=3)],
+               [producto('¿De qué producto?'), pregunta_cantidad(2), unidades(3, '${pregunta}', 0)],
                'Poner ${producto} a ${unidades}'),
         intent('ConsultarProductoVoz', 'Consultar un producto', 'Dice cuántas unidades quedan', 'information',
                [producto('¿De qué producto?')], 'Consultar ${producto}'),

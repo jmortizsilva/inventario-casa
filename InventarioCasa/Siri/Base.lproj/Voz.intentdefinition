@@ -494,7 +494,7 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>3</integer>
+					<integer>2</integer>
 					<key>INIntentParameterType</key>
 					<string>String</string>
 				</dict>
@@ -542,7 +542,7 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>2</integer>
+					<integer>3</integer>
 					<key>INIntentParameterType</key>
 					<string>Integer</string>
 				</dict>
@@ -777,7 +777,7 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>3</integer>
+					<integer>2</integer>
 					<key>INIntentParameterType</key>
 					<string>String</string>
 				</dict>
@@ -825,7 +825,7 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>2</integer>
+					<integer>3</integer>
 					<key>INIntentParameterType</key>
 					<string>Integer</string>
 				</dict>
@@ -1060,7 +1060,7 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>3</integer>
+					<integer>2</integer>
 					<key>INIntentParameterType</key>
 					<string>String</string>
 				</dict>
@@ -1108,7 +1108,7 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>2</integer>
+					<integer>3</integer>
 					<key>INIntentParameterType</key>
 					<string>Integer</string>
 				</dict>
